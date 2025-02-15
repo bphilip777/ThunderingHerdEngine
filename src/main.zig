@@ -7,6 +7,7 @@ pub fn main() !void {
 
     const proc_addr = try lookup(&lib, "GetInstanceProcAddr");
     const instance = proc_addr();
+    _ = instance;
 }
 
 fn getPFN(comptime name: []const u8) type {
