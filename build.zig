@@ -1,6 +1,7 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
+    // Build
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
@@ -18,6 +19,20 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(exe);
 
+    // Commands
+    // Shader
+    const cmd = b.addSystemCommand(&shader_compilation_commands);
+    // need to loop through all shader files in the directory and compile them
+    // make a check for whether the file exists or not
+    // check whether file is a vert or frag
+    const spv = cmd.addOutputFileArg("");
+    cmd.addFileArg(b.path("shaders/triangle.vert"));
+    const new_name = "old_name" ++ "_vert";
+    exe.root_module.addAnonymousImport(new_name, .{
+        .root_source_file = spv,
+    });
+
+    // Run
     const run_cmd = b.addRunArtifact(exe);
 
     run_cmd.step.dependOn(b.getInstallStep());
@@ -38,3 +53,9 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_exe_unit_tests.step);
 }
+
+const shader_compilation_commands = [_][]const u8{
+    "glslc",
+    "--target-env=vulkan1.2",
+    "-o",
+};
