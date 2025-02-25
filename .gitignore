@@ -1,4 +1,9 @@
+# Files
+src/root.zig
+src/debug.zig
+.gitignore
+
+# Directories
 /zig-out
 /.zig-cache
 /vulkan
-

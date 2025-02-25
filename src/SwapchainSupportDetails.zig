@@ -101,8 +101,10 @@ pub fn chooseSwapExtent(
         return caps.currentExtent;
     }
 
+    const w: u32 = @max(@as(u32, @intCast(width)), 0);
+    const h: u32 = @max(@as(u32, @intCast(height)), 0);
     return vk.VkExtent2D{
-        .width = std.math.clamp(width, caps.minImageExtent.width, caps.maxImageExtent.width),
-        .height = std.math.clamp(height, caps.minImageExtent.height, caps.maxImageExtent.height),
+        .width = std.math.clamp(w, caps.minImageExtent.width, caps.maxImageExtent.width),
+        .height = std.math.clamp(h, caps.minImageExtent.height, caps.maxImageExtent.height),
     };
 }

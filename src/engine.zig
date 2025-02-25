@@ -97,6 +97,8 @@ render_pass: vk.VkRenderPass,
 pipeline: vk.VkPipeline,
 
 pool: vk.VkCommandPool,
+vertex_buffer: vk.VkBuffer,
+vertex_buffer_memory: vk.VkDeviceMemory,
 command_buffers: []vk.VkCommandBuffer,
 
 image_available_semaphores: []vk.VkSemaphore,
@@ -139,10 +141,11 @@ pub fn init(
     defer ssd.deinit(allo);
     if (is_debug_mode) std.debug.print("# of Formats: {}\n", .{ssd.formats.len});
     if (is_debug_mode) std.debug.print("# of Present Modes: {}\n", .{ssd.present_modes.len});
-    const extent = ssd.chooseSwapExtent();
+
+    const extent = ssd.chooseSwapExtent(width, height);
     const format = ssd.chooseSwapSurfaceFormat();
 
-    const swapchain = try createSwapchain(allo, surface, physical_device, device);
+    const swapchain = try createSwapchain(allo, surface, physical_device, device, width, height);
 
     // allocate memory outside of the fn - one time call at initialization rather than every time recreate is called
     var n_images = try getNumberOfSwapchainImages(device, swapchain);
@@ -222,6 +225,8 @@ pub fn deinit(self: *Self) void {
     defer vk.vkDestroyPipelineLayout(self.device, self.layout, null);
     defer vk.vkDestroyRenderPass(self.device, self.render_pass, null);
     defer vk.vkDestroyPipeline(self.device, self.pipeline, null); // memory leaks w/ images once i reach this step - why?
+
+    defer vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
 
     defer self.allo.free(self.images);
     defer self.allo.free(self.views);
@@ -595,18 +600,21 @@ fn createSwapchain(
     surface: vk.VkSurfaceKHR,
     physical_device: vk.VkPhysicalDevice,
     device: vk.VkDevice,
+    width: i32,
+    height: i32,
 ) !vk.VkSwapchainKHR {
     var ssd = try SSD.init(allo, surface, physical_device);
     defer ssd.deinit(allo);
 
     const format = ssd.chooseSwapSurfaceFormat();
     const present_mode = ssd.chooseSwapPresentMode();
-    const extent = ssd.chooseSwapExtent();
+    const extent = ssd.chooseSwapExtent(width, height);
+    // if (is_debug_mode) std.debug.print("Extent: {any}\n", .{extent});
 
     const min = ssd.capabilities.minImageCount + 1;
     const max = ssd.capabilities.maxImageCount;
     const n_images = if (max != 0) @min(max, min) else min;
-    if (is_debug_mode) std.debug.print("Swapchain # of Images: {}\n", .{n_images});
+    // if (is_debug_mode) std.debug.print("Swapchain # of Images: {}\n", .{n_images});
 
     const qfi = QFI.findQueueFamilies(surface, physical_device);
     std.debug.assert(qfi.isComplete());
@@ -656,7 +664,8 @@ fn recreateSwapchain(self: *Self) !void {
 
     self.cleanupSwapchain();
 
-    self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device);
+    // if (is_debug_mode) std.debug.print("New Extent: {}x{}\n", .{ width, height });
+    self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
     // will break if n_images changes after new swapchain created
     var n_images: u32 = @truncate(self.images.len);
     try getSwapchainImages(self.device, self.swapchain, &n_images, self.images);
@@ -1004,6 +1013,60 @@ fn createCommandPool(
     return pool;
 }
 
+fn createVertexBuffer(device: vk.VkDevice) !vk.VkBuffer {
+    const bci = vk.VkBufferCreateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = @sizeOf(Vertex) * vertices.len,
+        .usage = vk.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        .sharingMode = vk.VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    var vertex_buffer: vk.VkBuffer = undefined;
+    try isSuccess(vk.vkCreateBuffer(device, &bci, null, &vertex_buffer));
+    return vertex_buffer;
+}
+
+fn bindMemory(device: vk.VkDevice, vertex_buffer: vk.VkBuffer,) !void {
+    var mem_reqs: vk.VkMemoryRequirements = undefined;
+    vk.vkGetBufferMemoryRequirements(device, vertex_buffer, &mem_reqs);
+    
+    const mai = vk.VkMemoryAllocateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = mem_reqs.size,
+        .memoryTypeIndex = findMemoryType(mem_reqs.memoryTypeBits, vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
+};
+
+    try isSuccess(vk.vkAllocateMemory(device, &mai, null, &vertex_buffer_memory));
+
+    vk.vkBindBufferMemory(device, vertex_buffer, vertex_buffer_memory, 0);
+    
+    var data: *anyopaque = undefined;
+    try isSuccess(vk.vkMapMemory(device, vertex_buffer_memory, 0, buffer_info.len, 0, &data));
+    defer vk.vkUnmapMemory(device, vertex_buffer_memory);
+    memcpy(data, vertices.len, bufferInfo.size);
+}
+
+// fn createIndexBuffer(device: vk.VkDevice) !vk.VkBuffer {
+//
+// }
+
+fn findMemoryType(
+    physical_device: vk.VkPhysicalDevice,
+    type_filter: u32,
+    props: vk.VkMemoryPropertyFlags,
+) !u32 {
+    var mem_props: vk.VkPhysicalDeviceMemoryProperties = undefined;
+    vk.vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_props);
+
+    for (0..mem_props.memoryTypeCount) |i| {
+        if (type_filter & @as(u32, 1 << i) and mem_props.memoryTypes[i].propertyFlags & props == props) {
+            return i;
+        }
+    }
+
+    return error.FailedToFindSuitableMemoryType;
+}
+
 fn createCommandBuffers(
     allo: Allocator,
     device: vk.VkDevice,
@@ -1156,8 +1219,8 @@ fn drawFrame(self: *Self) !void {
     const submit_info = vk.VkSubmitInfo{
         .sType = vk.VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = @truncate(wait_semaphores.len),
-        .pWaitSemaphores = @ptrCast(&wait_semaphores),
-        .pWaitDstStageMask = @ptrCast(&wait_stages),
+        .pWaitSemaphores = &wait_semaphores,
+        .pWaitDstStageMask = &wait_stages,
         .commandBufferCount = 1,
         .pCommandBuffers = &self.command_buffers[self.current_frame],
     };
