@@ -1,6 +1,7 @@
 # Goals:
 
-- Compile shaders through build.zig instead of .bat or .sh files
+- Converted vulkan fns from dynamic lib to static lib - 1.4 provides static libs rather than dynamic at least for ARM64 arch
+- Compile shaders through build.zig instead of .bat or .sh files - Done
 - Be able to display a triangle - Done
 - Be able to resize window - Done
 - Be able to scale triangle to new window size
@@ -14,15 +15,19 @@
 - Be able to rotate
 - Aim to create a game engine api from scratch
 
-## SDL = large library to abstract details of implementing a game engine
+## SDL
 
-- renderer = surface from glfw
-- surface = 2d bit maps/images for loading pictures
-- specific function for vulkan-style surfaces too
-- should drop sdl + glfw b/c I only use them for a few calls - adding a large library to do the basics seems insane
+- used a lot with custom game engines
+- used here to create window + surface
+- intend to drop support in the future
 
 ## GLFW = small c library to handle windows/surfaces
 
-- used glfw = smaller library for just creating window and surfaces
+- smaller library containing fns to create windows + surfaces cross-platform + handle events
+- annoying to build - also intend to drop
 
 ## GLAD/GLEW = small c library to handle
+
+- additional libraries combined with above two to provide extra features
+- GLAD = handles extensions across platforms
+- GLEW = handles loading vulkan functions across platforms
