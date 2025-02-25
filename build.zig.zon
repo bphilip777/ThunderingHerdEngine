@@ -1,0 +1,29 @@
+.{
+    .name = "GameEngine2",
+
+    .version = "0.0.0",
+
+    .minimum_zig_version = "0.14.0",
+
+    .dependencies = .{
+        // .vulkan_zig = .{
+        //     .url = "git+https://github.com/Snektron/vulkan-zig.git#604416bf44baf95568c428e1aa55499aa8e07607",
+        //     .hash = "1220129ea1652cc0f8578db3dcba254bc9fbc6fdd195b5e1021bf4da8592ea5dc9fb",
+        // },
+        .sdl = .{
+            .url = "git+https://github.com/castholm/SDL.git#5179baa2e5154acb229cd4b40c8689498d055691",
+            .hash = "1220655e63d759a534c28ce8ee47f40b2439ba95b6db9fc910c379b1aea294951c55",
+        },
+        // .vulkan_headers = .{
+        //     .url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/v1.4.304.tar.gz",
+        //     .hash = "d4a196d8c84e032d27f999adcea3075517c1c97f",
+        // },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        // "LICENSE",
+        "README.md",
+    },
+}
