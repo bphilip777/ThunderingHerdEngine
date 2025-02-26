@@ -1,9 +1,11 @@
 const vk = @import("vk.zig").vk;
 
-pos: [2]f32,
-color: [3]f32,
+pos: [2]f32, // 4 bytes * 2 = 8
+color: [3]f32, // 4 bytes * 3 = 12
+// total = 16
 
 const Vertex = @This();
+
 pub const binding_description = [_]vk.VkVertexInputBindingDescription{
     .{
         .binding = 0,

@@ -42,9 +42,22 @@ const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 // Model Info
 const Vertex = @import("vertex.zig");
 
-const triangle_vertices = @import("models/triangle.zig").vertices;
-// const square_vertices = @import("models/square.zig").vertices;
-// const square_indices = @import("models/square.zig").indices;
+// triangle
+// pub const triangle_vertices = [_]Vertex{
+//     .{ .pos = .{ 0, -0.5 }, .color = .{ 1, 0, 0 } },
+//     .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 1, 0 } },
+//     .{ .pos = .{ -0.5, 0.5 }, .color = .{ 0, 0, 1 } },
+// };
+// pub const triangle_indices = [_]u16{0, 1, 2};
+
+// square
+pub const square_vertices = [_]Vertex{
+    .{ .pos = .{ -0.5, -0.5 }, .color = .{ 1.0, 0.0, 0.0 } },
+    .{ .pos = .{ 0.5, -0.5 }, .color = .{ 0.0, 1.0, 0.0 } },
+    .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0.0, 0.0, 1.0 } },
+    .{ .pos = .{ -0.5, 0.5 }, .color = .{ 1.0, 1.0, 1.0 } },
+};
+pub const square_indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
 // App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
@@ -79,8 +92,8 @@ pool: vk.VkCommandPool,
 vertex_buffer: vk.VkBuffer,
 vertex_buffer_memory: vk.VkDeviceMemory,
 
-// index_buffer: vk.VkBuffer,
-// index_buffer_memory: vk.VkDeviceMemory,
+index_buffer: vk.VkBuffer,
+index_buffer_memory: vk.VkDeviceMemory,
 
 command_buffers: []vk.VkCommandBuffer,
 
@@ -150,16 +163,26 @@ pub fn init(
     var vertex_buffer: vk.VkBuffer = undefined;
     var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
     try createVertexBuffer(
-        @ptrCast(&triangle_vertices),
         physical_device,
         device,
         &vertex_buffer,
         &vertex_buffer_memory,
         pool,
         graphics_queue,
+        &square_vertices,
     );
 
-    // try createIndexBuffer();
+    var index_buffer: vk.VkBuffer = undefined;
+    var index_buffer_memory: vk.VkDeviceMemory = undefined;
+    try createIndexBuffer(
+        physical_device,
+        device,
+        &index_buffer,
+        &index_buffer_memory,
+        pool,
+        graphics_queue,
+        &square_indices,
+    );
 
     const command_buffers = try createCommandBuffers(allo, device, pool);
 
@@ -191,8 +214,13 @@ pub fn init(
         .pipeline = pipeline,
 
         .pool = pool,
+
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
+
+        .index_buffer = index_buffer,
+        .index_buffer_memory = index_buffer_memory,
+
         .command_buffers = command_buffers,
 
         .image_available_semaphores = image_available_semaphores,
@@ -224,6 +252,9 @@ pub fn deinit(self: *Self) void {
 
     defer vk.vkFreeMemory(self.device, self.vertex_buffer_memory, null);
     defer vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
+
+    defer vk.vkDestroyBuffer(self.device, self.index_buffer, null);
+    defer vk.vkFreeMemory(self.device, self.index_buffer_memory, null);
 
     defer vk.vkDestroyPipelineLayout(self.device, self.layout, null);
     defer vk.vkDestroyRenderPass(self.device, self.render_pass, null);
@@ -1015,15 +1046,15 @@ fn createCommandPool(
 }
 
 fn createVertexBuffer(
-    vertices: []const Vertex,
     physical_device: vk.VkPhysicalDevice,
     device: vk.VkDevice,
     vertex_buffer: *vk.VkBuffer,
     vertex_buffer_memory: *vk.VkDeviceMemory,
     pool: vk.VkCommandPool,
     graphics_queue: vk.VkQueue,
+    vertices: []const Vertex,
 ) !void {
-    const buffer_size: vk.VkDeviceSize = @truncate(@sizeOf(Vertex) * vertices.len);
+    const buffer_size: vk.VkDeviceSize = @sizeOf(Vertex) * vertices.len;
 
     var staging_buffer: vk.VkBuffer = undefined;
     var staging_buffer_memory: vk.VkDeviceMemory = undefined;
@@ -1039,14 +1070,18 @@ fn createVertexBuffer(
 
     {
         var data: ?*anyopaque = undefined;
-
         try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
         defer vk.vkUnmapMemory(device, staging_buffer_memory);
 
-        const gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
-        for (vertices, 0..) |vertex, i| {
-            gpu_vertices[i] = vertex;
-        }
+        // TODO: should be a @memcpy - seems like this might work
+        var gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
+        @memcpy(gpu_vertices[0..vertices.len], vertices);
+
+        // know this works
+        // const gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
+        // for (triangle_vertices, 0..) |vertex, i| {
+        //     gpu_vertices[i] = vertex;
+        // }
     }
 
     try createBuffer(
@@ -1058,10 +1093,11 @@ fn createVertexBuffer(
         vertex_buffer,
         vertex_buffer_memory,
     );
-    defer vk.vkFreeMemory(device, staging_buffer_memory, null);
-    defer vk.vkDestroyBuffer(device, staging_buffer, null);
 
     try copyBuffer(device, staging_buffer, vertex_buffer.*, buffer_size, pool, graphics_queue);
+
+    vk.vkDestroyBuffer(device, staging_buffer, null);
+    vk.vkFreeMemory(device, staging_buffer_memory, null);
 }
 
 fn createBuffer(
@@ -1080,7 +1116,7 @@ fn createBuffer(
         .usage = usage,
         .sharingMode = vk.VK_SHARING_MODE_EXCLUSIVE,
     };
-    try isSuccess(vk.vkCreateBuffer(device, &bci, null, @ptrCast(buffer)));
+    try isSuccess(vk.vkCreateBuffer(device, &bci, null, buffer));
 
     // create memory
     var mem_reqs: vk.VkMemoryRequirements = undefined;
@@ -1163,27 +1199,52 @@ fn findMemoryType(
     return error.FailedToFindSuitableMemoryType;
 }
 
-// fn createIndexBuffer(physical_device: vk.VkPhysicalDevice, device: vk.VkDevice, indices: []u16) void {
-//     var buffer_size: vk.VkDeviceSize = @sizeOf(indices) * indices.len;
-//     var staging_buffer: vk.VkBuffer = undefined;
-//     var staging_buffer_memory: vk.VkDeviceMemory = undefined;
-//
-// createBuffer(
-//         physical_device,
-//         device,
-//         buffer_size,
-//         vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-//         vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-//         &staging_buffer,
-//         &staging_buffer_memory,
-//     );
-//
-//     var data: ?*anyopaque = undefined;
-//     vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
-//     const gpu_indices = @as([indices.len]u16, @ptrCast(@alignCast(data)));
-//     @memcpy(&gpu_indices, &indices);
-//     vk.vkUnmapMemory(device, staging_buffer_memory);
-// }
+fn createIndexBuffer(
+    physical_device: vk.VkPhysicalDevice,
+    device: vk.VkDevice,
+    index_buffer: *vk.VkBuffer,
+    index_buffer_memory: *vk.VkDeviceMemory,
+    pool: vk.VkCommandPool,
+    graphics_queue: vk.VkQueue,
+    indices: []const u16,
+) !void {
+    const buffer_size: vk.VkDeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
+
+    var staging_buffer: vk.VkBuffer = undefined;
+    var staging_buffer_memory: vk.VkDeviceMemory = undefined;
+    try createBuffer(
+        physical_device,
+        device,
+        buffer_size,
+        vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &staging_buffer,
+        &staging_buffer_memory,
+    );
+
+    {
+        var data: ?*anyopaque = undefined;
+        try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
+        defer vk.vkUnmapMemory(device, staging_buffer_memory);
+        var gpu_indices: [*]u16 = @ptrCast(@alignCast(data));
+        @memcpy(gpu_indices[0..indices.len], indices);
+    }
+
+    try createBuffer(
+        physical_device,
+        device,
+        buffer_size,
+        vk.VK_BUFFER_USAGE_TRANSFER_DST_BIT | vk.VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        vk.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        index_buffer,
+        index_buffer_memory,
+    );
+
+    try copyBuffer(device, staging_buffer, index_buffer.*, buffer_size, pool, graphics_queue);
+
+    vk.vkDestroyBuffer(device, staging_buffer, null);
+    vk.vkFreeMemory(device, staging_buffer_memory, null);
+}
 
 fn createCommandBuffers(
     allo: Allocator,
@@ -1205,6 +1266,8 @@ fn createCommandBuffers(
 fn recordCommandBuffer(
     self: *Self,
     command_buffer: vk.VkCommandBuffer,
+    vertex_buffer: vk.VkBuffer,
+    index_buffer: vk.VkBuffer,
     image_index: u32,
 ) !void {
     const cbbi = vk.VkCommandBufferBeginInfo{
@@ -1258,7 +1321,13 @@ fn recordCommandBuffer(
     };
     vk.vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    vk.vkCmdDraw(command_buffer, 3, 1, 0, 0);
+    // vk.vkCmdDraw(command_buffer, 3, 1, 0, 0); // simple draw call fn
+
+    const vertex_buffers = [_]vk.VkBuffer{vertex_buffer};
+    const offsets = [_]vk.VkDeviceSize{0};
+    vk.vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets);
+    vk.vkCmdBindIndexBuffer(command_buffer, index_buffer, 0, vk.VK_INDEX_TYPE_UINT16);
+    vk.vkCmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0);
 
     vk.vkCmdEndRenderPass(command_buffer);
 
@@ -1324,7 +1393,12 @@ fn drawFrame(self: *Self) !void {
     try isSuccess(vk.vkResetFences(self.device, 1, &self.in_flight_fences[self.current_frame]));
 
     try isSuccess(vk.vkResetCommandBuffer(self.command_buffers[self.current_frame], 0));
-    try self.recordCommandBuffer(self.command_buffers[self.current_frame], image_index);
+    try self.recordCommandBuffer(
+        self.command_buffers[self.current_frame],
+        self.vertex_buffer,
+        self.index_buffer,
+        image_index,
+    );
 
     const wait_semaphores = [1]vk.VkSemaphore{self.image_available_semaphores[self.current_frame]};
     const wait_stages = [1]vk.VkPipelineStageFlags{vk.VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};

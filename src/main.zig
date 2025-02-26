@@ -1,5 +1,6 @@
 const std = @import("std");
 const Engine = @import("engine.zig");
+const triangle_vertices = @import("models/triangle.zig").vertices;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
