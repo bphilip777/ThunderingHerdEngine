@@ -1,9 +1,12 @@
 // TODO:
-// 1. need to implement both the draw and draw indexed functions (only indexed right now)
+// 1. need to implement both the draw and draw indexed functions (only indexed right now) - call correct one based on data
 // 2. need to separate engine and app into separate files = separation of concerns + orderliness
 // 3. need to fix loading primitives to make passing data easier
-// 4. need to fix scaling window size into scaling drawn size
-// 5. need to swap from 2d to 3d mode
+// 4. need to swap from 2d to 3d mode
+// 5. poll 1x every frame = check frame rate
+//      - need to create a fn that takes in other fns and runs them based on the time left - only need to check elapsed time as an argument for that function
+// 6. Need a way to abstract uniform buffer calls from specific impl in init - like side functions that call those functions
+//  - store UBO in another file
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
@@ -66,6 +69,21 @@ pub const square_vertices = [_]Vertex{
 };
 pub const square_indices = [_]u16{ 0, 1, 2, 2, 3, 0 };
 
+// Frame Rate
+const FPS = enum {
+    thirty,
+    sixty,
+    one_twenty,
+    one_fourty_four,
+};
+
+// UBO
+const UniformBufferObject = struct {
+    model: [16]f32,
+    view: [16]f32,
+    proj: [16]f32,
+};
+
 // App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
 
@@ -90,6 +108,7 @@ extent: vk.VkExtent2D,
 views: []vk.VkImageView,
 frame_buffers: []vk.VkFramebuffer,
 
+descriptor_set_layout: vk.VkDescriptorSetLayout,
 layout: vk.VkPipelineLayout,
 render_pass: vk.VkRenderPass,
 pipeline: vk.VkPipeline,
@@ -102,6 +121,10 @@ vertex_buffer_memory: vk.VkDeviceMemory,
 index_buffer: vk.VkBuffer,
 index_buffer_memory: vk.VkDeviceMemory,
 
+uniform_buffers: []vk.VkBuffer,
+uniform_buffers_memory: []vk.VkDeviceMemory,
+uniform_buffers_mapped: []?*anyopaque,
+
 command_buffers: []vk.VkCommandBuffer,
 
 image_available_semaphores: []vk.VkSemaphore,
@@ -110,6 +133,7 @@ in_flight_fences: []vk.VkFence,
 
 current_frame: u32 = 0,
 resize: bool = false,
+fps: FPS = .sixty,
 
 // public functions
 pub fn init(
@@ -157,6 +181,7 @@ pub fn init(
     const views = try allo.alloc(vk.VkImageView, n_images);
     const frame_buffers = try allo.alloc(vk.VkFramebuffer, n_images);
 
+    const descriptor_set_layout = try createDescriptorSetLayout(device);
     const layout = try createGraphicsPipelineLayout(device);
     const render_pass = try createRenderPass(device, format.format);
 
@@ -194,6 +219,18 @@ pub fn init(
         &square_indices,
     );
 
+    // probably want to pass this into this fn
+    const uniform_buffers = try allo.alloc(vk.VkBuffer, MAX_FRAMES_IN_FLIGHT);
+    const uniform_buffers_memory = try allo.alloc(vk.VkDeviceMemory, MAX_FRAMES_IN_FLIGHT);
+    const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
+    try createUniformBuffers(
+        physical_device,
+        device,
+        uniform_buffers,
+        uniform_buffers_memory,
+        uniform_buffers_mapped,
+    );
+
     const command_buffers = try createCommandBuffers(allo, device, pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
@@ -219,6 +256,7 @@ pub fn init(
         .views = views,
         .frame_buffers = frame_buffers,
 
+        .descriptor_set_layout = descriptor_set_layout,
         .layout = layout,
         .render_pass = render_pass,
         .pipeline = pipeline,
@@ -231,6 +269,10 @@ pub fn init(
         .index_buffer = index_buffer,
         .index_buffer_memory = index_buffer_memory,
 
+        .uniform_buffers = uniform_buffers,
+        .uniform_buffers_memory = uniform_buffers_memory,
+        .uniform_buffers_mapped = uniform_buffers_mapped,
+
         .command_buffers = command_buffers,
 
         .image_available_semaphores = image_available_semaphores,
@@ -240,47 +282,78 @@ pub fn init(
 }
 
 pub fn deinit(self: *Self) void {
-    defer sdl.SDL_Quit();
-    // defer self.window.destroy(); // glfw
-    defer sdl.SDL_DestroyWindow(self.window);
-    defer vk.vkDestroyInstance(self.instance, null);
-    // defer vk.vkDestroySurface(self.instance, self.surface, null); // glfw
-    defer sdl.SDL_Vulkan_DestroySurface(@ptrCast(self.instance), @ptrCast(self.surface), null); // sdl
-    defer vk.vkDestroyDevice(self.device, null);
-
-    defer vk.vkDestroyCommandPool(self.device, self.pool, null);
-    defer self.allo.free(self.command_buffers);
-
-    defer self.allo.free(self.in_flight_fences);
-    defer self.allo.free(self.image_available_semaphores);
-    defer self.allo.free(self.render_finished_semaphores);
-    for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-        defer vk.vkDestroySemaphore(self.device, self.image_available_semaphores[i], null);
-        defer vk.vkDestroySemaphore(self.device, self.render_finished_semaphores[i], null);
-        defer vk.vkDestroyFence(self.device, self.in_flight_fences[i], null);
+    defer { // Cleanup vulkan instance/window/surface/quit sdl
+        vk.vkDestroyDevice(self.device, null);
+        sdl.SDL_Vulkan_DestroySurface(@ptrCast(self.instance), @ptrCast(self.surface), null); // sdl
+        // defer vk.vkDestroySurface(self.instance, self.surface, null); // glfw
+        vk.vkDestroyInstance(self.instance, null);
+        sdl.SDL_DestroyWindow(self.window);
+        // defer self.window.destroy(); // glfw
+        sdl.SDL_Quit();
     }
 
-    defer vk.vkFreeMemory(self.device, self.vertex_buffer_memory, null);
-    defer vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
+    defer { // Cleanup command pool/buffers
+        vk.vkDestroyCommandPool(self.device, self.pool, null);
+        self.allo.free(self.command_buffers);
+    }
 
-    defer vk.vkDestroyBuffer(self.device, self.index_buffer, null);
-    defer vk.vkFreeMemory(self.device, self.index_buffer_memory, null);
+    defer { // Cleanup sync objects
+        for (0..MAX_FRAMES_IN_FLIGHT) |i| {
+            vk.vkDestroySemaphore(self.device, self.image_available_semaphores[i], null);
+            vk.vkDestroySemaphore(self.device, self.render_finished_semaphores[i], null);
+            vk.vkDestroyFence(self.device, self.in_flight_fences[i], null);
+        }
+        self.allo.free(self.in_flight_fences);
+        self.allo.free(self.image_available_semaphores);
+        self.allo.free(self.render_finished_semaphores);
+    }
 
-    defer vk.vkDestroyPipelineLayout(self.device, self.layout, null);
-    defer vk.vkDestroyRenderPass(self.device, self.render_pass, null);
-    defer vk.vkDestroyPipeline(self.device, self.pipeline, null);
+    defer { // Cleanup vertex buffers
+        vk.vkFreeMemory(self.device, self.vertex_buffer_memory, null);
+        vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
+    }
 
-    defer self.allo.free(self.images);
-    defer self.allo.free(self.views);
-    defer self.allo.free(self.frame_buffers);
-    defer self.cleanupSwapchain();
+    defer { // Cleanup index buffers
+        vk.vkDestroyBuffer(self.device, self.index_buffer, null);
+        vk.vkFreeMemory(self.device, self.index_buffer_memory, null);
+    }
+
+    defer { // Cleanup layout/renderpass/pipeline
+        vk.vkDestroyPipelineLayout(self.device, self.layout, null);
+        vk.vkDestroyRenderPass(self.device, self.render_pass, null);
+        vk.vkDestroyPipeline(self.device, self.pipeline, null);
+    }
+
+    defer vk.vkDestroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
+
+    defer { // Cleanup uniform buffers
+        for (0..MAX_FRAMES_IN_FLIGHT) |i| {
+            vk.vkDestroyBuffer(self.device, self.uniform_buffers[i], null);
+            vk.vkFreeMemory(self.device, self.uniform_buffers_memory[i], null);
+        }
+        self.allo.free(self.uniform_buffers);
+        self.allo.free(self.uniform_buffers_mapped);
+        self.allo.free(self.uniform_buffers_memory);
+    }
+
+    defer { // Cleanup swapchain data
+        self.cleanupSwapchain();
+        self.allo.free(self.images);
+        self.allo.free(self.views);
+        self.allo.free(self.frame_buffers);
+    }
 }
 
 pub fn mainLoop(self: *Self) !void {
+    // var start_time = std.time.nanosecond();
+
     // Main Loop
     outer: while (true) {
+        // var current_time = std.time.nanosecond();
+        // const elapsed_time = current_time - start_time;
 
         // poll events = multiplexer - only want to call once every few seconds and handle each case afterwards
+        // if (elapsed_time < 0.04) {
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -302,6 +375,7 @@ pub fn mainLoop(self: *Self) !void {
                 else => {},
             }
         }
+        // }
 
         // game logic
         if (self.resize) {
@@ -718,18 +792,19 @@ fn recreateSwapchain(self: *Self) !void {
 
     // don't update game while minimized
     // in c, null == 0 is truthy, so following works - yuck
+    // rather than doing this - more optimal to return and allow computer to wait on new events and do nothing = less work overall
     while (width == 0 and height == 0) {
         if (!sdl.SDL_GetWindowSize(self.window, &width, &height)) return;
         _ = sdl.SDL_WaitEvent(null);
     }
-    try isSuccess(vk.vkDeviceWaitIdle(self.device));
-    std.debug.print("Dims: {}x{}\n", .{ width, height });
+    // if (width == 0 or height == 0) return; // seems more efficient to return to regular polling rather than above
 
+    // idle device for awhile
+    try isSuccess(vk.vkDeviceWaitIdle(self.device));
     self.cleanupSwapchain();
 
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
     // WARNING: will break if n_images changes after new swapchain created
-
     var n_images: u32 = @truncate(self.images.len);
     try getSwapchainImages(self.device, self.swapchain, &n_images, self.images); // do i need to reobtain the images?
     try createImageViews(self.device, self.images, self.format, self.views);
@@ -738,7 +813,6 @@ fn recreateSwapchain(self: *Self) !void {
         .height = @intCast(height),
     };
     try createFramebuffers(self.device, self.extent, self.views, self.render_pass, self.frame_buffers);
-    std.debug.print("Dims: {}x{}\n", .{ width, height });
 }
 
 fn cleanupSwapchain(self: *Self) void {
@@ -818,11 +892,13 @@ fn createShaderModule(
 
 fn createGraphicsPipelineLayout(
     device: vk.VkDevice,
+    descriptor_set_layout: vk.VkDescriptorSetLayout,
 ) !vk.VkPipelineLayout {
+    const descriptor_set_layouts = [_]vk.VkDescriptorSetLayout{descriptor_set_layout};
     const plci = vk.VkPipelineLayoutCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .setLayoutCount = 0,
-        .pSetLayouts = null,
+        .setLayoutCount = @truncate(descriptor_set_layouts.len),
+        .pSetLayouts = &descriptor_set_layouts,
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = null,
     };
@@ -885,6 +961,26 @@ fn createRenderPass(device: vk.VkDevice, format: vk.VkFormat) !vk.VkRenderPass {
     var render_pass: vk.VkRenderPass = undefined;
     try isSuccess(vk.vkCreateRenderPass(device, &rpci, null, &render_pass));
     return render_pass;
+}
+
+fn createDescriptorSetLayout(device: vk.VkDevice) !vk.DescriptorSetLayout {
+    const ubo_layout_binding = vk.VkDescriptorSetLayout{
+        .binding = 0,
+        .descriptorType = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = 1,
+        .stageFlags = vk.VK_SHADER_STAGE_VERTEX_BIT,
+        .pImmutableSamplers = null,
+    };
+
+    const dslci = vk.VkDescriptorSetLayoutCreateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = 1,
+        .pBindings = &ubo_layout_binding,
+    };
+
+    var descriptor_set_layout: vk.VkDescriptorSetLayout = undefined;
+    try isSuccess(vk.vkCreateDescriptorSetLayout(device, &dslci, null, &descriptor_set_layout));
+    return descriptor_set_layout;
 }
 
 fn createGraphicsPipelines(
@@ -1283,6 +1379,28 @@ fn createIndexBuffer(
 
     vk.vkDestroyBuffer(device, staging_buffer, null);
     vk.vkFreeMemory(device, staging_buffer_memory, null);
+}
+
+fn createUniformBuffers(
+    physical_device: vk.VkPhysicalDevice,
+    device: vk.VkDevice,
+    uniform_buffers: []vk.VkBuffer,
+    uniform_buffers_memory: []vk.VkDeviceMemory,
+    uniform_buffers_mapped: []?*anyopaque,
+) ![]vk.VkBuffer {
+    const buffer_size: vk.VkDeviceSize = @sizeOf(UniformBufferObject);
+
+    for (0..MAX_FRAMES_IN_FLIGHT) |i| {
+        try createBuffer(
+            physical_device,
+            device,
+            vk.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            uniform_buffers[i],
+            uniform_buffers_memory[i],
+        );
+        vk.vkMapMemory(device, uniform_buffers_memory[i], 0, buffer_size, 0, &uniform_buffers_mapped[i]);
+    }
 }
 
 fn createCommandBuffers(
