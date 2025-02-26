@@ -35,50 +35,26 @@ const optional_instance_extensions = [_][*:0]const u8{
     vk.VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME,
 };
 
-// Model/Shader Info
+// Shader Info
 const vert_spv align(@alignOf(u32)) = @embedFile("vertex_shader").*;
 const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 
-const Vertex = struct {
-    const binding_description = vk.VkVertexInputBindingDescription{
-        .binding = 0,
-        .stride = @sizeOf(Vertex),
-        .inputRate = vk.VK_VERTEX_INPUT_RATE_VERTEX,
-    };
-    const attribute_description = [_]vk.VkVertexInputAttributeDescription{
-        .{
-            .location = 0,
-            .binding = 0,
-            .format = vk.VK_FORMAT_R32G32_SFLOAT,
-            .offset = @offsetOf(Vertex, "pos"),
-        },
-        .{
-            .location = 0,
-            .binding = 1,
-            .format = vk.VK_FORMAT_R32G32B32_SFLOAT,
-            .offset = @offsetOf(Vertex, "color"),
-        },
-    };
+// Model Info
+const VERTEX = @import("vertex.zig");
 
-    pos: [2]f32,
-    color: [3]f32,
-};
 
-const vertices = [_]Vertex{
-    .{ .pos = .{ 0, -0.5 }, .color = .{ 1, 0, 0 } },
-    .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 1, 0 } },
-    .{ .pos = .{ -0.5, 0.5 }, .color = .{ 0, 0, 1 } },
-};
 
+// App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
 
 const Self = @This();
 
 allo: Allocator,
 window: *sdl.SDL_Window,
-instance: vk.VkInstance,
 
+instance: vk.VkInstance,
 surface: vk.VkSurfaceKHR,
+
 physical_device: vk.VkPhysicalDevice,
 device: vk.VkDevice,
 
@@ -97,8 +73,13 @@ render_pass: vk.VkRenderPass,
 pipeline: vk.VkPipeline,
 
 pool: vk.VkCommandPool,
+
 vertex_buffer: vk.VkBuffer,
 vertex_buffer_memory: vk.VkDeviceMemory,
+
+index_buffer: vk.VkBuffer,
+index_buffer_memory: vk.VkDeviceMemory,
+
 command_buffers: []vk.VkCommandBuffer,
 
 image_available_semaphores: []vk.VkSemaphore,
@@ -163,6 +144,13 @@ pub fn init(
     const pipeline = try createGraphicsPipelines(device, layout, render_pass);
 
     const pool = try createCommandPool(surface, physical_device, device);
+
+    var vertex_buffer: vk.VkBuffer = undefined;
+    var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
+    try createVertexBuffer(physical_device, device, &vertex_buffer, &vertex_buffer_memory, pool, graphics_queue);
+
+    try createIndexBuffer();
+
     const command_buffers = try createCommandBuffers(allo, device, pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
@@ -193,6 +181,8 @@ pub fn init(
         .pipeline = pipeline,
 
         .pool = pool,
+        .vertex_buffer = vertex_buffer,
+        .vertex_buffer_memory = vertex_buffer_memory,
         .command_buffers = command_buffers,
 
         .image_available_semaphores = image_available_semaphores,
@@ -222,11 +212,12 @@ pub fn deinit(self: *Self) void {
         defer vk.vkDestroyFence(self.device, self.in_flight_fences[i], null);
     }
 
+    defer vk.vkFreeMemory(self.device, self.vertex_buffer_memory, null);
+    defer vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
+
     defer vk.vkDestroyPipelineLayout(self.device, self.layout, null);
     defer vk.vkDestroyRenderPass(self.device, self.render_pass, null);
-    defer vk.vkDestroyPipeline(self.device, self.pipeline, null); // memory leaks w/ images once i reach this step - why?
-
-    defer vk.vkDestroyBuffer(self.device, self.vertex_buffer, null);
+    defer vk.vkDestroyPipeline(self.device, self.pipeline, null);
 
     defer self.allo.free(self.images);
     defer self.allo.free(self.views);
@@ -650,23 +641,20 @@ fn createSwapchain(
 
 fn recreateSwapchain(self: *Self) !void {
     // resize window -> wait for size to become non zero -> cleanup engine
-    var width: i32 = 0;
-    var height: i32 = 0;
-    while (width == 0 or height == 0) {
-        if (!sdl.SDL_GetWindowSize(self.window, &width, &height)) {
-            std.debug.print("Failed to get window size: {s}\n", .{sdl.SDL_GetError()});
-            return error.FailedToGetWindowSize;
-        }
+    var width: i32, var height: i32 = .{ 0, 0 };
+    _ = sdl.SDL_GetWindowSize(self.window, &width, &height);
+    // in c, null == 0 is truthy, so following works - yuck
+    while (width == 0 and height == 0) {
+        if (!sdl.SDL_GetWindowSize(self.window, &width, &height)) return;
         _ = sdl.SDL_WaitEvent(null);
     }
-
     try isSuccess(vk.vkDeviceWaitIdle(self.device));
 
     self.cleanupSwapchain();
 
-    // if (is_debug_mode) std.debug.print("New Extent: {}x{}\n", .{ width, height });
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
-    // will break if n_images changes after new swapchain created
+
+    // WARNING: will break if n_images changes after new swapchain created
     var n_images: u32 = @truncate(self.images.len);
     try getSwapchainImages(self.device, self.swapchain, &n_images, self.images);
     try createImageViews(self.device, self.images, self.format, self.views);
@@ -852,12 +840,15 @@ fn createGraphicsPipelines(
         },
     };
 
+    const binding_description = VERTEX.binding_description;
+    const attribute_descriptions = VERTEX.attribute_descriptions;
+
     const vertex_input_info = vk.VkPipelineVertexInputStateCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-        .vertexBindingDescriptionCount = 0,
-        .pVertexBindingDescriptions = null,
-        .vertexAttributeDescriptionCount = 0,
-        .pVertexAttributeDescriptions = null,
+        .vertexBindingDescriptionCount = @truncate(binding_description.len),
+        .pVertexBindingDescriptions = &binding_description,
+        .vertexAttributeDescriptionCount = @truncate(attribute_descriptions.len),
+        .pVertexAttributeDescriptions = &attribute_descriptions,
     };
 
     const input_assembly = vk.VkPipelineInputAssemblyStateCreateInfo{
@@ -1013,42 +1004,137 @@ fn createCommandPool(
     return pool;
 }
 
-fn createVertexBuffer(device: vk.VkDevice) !vk.VkBuffer {
-    const bci = vk.VkBufferCreateInfo{
-        .sType = vk.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size = @sizeOf(Vertex) * vertices.len,
-        .usage = vk.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .sharingMode = vk.VK_SHARING_MODE_EXCLUSIVE,
-    };
+fn createVertexBuffer(
+    vertices: []VERTEX,
+    physical_device: vk.VkPhysicalDevice,
+    device: vk.VkDevice,
+    vertex_buffer: *vk.VkBuffer,
+    vertex_buffer_memory: *vk.VkDeviceMemory,
+    pool: vk.VkCommandPool,
+    graphics_queue: vk.VkQueue,
+) !void {
+    const buffer_size: vk.VkDeviceSize = @truncate(@sizeOf(VERTEX) * vertices.len);
 
-    var vertex_buffer: vk.VkBuffer = undefined;
-    try isSuccess(vk.vkCreateBuffer(device, &bci, null, &vertex_buffer));
-    return vertex_buffer;
+    var staging_buffer: vk.VkBuffer = undefined;
+    var staging_buffer_memory: vk.VkDeviceMemory = undefined;
+    try createBuffer(
+        physical_device,
+        device,
+        buffer_size,
+        vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &staging_buffer,
+        &staging_buffer_memory,
+    );
+
+    {
+        var data: ?*anyopaque = undefined;
+
+        try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
+        defer vk.vkUnmapMemory(device, staging_buffer_memory);
+
+        const gpu_vertices: [*]VERTEX = @ptrCast(@alignCast(data));
+        for (vertices, 0..) |vertex, i| {
+            gpu_vertices[i] = vertex;
+        }
+    }
+
+    try createBuffer(
+        physical_device,
+        device,
+        buffer_size,
+        vk.VK_BUFFER_USAGE_TRANSFER_DST_BIT | vk.VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        vk.VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vertex_buffer,
+        vertex_buffer_memory,
+    );
+    defer vk.vkFreeMemory(device, staging_buffer_memory, null);
+    defer vk.vkDestroyBuffer(device, staging_buffer, null);
+
+    try copyBuffer(device, staging_buffer, vertex_buffer.*, buffer_size, pool, graphics_queue);
 }
 
-fn bindMemory(device: vk.VkDevice, vertex_buffer: vk.VkBuffer,) !void {
+fn createBuffer(
+    physical_device: vk.VkPhysicalDevice,
+    device: vk.VkDevice,
+    size: vk.VkDeviceSize,
+    usage: vk.VkBufferUsageFlags,
+    props: vk.VkMemoryPropertyFlags,
+    buffer: *vk.VkBuffer,
+    buffer_memory: *vk.VkDeviceMemory,
+) !void {
+    // create buffer
+    const bci = vk.VkBufferCreateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .size = size,
+        .usage = usage,
+        .sharingMode = vk.VK_SHARING_MODE_EXCLUSIVE,
+    };
+    try isSuccess(vk.vkCreateBuffer(device, &bci, null, @ptrCast(buffer)));
+
+    // create memory
     var mem_reqs: vk.VkMemoryRequirements = undefined;
-    vk.vkGetBufferMemoryRequirements(device, vertex_buffer, &mem_reqs);
-    
+    vk.vkGetBufferMemoryRequirements(device, buffer.*, &mem_reqs);
+
     const mai = vk.VkMemoryAllocateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = mem_reqs.size,
-        .memoryTypeIndex = findMemoryType(mem_reqs.memoryTypeBits, vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT),
-};
+        .memoryTypeIndex = try findMemoryType(
+            physical_device,
+            mem_reqs.memoryTypeBits,
+            props,
+        ),
+    };
+    try isSuccess(vk.vkAllocateMemory(device, &mai, null, @ptrCast(buffer_memory)));
 
-    try isSuccess(vk.vkAllocateMemory(device, &mai, null, &vertex_buffer_memory));
-
-    vk.vkBindBufferMemory(device, vertex_buffer, vertex_buffer_memory, 0);
-    
-    var data: *anyopaque = undefined;
-    try isSuccess(vk.vkMapMemory(device, vertex_buffer_memory, 0, buffer_info.len, 0, &data));
-    defer vk.vkUnmapMemory(device, vertex_buffer_memory);
-    memcpy(data, vertices.len, bufferInfo.size);
+    try isSuccess(vk.vkBindBufferMemory(device, buffer.*, buffer_memory.*, 0));
 }
 
-// fn createIndexBuffer(device: vk.VkDevice) !vk.VkBuffer {
-//
-// }
+fn copyBuffer(
+    device: vk.VkDevice,
+    src_buffer: vk.VkBuffer,
+    dst_buffer: vk.VkBuffer,
+    size: vk.VkDeviceSize,
+    pool: vk.VkCommandPool,
+    graphics_queue: vk.VkQueue,
+) !void {
+    const cbai = vk.VkCommandBufferAllocateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .level = vk.VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandPool = pool,
+        .commandBufferCount = 1,
+    };
+    var command_buffer: vk.VkCommandBuffer = undefined;
+    try isSuccess(vk.vkAllocateCommandBuffers(device, &cbai, &command_buffer));
+
+    const cbbi = vk.VkCommandBufferBeginInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = vk.VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+    try isSuccess(vk.vkBeginCommandBuffer(command_buffer, &cbbi));
+
+    {
+        var copy_region = vk.VkBufferCopy{
+            .srcOffset = 0,
+            .dstOffset = 0,
+            .size = size,
+        };
+        vk.vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
+    }
+
+    try isSuccess(vk.vkEndCommandBuffer(command_buffer));
+
+    const si = vk.VkSubmitInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &command_buffer,
+    };
+
+    try isSuccess(vk.vkQueueSubmit(graphics_queue, 1, &si, null));
+    try isSuccess(vk.vkQueueWaitIdle(graphics_queue));
+
+    vk.vkFreeCommandBuffers(device, pool, 1, &command_buffer);
+}
 
 fn findMemoryType(
     physical_device: vk.VkPhysicalDevice,
@@ -1059,12 +1145,34 @@ fn findMemoryType(
     vk.vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_props);
 
     for (0..mem_props.memoryTypeCount) |i| {
-        if (type_filter & @as(u32, 1 << i) and mem_props.memoryTypes[i].propertyFlags & props == props) {
-            return i;
+        if ((type_filter & (@as(u32, 1) << @truncate(i))) > 0 and mem_props.memoryTypes[i].propertyFlags & props == props) {
+            return @truncate(i);
         }
     }
 
     return error.FailedToFindSuitableMemoryType;
+}
+
+fn createIndexBuffer(physical_device: vk.VkPhysicalDevice, device: vk.VkDevice) void {
+    var buffer_size: vk.VkDeviceSize = @sizeOf(indices) * indices.len;
+    var staging_buffer: vk.VkBuffer = undefined;
+    var staging_buffer_memory: vk.VkDeviceMemory = undefined;
+
+createBuffer(
+        physical_device,
+        device,
+        buffer_size,
+        vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        &staging_buffer,
+        &staging_buffer_memory,
+    );
+    
+    var data: ?*anyopaque = undefined;
+    vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
+    const gpu_indices = @as([indices.len]u16, @ptrCast(@alignCast(data)));
+    @memcpy(&gpu_indices, &indices); 
+    vk.vkUnmapMemory(device, staging_buffer_memory);
 }
 
 fn createCommandBuffers(
@@ -1181,9 +1289,7 @@ fn createSemaphores(
 }
 
 fn drawFrame(self: *Self) !void {
-    try isSuccess(
-        vk.vkWaitForFences(self.device, 1, &self.in_flight_fences[self.current_frame], 1, std.math.maxInt(u64)),
-    );
+    try isSuccess(vk.vkWaitForFences(self.device, 1, &self.in_flight_fences[self.current_frame], 1, std.math.maxInt(u64)));
 
     // if out of date = recreate swapchain
     var image_index: u32 = undefined;
