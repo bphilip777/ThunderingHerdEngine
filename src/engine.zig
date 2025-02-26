@@ -43,12 +43,12 @@ const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 const Vertex = @import("vertex.zig");
 
 // triangle
-// pub const triangle_vertices = [_]Vertex{
-//     .{ .pos = .{ 0, -0.5 }, .color = .{ 1, 0, 0 } },
-//     .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 1, 0 } },
-//     .{ .pos = .{ -0.5, 0.5 }, .color = .{ 0, 0, 1 } },
-// };
-// pub const triangle_indices = [_]u16{0, 1, 2};
+pub const triangle_vertices = [_]Vertex{
+    .{ .pos = .{ 0, -0.5 }, .color = .{ 1, 0, 0 } },
+    .{ .pos = .{ 0.5, 0.5 }, .color = .{ 0, 1, 0 } },
+    .{ .pos = .{ -0.5, 0.5 }, .color = .{ 0, 0, 1 } },
+};
+pub const triangle_indices = [_]u16{ 0, 1, 2 };
 
 // square
 pub const square_vertices = [_]Vertex{
@@ -169,7 +169,8 @@ pub fn init(
         &vertex_buffer_memory,
         pool,
         graphics_queue,
-        &square_vertices,
+        &triangle_vertices,
+        // &square_vertices,
     );
 
     var index_buffer: vk.VkBuffer = undefined;
@@ -181,7 +182,8 @@ pub fn init(
         &index_buffer_memory,
         pool,
         graphics_queue,
-        &square_indices,
+        &triangle_indices,
+        // &square_indices,
     );
 
     const command_buffers = try createCommandBuffers(allo, device, pool);
