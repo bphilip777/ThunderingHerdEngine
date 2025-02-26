@@ -40,9 +40,11 @@ const vert_spv align(@alignOf(u32)) = @embedFile("vertex_shader").*;
 const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 
 // Model Info
-const VERTEX = @import("vertex.zig");
+const Vertex = @import("vertex.zig");
 
-
+const triangle_vertices = @import("models/triangle.zig").vertices;
+// const square_vertices = @import("models/square.zig").vertices;
+// const square_indices = @import("models/square.zig").indices;
 
 // App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
@@ -77,8 +79,8 @@ pool: vk.VkCommandPool,
 vertex_buffer: vk.VkBuffer,
 vertex_buffer_memory: vk.VkDeviceMemory,
 
-index_buffer: vk.VkBuffer,
-index_buffer_memory: vk.VkDeviceMemory,
+// index_buffer: vk.VkBuffer,
+// index_buffer_memory: vk.VkDeviceMemory,
 
 command_buffers: []vk.VkCommandBuffer,
 
@@ -147,9 +149,17 @@ pub fn init(
 
     var vertex_buffer: vk.VkBuffer = undefined;
     var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
-    try createVertexBuffer(physical_device, device, &vertex_buffer, &vertex_buffer_memory, pool, graphics_queue);
+    try createVertexBuffer(
+        @ptrCast(&triangle_vertices),
+        physical_device,
+        device,
+        &vertex_buffer,
+        &vertex_buffer_memory,
+        pool,
+        graphics_queue,
+    );
 
-    try createIndexBuffer();
+    // try createIndexBuffer();
 
     const command_buffers = try createCommandBuffers(allo, device, pool);
 
@@ -840,8 +850,8 @@ fn createGraphicsPipelines(
         },
     };
 
-    const binding_description = VERTEX.binding_description;
-    const attribute_descriptions = VERTEX.attribute_descriptions;
+    const binding_description = Vertex.binding_description;
+    const attribute_descriptions = Vertex.attribute_descriptions;
 
     const vertex_input_info = vk.VkPipelineVertexInputStateCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
@@ -1005,7 +1015,7 @@ fn createCommandPool(
 }
 
 fn createVertexBuffer(
-    vertices: []VERTEX,
+    vertices: []const Vertex,
     physical_device: vk.VkPhysicalDevice,
     device: vk.VkDevice,
     vertex_buffer: *vk.VkBuffer,
@@ -1013,7 +1023,7 @@ fn createVertexBuffer(
     pool: vk.VkCommandPool,
     graphics_queue: vk.VkQueue,
 ) !void {
-    const buffer_size: vk.VkDeviceSize = @truncate(@sizeOf(VERTEX) * vertices.len);
+    const buffer_size: vk.VkDeviceSize = @truncate(@sizeOf(Vertex) * vertices.len);
 
     var staging_buffer: vk.VkBuffer = undefined;
     var staging_buffer_memory: vk.VkDeviceMemory = undefined;
@@ -1033,7 +1043,7 @@ fn createVertexBuffer(
         try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
         defer vk.vkUnmapMemory(device, staging_buffer_memory);
 
-        const gpu_vertices: [*]VERTEX = @ptrCast(@alignCast(data));
+        const gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
         for (vertices, 0..) |vertex, i| {
             gpu_vertices[i] = vertex;
         }
@@ -1153,27 +1163,27 @@ fn findMemoryType(
     return error.FailedToFindSuitableMemoryType;
 }
 
-fn createIndexBuffer(physical_device: vk.VkPhysicalDevice, device: vk.VkDevice) void {
-    var buffer_size: vk.VkDeviceSize = @sizeOf(indices) * indices.len;
-    var staging_buffer: vk.VkBuffer = undefined;
-    var staging_buffer_memory: vk.VkDeviceMemory = undefined;
-
-createBuffer(
-        physical_device,
-        device,
-        buffer_size,
-        vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        &staging_buffer,
-        &staging_buffer_memory,
-    );
-    
-    var data: ?*anyopaque = undefined;
-    vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
-    const gpu_indices = @as([indices.len]u16, @ptrCast(@alignCast(data)));
-    @memcpy(&gpu_indices, &indices); 
-    vk.vkUnmapMemory(device, staging_buffer_memory);
-}
+// fn createIndexBuffer(physical_device: vk.VkPhysicalDevice, device: vk.VkDevice, indices: []u16) void {
+//     var buffer_size: vk.VkDeviceSize = @sizeOf(indices) * indices.len;
+//     var staging_buffer: vk.VkBuffer = undefined;
+//     var staging_buffer_memory: vk.VkDeviceMemory = undefined;
+//
+// createBuffer(
+//         physical_device,
+//         device,
+//         buffer_size,
+//         vk.VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+//         vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+//         &staging_buffer,
+//         &staging_buffer_memory,
+//     );
+//
+//     var data: ?*anyopaque = undefined;
+//     vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data);
+//     const gpu_indices = @as([indices.len]u16, @ptrCast(@alignCast(data)));
+//     @memcpy(&gpu_indices, &indices);
+//     vk.vkUnmapMemory(device, staging_buffer_memory);
+// }
 
 fn createCommandBuffers(
     allo: Allocator,

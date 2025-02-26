@@ -20,8 +20,8 @@ pub const attribute_descriptions = [_]vk.VkVertexInputAttributeDescription{
         .offset = @offsetOf(Vertex, "pos"),
     },
     .{
-        .location = 0,
-        .binding = 1,
+        .binding = 0,
+        .location = 1,
         .format = vk.VK_FORMAT_R32G32B32_SFLOAT,
         .offset = @offsetOf(Vertex, "color"),
     },
