@@ -1,3 +1,10 @@
+// TODO:
+// 1. need to implement both the draw and draw indexed functions (only indexed right now)
+// 2. need to separate engine and app into separate files = separation of concerns + orderliness
+// 3. need to fix loading primitives to make passing data easier
+// 4. need to fix scaling window size into scaling drawn size
+// 5. need to swap from 2d to 3d mode
+
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 const is_debug_mode = @import("builtin").mode == .Debug;
@@ -102,6 +109,7 @@ render_finished_semaphores: []vk.VkSemaphore,
 in_flight_fences: []vk.VkFence,
 
 current_frame: u32 = 0,
+resize: bool = false,
 
 // public functions
 pub fn init(
@@ -169,8 +177,8 @@ pub fn init(
         &vertex_buffer_memory,
         pool,
         graphics_queue,
-        &triangle_vertices,
-        // &square_vertices,
+        // &triangle_vertices,
+        &square_vertices,
     );
 
     var index_buffer: vk.VkBuffer = undefined;
@@ -182,8 +190,8 @@ pub fn init(
         &index_buffer_memory,
         pool,
         graphics_queue,
-        &triangle_indices,
-        // &square_indices,
+        // &triangle_indices, // makes no sense since only 1 triangle
+        &square_indices,
     );
 
     const command_buffers = try createCommandBuffers(allo, device, pool);
@@ -269,19 +277,37 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn mainLoop(self: *Self) !void {
-    // SDL Loop
+    // Main Loop
     outer: while (true) {
-        // poll events = multiplexer
+
+        // poll events = multiplexer - only want to call once every few seconds and handle each case afterwards
         var event: sdl.SDL_Event = undefined;
         while (sdl.SDL_PollEvent(&event)) {
             switch (event.type) {
                 sdl.SDL_EVENT_QUIT => break :outer,
-                sdl.SDL_EVENT_WINDOW_RESIZED => try self.recreateSwapchain(),
+                sdl.SDL_EVENT_WINDOW_SHOWN,
+                sdl.SDL_EVENT_WINDOW_RESIZED,
+                sdl.SDL_EVENT_WINDOW_MAXIMIZED,
+                sdl.SDL_EVENT_WINDOW_EXPOSED,
+                sdl.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED,
+                sdl.SDL_EVENT_WINDOW_METAL_VIEW_RESIZED,
+                sdl.SDL_EVENT_WINDOW_RESTORED,
+                sdl.SDL_EVENT_WINDOW_DISPLAY_CHANGED,
+                sdl.SDL_EVENT_WINDOW_ENTER_FULLSCREEN,
+                sdl.SDL_EVENT_WINDOW_LEAVE_FULLSCREEN,
+                => {
+                    self.resize = true;
+                    break;
+                },
                 else => {},
             }
         }
 
         // game logic
+        if (self.resize) {
+            try self.recreateSwapchain();
+        }
+
         try self.drawFrame();
 
         try isSuccess(vk.vkDeviceWaitIdle(self.device));
@@ -683,25 +709,36 @@ fn createSwapchain(
 }
 
 fn recreateSwapchain(self: *Self) !void {
+    // set window resize flag to false
+    self.resize = false;
+
     // resize window -> wait for size to become non zero -> cleanup engine
     var width: i32, var height: i32 = .{ 0, 0 };
     _ = sdl.SDL_GetWindowSize(self.window, &width, &height);
+
+    // don't update game while minimized
     // in c, null == 0 is truthy, so following works - yuck
     while (width == 0 and height == 0) {
         if (!sdl.SDL_GetWindowSize(self.window, &width, &height)) return;
         _ = sdl.SDL_WaitEvent(null);
     }
     try isSuccess(vk.vkDeviceWaitIdle(self.device));
+    std.debug.print("Dims: {}x{}\n", .{ width, height });
 
     self.cleanupSwapchain();
 
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
-
     // WARNING: will break if n_images changes after new swapchain created
+
     var n_images: u32 = @truncate(self.images.len);
-    try getSwapchainImages(self.device, self.swapchain, &n_images, self.images);
+    try getSwapchainImages(self.device, self.swapchain, &n_images, self.images); // do i need to reobtain the images?
     try createImageViews(self.device, self.images, self.format, self.views);
+    self.extent = vk.VkExtent2D{
+        .width = @intCast(width),
+        .height = @intCast(height),
+    };
     try createFramebuffers(self.device, self.extent, self.views, self.render_pass, self.frame_buffers);
+    std.debug.print("Dims: {}x{}\n", .{ width, height });
 }
 
 fn cleanupSwapchain(self: *Self) void {
@@ -1442,4 +1479,5 @@ fn drawFrame(self: *Self) !void {
     }
 
     self.current_frame = @mod(self.current_frame + 1, MAX_FRAMES_IN_FLIGHT);
+    // std.debug.print("Current Frame: {}\n", .{self.current_frame}); // is swapping frames
 }
