@@ -77,12 +77,7 @@ const FPS = enum {
     one_fourty_four,
 };
 
-// UBO
-const UniformBufferObject = struct {
-    model: [16]f32,
-    view: [16]f32,
-    proj: [16]f32,
-};
+const UBO = @import("UniformBufferObject.zig");
 
 // App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
@@ -1563,6 +1558,8 @@ fn drawFrame(self: *Self) !void {
     std.debug.assert(wait_semaphores.len == wait_stages.len);
     const signal_semaphores = [1]vk.VkSemaphore{self.render_finished_semaphores[self.current_frame]};
 
+    updateUniformBuffer(self.current_frame);
+
     const submit_info = vk.VkSubmitInfo{
         .sType = vk.VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = @truncate(wait_semaphores.len),
@@ -1598,4 +1595,16 @@ fn drawFrame(self: *Self) !void {
 
     self.current_frame = @mod(self.current_frame + 1, MAX_FRAMES_IN_FLIGHT);
     // std.debug.print("Current Frame: {}\n", .{self.current_frame}); // is swapping frames
+}
+
+fn updateUniformBuffer(current_image: u32) void {
+    const start_time = std.time.nanoTimestamp();
+    const current_time = std.time.nanoTimestamp();
+
+    var time: f32 = current_time - start_time;
+    const ubo = UBO{
+        .model = 1,
+        .view = 1,
+        .proj = 1,
+    };
 }
