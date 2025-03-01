@@ -2,5 +2,8 @@
 // 1. window class
 // 2. create/display window
 // 3. listen for message events
+const windows = @cImport({
+    @cInclude("windows.h");
+});
 
 pub fn main() void {}

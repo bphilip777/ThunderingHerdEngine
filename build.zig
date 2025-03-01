@@ -70,6 +70,7 @@ pub fn build(b: *std.Build) void {
     exe.root_module.linkSystemLibrary("vulkan-1", .{});
     exe.addIncludePath(b.path("vulkan/Include"));
     exe.linkLibC();
+    exe.linkLibCpp();
 
     // // snektron
     // const vulkan = b.dependency("vulkan_zig", std.Build.LazyPath{

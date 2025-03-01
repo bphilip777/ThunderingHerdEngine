@@ -7,6 +7,7 @@
 //      - need to create a fn that takes in other fns and runs them based on the time left - only need to check elapsed time as an argument for that function
 // 6. Need a way to abstract uniform buffer calls from specific impl in init - like side functions that call those functions
 //  - store UBO in another file
+// 7. Need to update the slices 
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
@@ -20,7 +21,8 @@ const Result = @import("helpers.zig").Result;
 
 pub const std_options: std.Options = .{ .log_level = .debug };
 
-const vk = @import("vk.zig").vk;
+const vk = @import("libs.zig").vk;
+const glm = @import("libs.zig").glm;
 
 // sdl - huge library that may not be what i want
 const sdl = @cImport({
@@ -85,6 +87,8 @@ const MAX_FRAMES_IN_FLIGHT: i32 = 2;
 const Self = @This();
 
 allo: Allocator,
+
+// all of the below should be changed with calls to specific graphics api
 window: *sdl.SDL_Window,
 
 instance: vk.VkInstance,
@@ -108,7 +112,7 @@ layout: vk.VkPipelineLayout,
 render_pass: vk.VkRenderPass,
 pipeline: vk.VkPipeline,
 
-pool: vk.VkCommandPool,
+command_pool: vk.VkCommandPool,
 
 vertex_buffer: vk.VkBuffer,
 vertex_buffer_memory: vk.VkDeviceMemory,
@@ -119,6 +123,9 @@ index_buffer_memory: vk.VkDeviceMemory,
 uniform_buffers: []vk.VkBuffer,
 uniform_buffers_memory: []vk.VkDeviceMemory,
 uniform_buffers_mapped: []?*anyopaque,
+
+descriptor_pool: vk.VkDescriptorPool,
+    descriptor_sets: []vk.VkDescriptorSet,
 
 command_buffers: []vk.VkCommandBuffer,
 
@@ -186,7 +193,7 @@ pub fn init(
 
     const pipeline = try createGraphicsPipelines(device, layout, render_pass);
 
-    const pool = try createCommandPool(surface, physical_device, device);
+    const command_pool = try createCommandPool(surface, physical_device, device);
 
     var vertex_buffer: vk.VkBuffer = undefined;
     var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
@@ -195,7 +202,7 @@ pub fn init(
         device,
         &vertex_buffer,
         &vertex_buffer_memory,
-        pool,
+        command_pool,
         graphics_queue,
         // &triangle_vertices,
         &square_vertices,
@@ -208,7 +215,7 @@ pub fn init(
         device,
         &index_buffer,
         &index_buffer_memory,
-        pool,
+        command_pool,
         graphics_queue,
         // &triangle_indices, // makes no sense since only 1 triangle
         &square_indices,
@@ -226,7 +233,10 @@ pub fn init(
         uniform_buffers_mapped,
     );
 
-    const command_buffers = try createCommandBuffers(allo, device, pool);
+    const descriptor_pool = try createDescriptorPool(device);
+    const descriptor_sets = try createDescriptorSets(device);
+
+    const command_buffers = try createCommandBuffers(allo, device, command_pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
     const render_finished_semaphores = try createSemaphores(allo, device);
@@ -256,7 +266,7 @@ pub fn init(
         .render_pass = render_pass,
         .pipeline = pipeline,
 
-        .pool = pool,
+        .command_pool = command_pool,
 
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
@@ -268,6 +278,8 @@ pub fn init(
         .uniform_buffers_memory = uniform_buffers_memory,
         .uniform_buffers_mapped = uniform_buffers_mapped,
 
+        .descriptor_pool = descriptor_pool,
+
         .command_buffers = command_buffers,
 
         .image_available_semaphores = image_available_semaphores,
@@ -277,6 +289,7 @@ pub fn init(
 }
 
 pub fn deinit(self: *Self) void {
+    // TODO: separate these subsections into separate deinit fns for flexibility
     defer { // Cleanup vulkan instance/window/surface/quit sdl
         vk.vkDestroyDevice(self.device, null);
         sdl.SDL_Vulkan_DestroySurface(@ptrCast(self.instance), @ptrCast(self.surface), null); // sdl
@@ -288,7 +301,7 @@ pub fn deinit(self: *Self) void {
     }
 
     defer { // Cleanup command pool/buffers
-        vk.vkDestroyCommandPool(self.device, self.pool, null);
+        vk.vkDestroyCommandPool(self.device, self.command_pool, null);
         self.allo.free(self.command_buffers);
     }
 
@@ -1170,9 +1183,9 @@ fn createCommandPool(
         .queueFamilyIndex = qfi.graphics_family.?,
     };
 
-    var pool: vk.VkCommandPool = undefined;
-    try isSuccess(vk.vkCreateCommandPool(device, &cpci, null, &pool));
-    return pool;
+    var command_pool: vk.VkCommandPool = undefined;
+    try isSuccess(vk.vkCreateCommandPool(device, &cpci, null, &command_pool));
+    return command_pool;
 }
 
 fn createVertexBuffer(
@@ -1383,7 +1396,7 @@ fn createUniformBuffers(
     uniform_buffers_memory: []vk.VkDeviceMemory,
     uniform_buffers_mapped: []?*anyopaque,
 ) ![]vk.VkBuffer {
-    const buffer_size: vk.VkDeviceSize = @sizeOf(UniformBufferObject);
+    const buffer_size: vk.VkDeviceSize = @sizeOf(UBO);
 
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
         try createBuffer(
@@ -1396,6 +1409,40 @@ fn createUniformBuffers(
         );
         vk.vkMapMemory(device, uniform_buffers_memory[i], 0, buffer_size, 0, &uniform_buffers_mapped[i]);
     }
+}
+
+fn createDescriptorPool(device: vk.VkDevice) !vk.VkDescriptorPool {
+    const pool_size = [_]vk.VkDescriptorPoolSize{
+        .{
+            .type = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = @as(u32, MAX_FRAMES_IN_FLIGHT),
+        },
+    };
+
+    const dpci = vk.VkDescriptorPoolCreateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .poolSizeCount = @truncate(pool_size.len),
+        .pPoolSizes = &pool_size,
+        .maxSets = @as(u32, MAX_FRAMES_IN_FLIGHT),
+    };
+
+    var descriptor_pool: vk.VkDescriptorPool = undefined;
+    try isSuccess(vk.vkCreateDescriptorPool(device, &dpci, null, &descriptor_pool));
+    return descriptor_pool;
+}
+
+fn createDescriptorSets(allo: Allocator, device: vk.VkDevice, descriptor_pool: vk.VkDescriptorPool,) ![]vk.VkDeviceSet {
+    var layouts = try allo.alloc(vk.VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
+
+    const ai = vk.VkDescriptorSetAllocateInfo{
+        .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = descriptor_pool,
+        .descriptorSetCount = @as(u32, MAX_FRAMES_IN_FLIGHT),
+        .pSetLayouts = layouts.ptr,
+};
+
+    try isSuccess(vk.vkAllocateDescriptorSets(device, &ai, descriptor_sets.ptr));
+    return layouts;
 }
 
 fn createCommandBuffers(
@@ -1597,14 +1644,19 @@ fn drawFrame(self: *Self) !void {
     // std.debug.print("Current Frame: {}\n", .{self.current_frame}); // is swapping frames
 }
 
-fn updateUniformBuffer(current_image: u32) void {
-    const start_time = std.time.nanoTimestamp();
-    const current_time = std.time.nanoTimestamp();
-
-    var time: f32 = current_time - start_time;
-    const ubo = UBO{
-        .model = 1,
-        .view = 1,
-        .proj = 1,
+fn updateUniformBuffer(self: *Self, current_image: u32) void {
+    const state = struct {
+        const start_time = std.time.nanoTimestamp();
+        var current_time = start_time;
     };
+    state.current_time = std.time.nanoTimestamp();
+    const elapsed_time = state.current_time - state.start_time;
+
+    var ubo = UBO{
+        .model = glm.rotate(glm.mat4(1.0), elapsed_time * glm.radians(90), glm.vec3(0, 0, 1)),
+        .view = glm.lookAt(glm.vec3(2, 2, 2), glm.vec3(0, 0, 0), glm.vec3(0, 0, 1)),
+        .proj = glm.perspective(glm.radians(45), self.extent.width / self.extent.height, 0.1, 10.0),
+    };
+    ubo.proj[1][1] *= -1;
+    @memcpy(self.uniform_buffers_mapped[current_image], @sizeOf(UBO));
 }
