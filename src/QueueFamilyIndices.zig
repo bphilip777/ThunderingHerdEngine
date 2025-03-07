@@ -1,4 +1,4 @@
-const vk = @import("vk.zig").vk;
+const vk = @import("libs.zig").vk;
 const Self = @This();
 
 graphics_family: ?u32 = null,

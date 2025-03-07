@@ -7,7 +7,8 @@
 //      - need to create a fn that takes in other fns and runs them based on the time left - only need to check elapsed time as an argument for that function
 // 6. Need a way to abstract uniform buffer calls from specific impl in init - like side functions that call those functions
 //  - store UBO in another file
-// 7. Need to update the slices 
+// 7. Need to update the slices
+// 8. Convert a lot of syscalls to all into arrays
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
@@ -22,7 +23,7 @@ const Result = @import("helpers.zig").Result;
 pub const std_options: std.Options = .{ .log_level = .debug };
 
 const vk = @import("libs.zig").vk;
-const glm = @import("libs.zig").glm;
+const math = @import("math/math.zig");
 
 // sdl - huge library that may not be what i want
 const sdl = @cImport({
@@ -36,6 +37,9 @@ const sdl = @cImport({
     @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
     @cInclude("SDL3/SDL_main.h");
 });
+
+// Timer
+const Stopwatch = @import("Stopwatch.zig");
 
 // Extensions
 const required_device_extensions = [_][*:0]const u8{
@@ -52,7 +56,7 @@ const vert_spv align(@alignOf(u32)) = @embedFile("vertex_shader").*;
 const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 
 // Model Info
-const Vertex = @import("vertex.zig");
+const Vertex = @import("models/vertex.zig");
 
 // triangle
 pub const triangle_vertices = [_]Vertex{
@@ -79,6 +83,7 @@ const FPS = enum {
     one_fourty_four,
 };
 
+// UBOs
 const UBO = @import("UniformBufferObject.zig");
 
 // App Data
@@ -107,9 +112,9 @@ extent: vk.VkExtent2D,
 views: []vk.VkImageView,
 frame_buffers: []vk.VkFramebuffer,
 
-descriptor_set_layout: vk.VkDescriptorSetLayout,
-layout: vk.VkPipelineLayout,
 render_pass: vk.VkRenderPass,
+descriptor_set_layout: vk.VkDescriptorSetLayout,
+pipeline_layout: vk.VkPipelineLayout,
 pipeline: vk.VkPipeline,
 
 command_pool: vk.VkCommandPool,
@@ -125,7 +130,7 @@ uniform_buffers_memory: []vk.VkDeviceMemory,
 uniform_buffers_mapped: []?*anyopaque,
 
 descriptor_pool: vk.VkDescriptorPool,
-    descriptor_sets: []vk.VkDescriptorSet,
+descriptor_sets: []vk.VkDescriptorSet,
 
 command_buffers: []vk.VkCommandBuffer,
 
@@ -136,6 +141,7 @@ in_flight_fences: []vk.VkFence,
 current_frame: u32 = 0,
 resize: bool = false,
 fps: FPS = .sixty,
+time: Stopwatch,
 
 // public functions
 pub fn init(
@@ -184,16 +190,16 @@ pub fn init(
     const frame_buffers = try allo.alloc(vk.VkFramebuffer, n_images);
 
     const descriptor_set_layout = try createDescriptorSetLayout(device);
-    const layout = try createGraphicsPipelineLayout(device);
+    const pipeline_layout = try createGraphicsPipelineLayout(device, &.{descriptor_set_layout});
     const render_pass = try createRenderPass(device, format.format);
 
     try getSwapchainImages(device, swapchain, &n_images, images);
     try createImageViews(device, images, format.format, views);
     try createFramebuffers(device, extent, views, render_pass, frame_buffers);
-
-    const pipeline = try createGraphicsPipelines(device, layout, render_pass);
+    const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
 
     const command_pool = try createCommandPool(surface, physical_device, device);
+    // createTextureImage();
 
     var vertex_buffer: vk.VkBuffer = undefined;
     var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
@@ -234,13 +240,21 @@ pub fn init(
     );
 
     const descriptor_pool = try createDescriptorPool(device);
-    const descriptor_sets = try createDescriptorSets(device);
+    const descriptor_sets = try createDescriptorSets(
+        allo,
+        device,
+        descriptor_set_layout,
+        descriptor_pool,
+        uniform_buffers,
+    );
 
     const command_buffers = try createCommandBuffers(allo, device, command_pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
     const render_finished_semaphores = try createSemaphores(allo, device);
     const in_flight_fences = try createFences(allo, device);
+
+    const time = Stopwatch.init();
 
     return Self{
         .allo = allo,
@@ -262,7 +276,7 @@ pub fn init(
         .frame_buffers = frame_buffers,
 
         .descriptor_set_layout = descriptor_set_layout,
-        .layout = layout,
+        .pipeline_layout = pipeline_layout,
         .render_pass = render_pass,
         .pipeline = pipeline,
 
@@ -279,17 +293,19 @@ pub fn init(
         .uniform_buffers_mapped = uniform_buffers_mapped,
 
         .descriptor_pool = descriptor_pool,
+        .descriptor_sets = descriptor_sets,
 
         .command_buffers = command_buffers,
 
         .image_available_semaphores = image_available_semaphores,
         .render_finished_semaphores = render_finished_semaphores,
         .in_flight_fences = in_flight_fences,
+
+        .time = time,
     };
 }
 
 pub fn deinit(self: *Self) void {
-    // TODO: separate these subsections into separate deinit fns for flexibility
     defer { // Cleanup vulkan instance/window/surface/quit sdl
         vk.vkDestroyDevice(self.device, null);
         sdl.SDL_Vulkan_DestroySurface(@ptrCast(self.instance), @ptrCast(self.surface), null); // sdl
@@ -326,18 +342,22 @@ pub fn deinit(self: *Self) void {
         vk.vkFreeMemory(self.device, self.index_buffer_memory, null);
     }
 
-    defer { // Cleanup layout/renderpass/pipeline
-        vk.vkDestroyPipelineLayout(self.device, self.layout, null);
+    defer { // Cleanup layout/renderpass/pipeline/pipeline specific descriptor set layout
+        vk.vkDestroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
+        vk.vkDestroyPipelineLayout(self.device, self.pipeline_layout, null);
         vk.vkDestroyRenderPass(self.device, self.render_pass, null);
         vk.vkDestroyPipeline(self.device, self.pipeline, null);
     }
 
-    defer vk.vkDestroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
+    defer { // Cleanup descriptor sets/layouts/pool - used with UBO
+        vk.vkDestroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
+        self.allo.free(self.descriptor_sets);
+    }
 
     defer { // Cleanup uniform buffers
-        for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-            vk.vkDestroyBuffer(self.device, self.uniform_buffers[i], null);
-            vk.vkFreeMemory(self.device, self.uniform_buffers_memory[i], null);
+        for (self.uniform_buffers, self.uniform_buffers_memory) |ub, ub_mem| {
+            vk.vkDestroyBuffer(self.device, ub, null);
+            vk.vkFreeMemory(self.device, ub_mem, null);
         }
         self.allo.free(self.uniform_buffers);
         self.allo.free(self.uniform_buffers_mapped);
@@ -353,8 +373,6 @@ pub fn deinit(self: *Self) void {
 }
 
 pub fn mainLoop(self: *Self) !void {
-    // var start_time = std.time.nanosecond();
-
     // Main Loop
     outer: while (true) {
         // var current_time = std.time.nanosecond();
@@ -390,7 +408,12 @@ pub fn mainLoop(self: *Self) !void {
             try self.recreateSwapchain();
         }
 
-        try self.drawFrame();
+        // only draw at 60 fps
+        // not ideal - should set up a poll like above or keep track of previous posiitons and smoothly interpolate b/w them
+        if (self.time.elapsed() > (std.time.ns_per_ms * 1_000)) {
+            try self.drawFrame();
+            self.time.reset();
+        }
 
         try isSuccess(vk.vkDeviceWaitIdle(self.device));
     }
@@ -610,7 +633,12 @@ fn printDeviceExtensions(device: vk.VkPhysicalDevice) !void {
     std.debug.assert(n_exts > 0);
 
     var available_device_extensions: [128]vk.VkExtensionProperties = undefined; // init to alternating 1s and 0s
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(device, null, &n_exts, available_device_extensions[0..n_exts].ptr));
+    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(
+        device,
+        null,
+        &n_exts,
+        available_device_extensions[0..n_exts].ptr,
+    ));
 
     std.debug.print("Available Device Extensions:\n", .{});
     for (available_device_extensions[0..n_exts]) |extension| {
@@ -627,7 +655,12 @@ fn checkDeviceExtensionSupport(device: vk.VkPhysicalDevice) !bool {
     std.debug.assert(n_exts > 0);
 
     var available_device_extensions: [128]vk.VkExtensionProperties = undefined; // init to alternating 1s and 0s
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(device, null, &n_exts, available_device_extensions[0..n_exts].ptr));
+    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(
+        device,
+        null,
+        &n_exts,
+        available_device_extensions[0..n_exts].ptr,
+    ));
 
     blk: for (required_device_extensions) |req_ext| {
         const req_ext_name = std.mem.span(req_ext);
@@ -900,13 +933,14 @@ fn createShaderModule(
 
 fn createGraphicsPipelineLayout(
     device: vk.VkDevice,
-    descriptor_set_layout: vk.VkDescriptorSetLayout,
+    descriptor_set_layouts: []const vk.VkDescriptorSetLayout,
 ) !vk.VkPipelineLayout {
-    const descriptor_set_layouts = [_]vk.VkDescriptorSetLayout{descriptor_set_layout};
     const plci = vk.VkPipelineLayoutCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+
         .setLayoutCount = @truncate(descriptor_set_layouts.len),
-        .pSetLayouts = &descriptor_set_layouts,
+        .pSetLayouts = descriptor_set_layouts.ptr,
+
         .pushConstantRangeCount = 0,
         .pPushConstantRanges = null,
     };
@@ -971,19 +1005,22 @@ fn createRenderPass(device: vk.VkDevice, format: vk.VkFormat) !vk.VkRenderPass {
     return render_pass;
 }
 
-fn createDescriptorSetLayout(device: vk.VkDevice) !vk.DescriptorSetLayout {
-    const ubo_layout_binding = vk.VkDescriptorSetLayout{
-        .binding = 0,
-        .descriptorType = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = vk.VK_SHADER_STAGE_VERTEX_BIT,
-        .pImmutableSamplers = null,
+fn createDescriptorSetLayout(device: vk.VkDevice) !vk.VkDescriptorSetLayout {
+    // in the future, pass this into the fn to generate the descriptor set layout
+    const dslb = [_]vk.VkDescriptorSetLayoutBinding{
+        .{
+            .binding = 0,
+            .descriptorCount = 1,
+            .descriptorType = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pImmutableSamplers = null,
+            .stageFlags = vk.VK_SHADER_STAGE_VERTEX_BIT,
+        },
     };
 
     const dslci = vk.VkDescriptorSetLayoutCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &ubo_layout_binding,
+        .bindingCount = @truncate(dslb.len),
+        .pBindings = &dslb,
     };
 
     var descriptor_set_layout: vk.VkDescriptorSetLayout = undefined;
@@ -1069,8 +1106,8 @@ fn createGraphicsPipelines(
         .rasterizerDiscardEnable = 0,
         .polygonMode = vk.VK_POLYGON_MODE_FILL,
         .lineWidth = 1.0,
-        .cullMode = vk.VK_CULL_MODE_BACK_BIT,
-        .frontFace = vk.VK_FRONT_FACE_CLOCKWISE,
+        .cullMode = vk.VK_CULL_MODE_BACK_BIT, // vk.VK_CULL_MODE_FRONT_BIT, // defines what is culled - front or back
+        .frontFace = vk.VK_FRONT_FACE_COUNTER_CLOCKWISE, // vk.VK_FRONT_FACE_CLOCKWISE, defines what is front/back
         .depthBiasEnable = 0,
         // .depthBiasConstantFactor = 0.0,
         // .depthBiasClamp = 0.0,
@@ -1188,6 +1225,14 @@ fn createCommandPool(
     return command_pool;
 }
 
+fn createTextureImage() !void {
+    // var width, var height, var channels = .{undefined, undefined, undefined};
+    // const image_size: vk.VkDeviceSize = width * height * 4;
+    // if (!pixels) {
+    //     return error.FailedToLoadImage;
+    // }
+}
+
 fn createVertexBuffer(
     physical_device: vk.VkPhysicalDevice,
     device: vk.VkDevice,
@@ -1216,15 +1261,8 @@ fn createVertexBuffer(
         try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
         defer vk.vkUnmapMemory(device, staging_buffer_memory);
 
-        // TODO: should be a @memcpy - seems like this might work
         var gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
         @memcpy(gpu_vertices[0..vertices.len], vertices);
-
-        // know this works
-        // const gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
-        // for (triangle_vertices, 0..) |vertex, i| {
-        //     gpu_vertices[i] = vertex;
-        // }
     }
 
     try createBuffer(
@@ -1369,6 +1407,7 @@ fn createIndexBuffer(
         var data: ?*anyopaque = undefined;
         try isSuccess(vk.vkMapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
         defer vk.vkUnmapMemory(device, staging_buffer_memory);
+
         var gpu_indices: [*]u16 = @ptrCast(@alignCast(data));
         @memcpy(gpu_indices[0..indices.len], indices);
     }
@@ -1395,23 +1434,26 @@ fn createUniformBuffers(
     uniform_buffers: []vk.VkBuffer,
     uniform_buffers_memory: []vk.VkDeviceMemory,
     uniform_buffers_mapped: []?*anyopaque,
-) ![]vk.VkBuffer {
+) !void {
     const buffer_size: vk.VkDeviceSize = @sizeOf(UBO);
 
-    for (0..MAX_FRAMES_IN_FLIGHT) |i| {
+    for (uniform_buffers, uniform_buffers_memory, uniform_buffers_mapped) |*ub, *ub_mem, *ub_map| {
         try createBuffer(
             physical_device,
             device,
+            buffer_size,
             vk.VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             vk.VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk.VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            uniform_buffers[i],
-            uniform_buffers_memory[i],
+            ub,
+            ub_mem,
         );
-        vk.vkMapMemory(device, uniform_buffers_memory[i], 0, buffer_size, 0, &uniform_buffers_mapped[i]);
+
+        try isSuccess(vk.vkMapMemory(device, ub_mem.*, 0, buffer_size, 0, @ptrCast(ub_map)));
     }
 }
 
 fn createDescriptorPool(device: vk.VkDevice) !vk.VkDescriptorPool {
+    // Currently 1 per frame
     const pool_size = [_]vk.VkDescriptorPoolSize{
         .{
             .type = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -1422,7 +1464,7 @@ fn createDescriptorPool(device: vk.VkDevice) !vk.VkDescriptorPool {
     const dpci = vk.VkDescriptorPoolCreateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         .poolSizeCount = @truncate(pool_size.len),
-        .pPoolSizes = &pool_size,
+        .pPoolSizes = @ptrCast(&pool_size),
         .maxSets = @as(u32, MAX_FRAMES_IN_FLIGHT),
     };
 
@@ -1431,18 +1473,53 @@ fn createDescriptorPool(device: vk.VkDevice) !vk.VkDescriptorPool {
     return descriptor_pool;
 }
 
-fn createDescriptorSets(allo: Allocator, device: vk.VkDevice, descriptor_pool: vk.VkDescriptorPool,) ![]vk.VkDeviceSet {
-    var layouts = try allo.alloc(vk.VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
+fn createDescriptorSets(
+    allo: Allocator,
+    device: vk.VkDevice,
+    descriptor_set_layout: vk.VkDescriptorSetLayout,
+    descriptor_pool: vk.VkDescriptorPool,
+    uniform_buffers: []vk.VkBuffer,
+) ![]vk.VkDescriptorSet {
+    const descriptor_set_layouts = try allo.alloc(vk.VkDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
+    @memset(descriptor_set_layouts, descriptor_set_layout); // default value
+    defer allo.free(descriptor_set_layouts);
 
-    const ai = vk.VkDescriptorSetAllocateInfo{
+    const dsai = vk.VkDescriptorSetAllocateInfo{
         .sType = vk.VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
         .descriptorPool = descriptor_pool,
-        .descriptorSetCount = @as(u32, MAX_FRAMES_IN_FLIGHT),
-        .pSetLayouts = layouts.ptr,
-};
+        .descriptorSetCount = @intCast(MAX_FRAMES_IN_FLIGHT),
+        .pSetLayouts = descriptor_set_layouts.ptr,
+    };
 
-    try isSuccess(vk.vkAllocateDescriptorSets(device, &ai, descriptor_sets.ptr));
-    return layouts;
+    const sets = try allo.alloc(vk.VkDescriptorSet, MAX_FRAMES_IN_FLIGHT);
+    try isSuccess(vk.vkAllocateDescriptorSets(device, &dsai, sets.ptr));
+
+    // fails on second iteration - why?
+    for (0..MAX_FRAMES_IN_FLIGHT) |i| {
+        const dbi = vk.VkDescriptorBufferInfo{
+            .buffer = uniform_buffers[i],
+            .offset = 0,
+            .range = @sizeOf(UBO),
+        };
+
+        const descriptor_write = [_]vk.VkWriteDescriptorSet{
+            .{
+                .sType = vk.VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                .dstSet = sets[i],
+                .dstBinding = 0,
+                .dstArrayElement = 0,
+                .descriptorType = vk.VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = 1,
+                .pBufferInfo = &dbi,
+                .pImageInfo = null,
+                .pTexelBufferView = null,
+            },
+        };
+
+        vk.vkUpdateDescriptorSets(device, @truncate(descriptor_write.len), @ptrCast(&descriptor_write), 0, null);
+    }
+
+    return sets;
 }
 
 fn createCommandBuffers(
@@ -1458,14 +1535,16 @@ fn createCommandBuffers(
     };
 
     const command_buffers = try allo.alloc(vk.VkCommandBuffer, MAX_FRAMES_IN_FLIGHT);
-    try isSuccess(vk.vkAllocateCommandBuffers(device, &cbai, @ptrCast(command_buffers.ptr)));
+    try isSuccess(vk.vkAllocateCommandBuffers(device, &cbai, command_buffers.ptr));
     return command_buffers;
 }
 
 fn recordCommandBuffer(
     self: *Self,
     command_buffer: vk.VkCommandBuffer,
+    pipeline_layout: vk.VkPipelineLayout,
     vertex_buffer: vk.VkBuffer,
+    descriptor_set: *const vk.VkDescriptorSet,
     index_buffer: vk.VkBuffer,
     image_index: u32,
 ) !void {
@@ -1524,9 +1603,11 @@ fn recordCommandBuffer(
 
     const vertex_buffers = [_]vk.VkBuffer{vertex_buffer};
     const offsets = [_]vk.VkDeviceSize{0};
-    vk.vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets);
-    vk.vkCmdBindIndexBuffer(command_buffer, index_buffer, 0, vk.VK_INDEX_TYPE_UINT16);
-    vk.vkCmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0);
+
+    vk.vkCmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets); // bind vertex buffers
+    vk.vkCmdBindIndexBuffer(command_buffer, index_buffer, 0, vk.VK_INDEX_TYPE_UINT16); // bind indices
+    vk.vkCmdBindDescriptorSets(command_buffer, vk.VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, descriptor_set, 0, null); // bind descriptors
+    vk.vkCmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0); // draw indices
 
     vk.vkCmdEndRenderPass(command_buffer);
 
@@ -1579,6 +1660,7 @@ fn drawFrame(self: *Self) !void {
         null,
         &image_index,
     ))));
+
     switch (r1) {
         .success => {},
         .out_of_date => {
@@ -1588,13 +1670,17 @@ fn drawFrame(self: *Self) !void {
         inline else => |err| return @field(anyerror, @tagName(err)),
     }
 
-    // only reset if doing work - prevents deadlock
+    self.updateUniformBuffer();
+
+    // only reset if doing work - prevents dead lock
     try isSuccess(vk.vkResetFences(self.device, 1, &self.in_flight_fences[self.current_frame]));
 
     try isSuccess(vk.vkResetCommandBuffer(self.command_buffers[self.current_frame], 0));
     try self.recordCommandBuffer(
         self.command_buffers[self.current_frame],
+        self.pipeline_layout,
         self.vertex_buffer,
+        &self.descriptor_sets[self.current_frame],
         self.index_buffer,
         image_index,
     );
@@ -1604,8 +1690,6 @@ fn drawFrame(self: *Self) !void {
 
     std.debug.assert(wait_semaphores.len == wait_stages.len);
     const signal_semaphores = [1]vk.VkSemaphore{self.render_finished_semaphores[self.current_frame]};
-
-    updateUniformBuffer(self.current_frame);
 
     const submit_info = vk.VkSubmitInfo{
         .sType = vk.VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -1641,22 +1725,26 @@ fn drawFrame(self: *Self) !void {
     }
 
     self.current_frame = @mod(self.current_frame + 1, MAX_FRAMES_IN_FLIGHT);
-    // std.debug.print("Current Frame: {}\n", .{self.current_frame}); // is swapping frames
 }
 
-fn updateUniformBuffer(self: *Self, current_image: u32) void {
-    const state = struct {
-        const start_time = std.time.nanoTimestamp();
-        var current_time = start_time;
-    };
-    state.current_time = std.time.nanoTimestamp();
-    const elapsed_time = state.current_time - state.start_time;
+fn updateUniformBuffer(self: *Self) void {
+    const elapsed_time = @as(f32, @floatFromInt(self.time.elapsed()));
 
-    var ubo = UBO{
-        .model = glm.rotate(glm.mat4(1.0), elapsed_time * glm.radians(90), glm.vec3(0, 0, 1)),
-        .view = glm.lookAt(glm.vec3(2, 2, 2), glm.vec3(0, 0, 0), glm.vec3(0, 0, 1)),
-        .proj = glm.perspective(glm.radians(45), self.extent.width / self.extent.height, 0.1, 10.0),
+    const model = math.rotation(std.math.degreesToRadians(90) * elapsed_time, math.VZ);
+    const view = math.lookAt(math.Vector(3, f32).ones().mulScalar(2), math.Vector(3, f32).zeros(), math.VZ);
+    const aspect_ratio = @as(f32, @floatFromInt(self.extent.width)) / @as(f32, @floatFromInt(self.extent.height));
+    const proj = math.perspective(std.math.degreesToRadians(45), aspect_ratio, 0.1, 10);
+
+    // need to compute basics
+    var ubo = [_]UBO{
+        .{
+            .model = @as([16]f32, @bitCast(model.values)),
+            .view = @as([16]f32, @bitCast(view.values)),
+            .proj = @as([16]f32, @bitCast(proj.values)),
+        },
     };
-    ubo.proj[1][1] *= -1;
-    @memcpy(self.uniform_buffers_mapped[current_image], @sizeOf(UBO));
+    ubo[0].proj[5] *= -1;
+
+    var ubos_mapped: [*]UBO = @ptrCast(@alignCast(self.uniform_buffers_mapped[self.current_frame]));
+    @memcpy(ubos_mapped[0..ubo.len], @as([*]UBO, @ptrCast(&ubo)));
 }

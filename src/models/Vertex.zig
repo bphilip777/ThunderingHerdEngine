@@ -1,4 +1,4 @@
-const vk = @import("vk.zig").vk;
+const vk = @import("../libs.zig").vk;
 
 pos: [2]f32, // 4 bytes * 2 = 8
 color: [3]f32, // 4 bytes * 3 = 12
