@@ -16,6 +16,7 @@ const is_debug_mode = @import("builtin").mode == .Debug;
 
 const SSD = @import("SwapchainSupportDetails.zig");
 const QFI = @import("QueueFamilyIndices.zig");
+const Stopwatch = @import("Stopwatch.zig");
 
 const isSuccess = @import("helpers.zig").isSuccess;
 const Result = @import("helpers.zig").Result;
@@ -37,9 +38,6 @@ const sdl = @cImport({
     @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
     @cInclude("SDL3/SDL_main.h");
 });
-
-// Timer
-const Stopwatch = @import("Stopwatch.zig");
 
 // Extensions
 const required_device_extensions = [_][*:0]const u8{
