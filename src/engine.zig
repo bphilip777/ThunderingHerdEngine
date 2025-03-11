@@ -795,10 +795,10 @@ fn createSwapchain(
 
         .min_image_count = n_images,
         .image_format = format.format,
-        .image_color_space = format.colorSpace,
+        .image_color_space = format.color_space,
         .image_extent = extent,
         .image_array_layers = 1,
-        .image_usage = vk._IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        .image_usage = .color_attachment_bit,
 
         .image_sharing_mode = if (is_same_family) .exclusive else .concurrent,
         .queue_family_index_count = if (is_same_family) 1 else 2,
@@ -807,12 +807,12 @@ fn createSwapchain(
             qfi.present_family.?,
         },
 
-        .pre_transform = ssd.capabilities.currentTransform,
+        .pre_transform = ssd.capabilities.current_transform,
         .composite_alpha = .opaque_bit_khr, // vk._COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
         .present_mode = present_mode,
-        .clipped = 1,
+        .clipped = .true,
 
-        .old_swapchain = null,
+        .old_swapchain = .null,
     };
 
     var swapchain: vk.SwapchainKHR = undefined;
@@ -838,7 +838,7 @@ fn recreateSwapchain(self: *Self) !void {
     // if (width == 0 or height == 0) return; // seems more efficient to return to regular polling rather than above
 
     // idle device for awhile
-    try isSuccess(vk.DeviceWaitIdle(self.device));
+    try isSuccess(vk.deviceWaitIdle(self.device));
     self.cleanupSwapchain();
 
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
@@ -932,7 +932,7 @@ fn createGraphicsPipelineLayout(
     descriptor_set_layouts: []const vk.DescriptorSetLayout,
 ) !vk.PipelineLayout {
     const plci = vk.PipelineLayoutCreateInfo{
-        .set_layer_count = @truncate(descriptor_set_layouts.len),
+        .set_layout_count = @truncate(descriptor_set_layouts.len),
         .p_set_layouts = descriptor_set_layouts.ptr,
 
         .push_constant_range_count = 0,
@@ -949,8 +949,8 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
         .{
             .format = format,
             .samples = .@"1_bit", // vk._SAMPLE_COUNT_1_BIT,
-            .load_op = .load_op_clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
-            .store_op = .store_op_store, // vk._ATTACHMENT_STORE_OP_STORE,
+            .load_op = .clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
+            .store_op = .store, // vk._ATTACHMENT_STORE_OP_STORE,
             .stencil_load_op = .dont_care, // vk._ATTACHMENT_LOAD_OP_DONT_CARE,
             .stencil_store_op = .dont_care, // vk._ATTACHMENT_STORE_OP_DONT_CARE,
             .initial_layout = .undefined, // vk._IMAGE_LAYOUT_UNDEFINED,
@@ -961,13 +961,13 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
     const color_attachment_refs = [1]vk.AttachmentReference{
         .{
             .attachment = 0,
-            .layout = .optimal, // vk._IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .layout = .attachment_optimal, // vk._IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         },
     };
 
     const subpasses = [1]vk.SubpassDescription{
         .{
-            .pipeline_bind_point = vk._PIPELINE_BIND_POINT_GRAPHICS,
+            .pipeline_bind_point = .graphics,
             .color_attachment_count = @truncate(color_attachment_refs.len),
             .p_color_attachments = &color_attachment_refs,
         },
@@ -975,12 +975,12 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
 
     const dependencies = [1]vk.SubpassDependency{
         .{
-            .srcSubpass = .external, // vk._SUBPASS_EXTERNAL,
-            .dstSubpass = 0,
-            .srcStageMask = .output_bit, // vk._PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .srcAccessMask = 0,
-            .dstStageMask = .output_bit, // vk._PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstAccessMask = .write_bit, // vk._ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .src_subpass = vk.subpass_external,
+            .dst_subpass = 0,
+            .src_stage_mask = .output_bit,
+            .src_access_mask = 0,
+            .dst_stage_mask = .output_bit,
+            .dst_access_mask = .write_bit,
         },
     };
 

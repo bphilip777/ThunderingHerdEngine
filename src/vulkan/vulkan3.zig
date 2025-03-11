@@ -3,6 +3,7 @@
 //     // @cDefine("VK_USE_PLATFORM_WIN32_KHR", "1"); // specific to window impl - different for each software
 //     @cInclude("vulkan/vulkan.h");
 // });
+pub const subpass_external = ~@as(c_uint, 0);
 pub const Bool32 = enum(u32) {
     true = 1,
     false = 0,

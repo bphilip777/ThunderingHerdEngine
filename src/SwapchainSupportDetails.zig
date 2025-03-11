@@ -75,7 +75,7 @@ pub fn isSwapchainAdequate(surface: vk.SurfaceKHR, device: vk.PhysicalDevice) !b
 pub fn chooseSwapSurfaceFormat(self: *const Self) vk.SurfaceFormatKHR {
     std.debug.assert(self.formats.len > 0);
     for (self.formats) |format| {
-        if (format.format == .b8g8r8a8_srgb and format.color_sppace == .srgb_nonlinear_khr) {
+        if (format.format == .b8g8r8a8_srgb and format.color_space == .srgb_nonlinear_khr) {
             return format;
         }
     }
