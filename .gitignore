@@ -2,6 +2,8 @@
 src/root.zig
 src/debug.zig
 .gitignore
+src/vulkan/vulkan.zig
+src/vulkan/vulkan2.zig
 
 # Directories
 /zig-out
