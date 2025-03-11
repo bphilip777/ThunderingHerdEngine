@@ -1,4 +1,5 @@
-const vk = @import("libs.zig").vk;
+// const vk = @import("libs.zig").vk;
+const vk = @import("vulkan/vulkan2.zig");
 const Self = @This();
 
 graphics_family: ?u32 = null,

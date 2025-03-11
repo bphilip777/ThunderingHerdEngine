@@ -65,12 +65,18 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
+    exe.linkLibC();
+    // exe.linkLibCpp();
+
     // add vulkan lib - no need for proc addr now
     exe.root_module.addLibraryPath(b.path("vulkan/Lib"));
     exe.root_module.linkSystemLibrary("vulkan-1", .{});
     exe.addIncludePath(b.path("vulkan/Include"));
-    exe.linkLibC();
-    exe.linkLibCpp();
+
+    // stbi
+    const zstbi = b.dependency("zstbi", .{});
+    exe.root_module.addImport("zstbi", zstbi.module("root"));
+    exe.linkLibrary(zstbi.artifact("zstbi"));
 
     // // snektron
     // const vulkan = b.dependency("vulkan_zig", std.Build.LazyPath{

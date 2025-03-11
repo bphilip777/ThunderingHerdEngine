@@ -1,7 +1,8 @@
-pub const vk = @cImport({
-    // @cDefine("VK_USE_PLATFORM_WIN32_KHR", "1"); // specific to window impl - different for each software
-    @cInclude("vulkan/vulkan.h");
-});
+// Do I need this call too - double overhead
+// pub const vk = @cImport({
+//     // @cDefine("VK_USE_PLATFORM_WIN32_KHR", "1"); // specific to window impl - different for each software
+//     @cInclude("vulkan/vulkan.h");
+// });
 pub const Bool32 = enum(u32) {
     true = 1,
     false = 0,
@@ -3555,143 +3556,555 @@ pub const PFN_cmdBeginRenderPass = ?*const fn (CommandBuffer, [*c]const RenderPa
 pub const PFN_cmdNextSubpass = ?*const fn (CommandBuffer, SubpassContents) callconv(.c) void;
 pub const PFN_cmdEndRenderPass = ?*const fn (CommandBuffer) callconv(.c) void;
 pub const PFN_cmdExecuteCommands = ?*const fn (CommandBuffer, u32, [*c]const CommandBuffer) callconv(.c) void;
-pub extern fn createInstance(p_create_info: [*c]const InstanceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_instance: [*c]Instance) Result;
-pub extern fn destroyInstance(instance: Instance, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn enumeratePhysicalDevices(instance: Instance, p_physical_device_count: [*c]u32, p_physical_devices: [*c]PhysicalDevice) Result;
-pub extern fn getPhysicalDeviceFeatures(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures) void;
-pub extern fn getPhysicalDeviceFormatProperties(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties) void;
-pub extern fn getPhysicalDeviceImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, p_image_format_properties: [*c]ImageFormatProperties) Result;
-pub extern fn getPhysicalDeviceProperties(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties) void;
-pub extern fn getPhysicalDeviceQueueFamilyProperties(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties) void;
-pub extern fn getPhysicalDeviceMemoryProperties(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties) void;
-pub extern fn getInstanceProcAddr(instance: Instance, p_name: [*c]const u8) PFN_voidFunction;
-pub extern fn getDeviceProcAddr(device: Device, p_name: [*c]const u8) PFN_voidFunction;
-pub extern fn createDevice(physical_device: PhysicalDevice, p_create_info: [*c]const DeviceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_device: [*c]Device) Result;
-pub extern fn destroyDevice(device: Device, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn enumerateInstanceExtensionProperties(p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result;
-pub extern fn enumerateDeviceExtensionProperties(physical_device: PhysicalDevice, p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result;
-pub extern fn enumerateInstanceLayerProperties(p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result;
-pub extern fn enumerateDeviceLayerProperties(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result;
-pub extern fn getDeviceQueue(device: Device, queue_family_index: u32, queue_index: u32, p_queue: [*c]Queue) void;
-pub extern fn queueSubmit(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo, fence: Fence) Result;
-pub extern fn queueWaitIdle(queue: Queue) Result;
-pub extern fn deviceWaitIdle(device: Device) Result;
-pub extern fn allocateMemory(device: Device, p_allocate_info: [*c]const MemoryAllocateInfo, p_allocator: [*c]const AllocationCallbacks, p_memory: [*c]DeviceMemory) Result;
-pub extern fn freeMemory(device: Device, memory: DeviceMemory, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn mapMemory(device: Device, memory: DeviceMemory, offset: DeviceSize, size: DeviceSize, flags: MemoryMapFlags, pp_data: [*c]?*anyopaque) Result;
-pub extern fn unmapMemory(device: Device, memory: DeviceMemory) void;
-pub extern fn flushMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result;
-pub extern fn invalidateMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result;
-pub extern fn getDeviceMemoryCommitment(device: Device, memory: DeviceMemory, p_committed_memory_in_bytes: [*c]DeviceSize) void;
-pub extern fn bindBufferMemory(device: Device, buffer: Buffer, memory: DeviceMemory, memory_offset: DeviceSize) Result;
-pub extern fn bindImageMemory(device: Device, image: Image, memory: DeviceMemory, memory_offset: DeviceSize) Result;
-pub extern fn getBufferMemoryRequirements(device: Device, buffer: Buffer, p_memory_requirements: [*c]MemoryRequirements) void;
-pub extern fn getImageMemoryRequirements(device: Device, image: Image, p_memory_requirements: [*c]MemoryRequirements) void;
-pub extern fn getImageSparseMemoryRequirements(device: Device, image: Image, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements) void;
-pub extern fn getPhysicalDeviceSparseImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, samples: SampleCountFlags, usage: ImageUsageFlags, tiling: ImageTiling, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties) void;
-pub extern fn queueBindSparse(queue: Queue, bind_info_count: u32, p_bind_info: [*c]const BindSparseInfo, fence: Fence) Result;
-pub extern fn createFence(device: Device, p_create_info: [*c]const FenceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
-pub extern fn destroyFence(device: Device, fence: Fence, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn resetFences(device: Device, fence_count: u32, p_fences: [*c]const Fence) Result;
-pub extern fn getFenceStatus(device: Device, fence: Fence) Result;
-pub extern fn waitForFences(device: Device, fence_count: u32, p_fences: [*c]const Fence, wait_all: Bool32, timeout: u64) Result;
-pub extern fn createSemaphore(device: Device, p_create_info: [*c]const SemaphoreCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_semaphore: [*c]Semaphore) Result;
-pub extern fn destroySemaphore(device: Device, semaphore: Semaphore, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createEvent(device: Device, p_create_info: [*c]const EventCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_event: [*c]Event) Result;
-pub extern fn destroyEvent(device: Device, event: Event, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getEventStatus(device: Device, event: Event) Result;
-pub extern fn setEvent(device: Device, event: Event) Result;
-pub extern fn resetEvent(device: Device, event: Event) Result;
-pub extern fn createQueryPool(device: Device, p_create_info: [*c]const QueryPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_query_pool: [*c]QueryPool) Result;
-pub extern fn destroyQueryPool(device: Device, query_pool: QueryPool, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getQueryPoolResults(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32, data_size: usize, p_data: ?*anyopaque, stride: DeviceSize, flags: QueryResultFlags) Result;
-pub extern fn createBuffer(device: Device, p_create_info: [*c]const BufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_buffer: [*c]Buffer) Result;
-pub extern fn destroyBuffer(device: Device, buffer: Buffer, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createBufferView(device: Device, p_create_info: [*c]const BufferViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]BufferView) Result;
-pub extern fn destroyBufferView(device: Device, buffer_view: BufferView, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createImage(device: Device, p_create_info: [*c]const ImageCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_image: [*c]Image) Result;
-pub extern fn destroyImage(device: Device, image: Image, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getImageSubresourceLayout(device: Device, image: Image, p_subresource: [*c]const ImageSubresource, p_layout: [*c]SubresourceLayout) void;
-pub extern fn createImageView(device: Device, p_create_info: [*c]const ImageViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]ImageView) Result;
-pub extern fn destroyImageView(device: Device, image_view: ImageView, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createShaderModule(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_shader_module: [*c]ShaderModule) Result;
-pub extern fn destroyShaderModule(device: Device, shader_module: ShaderModule, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createPipelineCache(device: Device, p_create_info: [*c]const PipelineCacheCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_cache: [*c]PipelineCache) Result;
-pub extern fn destroyPipelineCache(device: Device, pipeline_cache: PipelineCache, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getPipelineCacheData(device: Device, pipeline_cache: PipelineCache, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
-pub extern fn mergePipelineCaches(device: Device, dst_cache: PipelineCache, src_cache_count: u32, p_src_caches: [*c]const PipelineCache) Result;
-pub extern fn createGraphicsPipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const GraphicsPipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
-pub extern fn createComputePipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const ComputePipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
-pub extern fn destroyPipeline(device: Device, pipeline: Pipeline, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createPipelineLayout(device: Device, p_create_info: [*c]const PipelineLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_layout: [*c]PipelineLayout) Result;
-pub extern fn destroyPipelineLayout(device: Device, pipeline_layout: PipelineLayout, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createSampler(device: Device, p_create_info: [*c]const SamplerCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_sampler: [*c]Sampler) Result;
-pub extern fn destroySampler(device: Device, sampler: Sampler, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createDescriptorSetLayout(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_set_layout: [*c]DescriptorSetLayout) Result;
-pub extern fn destroyDescriptorSetLayout(device: Device, descriptor_set_layout: DescriptorSetLayout, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createDescriptorPool(device: Device, p_create_info: [*c]const DescriptorPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_pool: [*c]DescriptorPool) Result;
-pub extern fn destroyDescriptorPool(device: Device, descriptor_pool: DescriptorPool, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn resetDescriptorPool(device: Device, descriptor_pool: DescriptorPool, flags: DescriptorPoolResetFlags) Result;
-pub extern fn allocateDescriptorSets(device: Device, p_allocate_info: [*c]const DescriptorSetAllocateInfo, p_descriptor_sets: [*c]DescriptorSet) Result;
-pub extern fn freeDescriptorSets(device: Device, descriptor_pool: DescriptorPool, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet) Result;
-pub extern fn updateDescriptorSets(device: Device, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet, descriptor_copy_count: u32, p_descriptor_copies: [*c]const CopyDescriptorSet) void;
-pub extern fn createFramebuffer(device: Device, p_create_info: [*c]const FramebufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_framebuffer: [*c]Framebuffer) Result;
-pub extern fn destroyFramebuffer(device: Device, framebuffer: Framebuffer, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createRenderPass(device: Device, p_create_info: [*c]const RenderPassCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result;
-pub extern fn destroyRenderPass(device: Device, render_pass: RenderPass, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getRenderAreaGranularity(device: Device, render_pass: RenderPass, p_granularity: [*c]Extent2D) void;
-pub extern fn createCommandPool(device: Device, p_create_info: [*c]const CommandPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_command_pool: [*c]CommandPool) Result;
-pub extern fn destroyCommandPool(device: Device, command_pool: CommandPool, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn resetCommandPool(device: Device, command_pool: CommandPool, flags: CommandPoolResetFlags) Result;
-pub extern fn allocateCommandBuffers(device: Device, p_allocate_info: [*c]const CommandBufferAllocateInfo, p_command_buffers: [*c]CommandBuffer) Result;
-pub extern fn freeCommandBuffers(device: Device, command_pool: CommandPool, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void;
-pub extern fn beginCommandBuffer(command_buffer: CommandBuffer, p_begin_info: [*c]const CommandBufferBeginInfo) Result;
-pub extern fn endCommandBuffer(command_buffer: CommandBuffer) Result;
-pub extern fn resetCommandBuffer(command_buffer: CommandBuffer, flags: CommandBufferResetFlags) Result;
-pub extern fn cmdBindPipeline(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void;
-pub extern fn cmdSetViewport(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewports: [*c]const Viewport) void;
-pub extern fn cmdSetScissor(command_buffer: CommandBuffer, first_scissor: u32, scissor_count: u32, p_scissors: [*c]const Rect2D) void;
-pub extern fn cmdSetLineWidth(command_buffer: CommandBuffer, line_width: f32) void;
-pub extern fn cmdSetDepthBias(command_buffer: CommandBuffer, depth_bias_constant_factor: f32, depth_bias_clamp: f32, depth_bias_slope_factor: f32) void;
-pub extern fn cmdSetBlendConstants(command_buffer: CommandBuffer, blend_constants: [*c]const f32) void;
-pub extern fn cmdSetDepthBounds(command_buffer: CommandBuffer, min_depth_bounds: f32, max_depth_bounds: f32) void;
-pub extern fn cmdSetStencilCompareMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, compare_mask: u32) void;
-pub extern fn cmdSetStencilWriteMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, write_mask: u32) void;
-pub extern fn cmdSetStencilReference(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, reference: u32) void;
-pub extern fn cmdBindDescriptorSets(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet, dynamic_offset_count: u32, p_dynamic_offsets: [*c]const u32) void;
-pub extern fn cmdBindIndexBuffer(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, index_type: IndexType) void;
-pub extern fn cmdBindVertexBuffers(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize) void;
-pub extern fn cmdDraw(command_buffer: CommandBuffer, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) void;
-pub extern fn cmdDrawIndexed(command_buffer: CommandBuffer, index_count: u32, instance_count: u32, first_index: u32, vertex_offset: i32, first_instance: u32) void;
-pub extern fn cmdDrawIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
-pub extern fn cmdDrawIndexedIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
-pub extern fn cmdDispatch(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
-pub extern fn cmdDispatchIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void;
-pub extern fn cmdCopyBuffer(command_buffer: CommandBuffer, src_buffer: Buffer, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferCopy) void;
-pub extern fn cmdCopyImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageCopy) void;
-pub extern fn cmdBlitImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageBlit, filter: Filter) void;
-pub extern fn cmdCopyBufferToImage(command_buffer: CommandBuffer, src_buffer: Buffer, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const BufferImageCopy) void;
-pub extern fn cmdCopyImageToBuffer(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferImageCopy) void;
-pub extern fn cmdUpdateBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, data_size: DeviceSize, p_data: ?*const anyopaque) void;
-pub extern fn cmdFillBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, size: DeviceSize, data: u32) void;
-pub extern fn cmdClearColorImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_color: [*c]const ClearColorValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void;
-pub extern fn cmdClearDepthStencilImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_depth_stencil: [*c]const ClearDepthStencilValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void;
-pub extern fn cmdClearAttachments(command_buffer: CommandBuffer, attachment_count: u32, p_attachments: [*c]const ClearAttachment, rect_count: u32, p_rects: [*c]const ClearRect) void;
-pub extern fn cmdResolveImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageResolve) void;
-pub extern fn cmdSetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void;
-pub extern fn cmdResetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void;
-pub extern fn cmdWaitEvents(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void;
-pub extern fn cmdPipelineBarrier(command_buffer: CommandBuffer, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, dependency_flags: DependencyFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void;
-pub extern fn cmdBeginQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags) void;
-pub extern fn cmdEndQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32) void;
-pub extern fn cmdResetQueryPool(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32) void;
-pub extern fn cmdWriteTimestamp(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, query_pool: QueryPool, query: u32) void;
-pub extern fn cmdCopyQueryPoolResults(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32, dst_buffer: Buffer, dst_offset: DeviceSize, stride: DeviceSize, flags: QueryResultFlags) void;
-pub extern fn cmdPushConstants(command_buffer: CommandBuffer, layout: PipelineLayout, stage_flags: ShaderStageFlags, offset: u32, size: u32, p_values: ?*const anyopaque) void;
-pub extern fn cmdBeginRenderPass(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, contents: SubpassContents) void;
-pub extern fn cmdNextSubpass(command_buffer: CommandBuffer, contents: SubpassContents) void;
-pub extern fn cmdEndRenderPass(command_buffer: CommandBuffer) void;
-pub extern fn cmdExecuteCommands(command_buffer: CommandBuffer, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void;
+pub extern fn vkCreateInstance(p_create_info: [*c]const InstanceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_instance: [*c]Instance) Result;
+pub inline fn createInstance(p_create_info: [*c]const InstanceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_instance: [*c]Instance) Result {
+    return vkCreateInstance(p_create_info, p_allocator, p_instance);
+}
+pub extern fn vkDestroyInstance(instance: Instance, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyInstance(instance: Instance, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyInstance(instance, p_allocator);
+}
+pub extern fn vkEnumeratePhysicalDevices(instance: Instance, p_physical_device_count: [*c]u32, p_physical_devices: [*c]PhysicalDevice) Result;
+pub inline fn enumeratePhysicalDevices(instance: Instance, p_physical_device_count: [*c]u32, p_physical_devices: [*c]PhysicalDevice) Result {
+    return vkEnumeratePhysicalDevices(instance, p_physical_device_count, p_physical_devices);
+}
+pub extern fn vkGetPhysicalDeviceFeatures(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures) void;
+pub inline fn getPhysicalDeviceFeatures(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures) void {
+    return vkGetPhysicalDeviceFeatures(physical_device, p_features);
+}
+pub extern fn vkGetPhysicalDeviceFormatProperties(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties) void;
+pub inline fn getPhysicalDeviceFormatProperties(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties) void {
+    return vkGetPhysicalDeviceFormatProperties(physical_device, format, p_format_properties);
+}
+pub extern fn vkGetPhysicalDeviceImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, p_image_format_properties: [*c]ImageFormatProperties) Result;
+pub inline fn getPhysicalDeviceImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, p_image_format_properties: [*c]ImageFormatProperties) Result {
+    return getPhysicalDeviceImageFormatProperties(physical_device, format, @"type", tiling, usage, flags, p_image_format_properties);
+}
+pub extern fn vkGetPhysicalDeviceProperties(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties) void;
+pub inline fn getPhysicalDeviceProperties(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties) void {
+    return vkGetPhysicalDeviceProperties(physical_device, p_properties);
+}
+
+pub extern fn vkGetPhysicalDeviceQueueFamilyProperties(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties) void;
+pub inline fn getPhysicalDeviceQueueFamilyProperties(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties) void {
+    return vkGetPhysicalDeviceQueueFamilyProperties(physical_device, p_queue_family_property_count, p_queue_family_property_count, p_queue_family_properties);
+}
+pub extern fn vkGetPhysicalDeviceMemoryProperties(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties) void;
+pub inline fn getPhysicalDeviceMemoryProperties(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties) void {
+    return vkGetPhysicalDeviceMemoryProperties(physical_device, p_memory_properties);
+}
+pub extern fn vkGetInstanceProcAddr(instance: Instance, p_name: [*c]const u8) PFN_voidFunction;
+pub inline fn getInstanceProcAddr(instance: Instance, p_name: [*c]const u8) PFN_voidFunction {
+    return vkGetInstanceProcAddr(instance, p_name);
+}
+pub extern fn vkGetDeviceProcAddr(device: Device, p_name: [*c]const u8) PFN_voidFunction;
+pub inline fn getDeviceProcAddr(device: Device, p_name: [*c]const u8) PFN_voidFunction {
+    return getDeviceProcAddr(device, p_name);
+}
+pub extern fn vkCreateDevice(physical_device: PhysicalDevice, p_create_info: [*c]const DeviceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_device: [*c]Device) Result;
+pub inline fn createDevice(physical_device: PhysicalDevice, p_create_info: [*c]const DeviceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_device: [*c]Device) Result {
+    return vkCreateDevice(physical_device, p_create_info, p_allocator, p_device);
+}
+pub extern fn vkDestroyDevice(device: Device, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDevice(device: Device, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDevice(device, p_allocator);
+}
+pub extern fn vkEnumerateInstanceExtensionProperties(p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result;
+pub inline fn enumerateInstanceExtensionProperties(p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result {
+    return vkEnumerateInstanceExtensionProperties(p_layer_name, p_property_count, p_properties);
+}
+pub extern fn vkEnumerateDeviceExtensionProperties(physical_device: PhysicalDevice, p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result;
+pub inline fn enumerateDeviceExtensionProperties(physical_device: PhysicalDevice, p_layer_name: [*c]const u8, p_property_count: [*c]u32, p_properties: [*c]ExtensionProperties) Result {
+    return vkEnumerateDeviceExtensionProperties(physical_device, p_layer_name, p_property_count, p_properties);
+}
+pub extern fn vkEnumerateInstanceLayerProperties(p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result;
+pub inline fn enumerateInstanceLayerProperties(p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result {
+    return vkEnumerateInstanceLayerProperties(p_property_count, p_properties);
+}
+pub extern fn vkEnumerateDeviceLayerProperties(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result;
+pub inline fn enumerateDeviceLayerProperties(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]LayerProperties) Result {
+    return vkEnumerateDeviceLayerProperties(physical_device, p_property_count, p_properties);
+}
+pub extern fn vkGetDeviceQueue(device: Device, queue_family_index: u32, queue_index: u32, p_queue: [*c]Queue) void;
+pub inline fn getDeviceQueue(device: Device, queue_family_index: u32, queue_index: u32, p_queue: [*c]Queue) void {
+    return vkGetDeviceQueue(device, queue_family_index, queue_index, p_queue);
+}
+pub extern fn vkQueueSubmit(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo, fence: Fence) Result;
+pub inline fn queueSubmit(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo, fence: Fence) Result {
+    return vkQueueSubmit(queue, submit_count, p_submits, fence);
+}
+pub extern fn vkQueueWaitIdle(queue: Queue) Result;
+pub inline fn queueWaitIdle(queue: Queue) Result {
+    return vkQueueWaitIdle(queue);
+}
+pub extern fn vkDeviceWaitIdle(device: Device) Result;
+pub inline fn deviceWaitIdle(device: Device) Result {
+    return vkDeviceWaitIdle(device);
+}
+pub extern fn vkAllocateMemory(device: Device, p_allocate_info: [*c]const MemoryAllocateInfo, p_allocator: [*c]const AllocationCallbacks, p_memory: [*c]DeviceMemory) Result;
+pub inline fn allocateMemory(device: Device, p_allocate_info: [*c]const MemoryAllocateInfo, p_allocator: [*c]const AllocationCallbacks, p_memory: [*c]DeviceMemory) Result {
+    return vkAllocateMemory(device, p_allocate_info, p_allocator, p_memory);
+}
+pub extern fn vkFreeMemory(device: Device, memory: DeviceMemory, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn freeMemory(device: Device, memory: DeviceMemory, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkFreeMemory(device, memory, p_allocator);
+}
+pub extern fn vkMapMemory(device: Device, memory: DeviceMemory, offset: DeviceSize, size: DeviceSize, flags: MemoryMapFlags, pp_data: [*c]?*anyopaque) Result;
+pub inline fn mapMemory(device: Device, memory: DeviceMemory, offset: DeviceSize, size: DeviceSize, flags: MemoryMapFlags, pp_data: [*c]?*anyopaque) Result {
+    return vkMapMemory(device, memory, offset, size, flags, pp_data);
+}
+pub extern fn vkUnmapMemory(device: Device, memory: DeviceMemory) void;
+pub inline fn unmapMemory(device: Device, memory: DeviceMemory) void {
+    return vkUnmapMemory(device, memory);
+}
+pub extern fn vkFlushMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result;
+pub inline fn flushMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result {
+    return vkFlushMappedMemoryRanges(device, memory_range_count, p_memory_ranges);
+}
+pub extern fn vkInvalidateMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result;
+pub inline fn invalidateMappedMemoryRanges(device: Device, memory_range_count: u32, p_memory_ranges: [*c]const MappedMemoryRange) Result {
+    return vkInvalidateMappedMemoryRanges(device, memory_range_count, p_memory_ranges);
+}
+pub extern fn vkGetDeviceMemoryCommitment(device: Device, memory: DeviceMemory, p_committed_memory_in_bytes: [*c]DeviceSize) void;
+pub inline fn getDeviceMemoryCommitment(device: Device, memory: DeviceMemory, p_committed_memory_in_bytes: [*c]DeviceSize) void {
+    return vkGetDeviceMemoryCommitment(device, memory, p_committed_memory_in_bytes);
+}
+pub extern fn vkBindBufferMemory(device: Device, buffer: Buffer, memory: DeviceMemory, memory_offset: DeviceSize) Result;
+pub inline fn bindBufferMemory(device: Device, buffer: Buffer, memory: DeviceMemory, memory_offset: DeviceSize) Result {
+    return vkBindBufferMemory(device, buffer, memory, memory_offset);
+}
+pub extern fn vkBindImageMemory(device: Device, image: Image, memory: DeviceMemory, memory_offset: DeviceSize) Result;
+pub inline fn bindImageMemory(device: Device, image: Image, memory: DeviceMemory, memory_offset: DeviceSize) Result {
+    return vkBindImageMemory(device, image, memory, memory_offset);
+}
+pub extern fn vkGetBufferMemoryRequirements(device: Device, buffer: Buffer, p_memory_requirements: [*c]MemoryRequirements) void;
+pub inline fn getBufferMemoryRequirements(device: Device, buffer: Buffer, p_memory_requirements: [*c]MemoryRequirements) void {
+    return vkGetBufferMemoryRequirements(device, buffer, p_memory_requirements);
+}
+pub extern fn vkGetImageMemoryRequirements(device: Device, image: Image, p_memory_requirements: [*c]MemoryRequirements) void;
+pub inline fn getImageMemoryRequirements(device: Device, image: Image, p_memory_requirements: [*c]MemoryRequirements) void {
+    return vkGetImageMemoryRequirements(device, image, p_memory_requirements);
+}
+pub extern fn vkGetImageSparseMemoryRequirements(device: Device, image: Image, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements) void;
+pub inline fn getImageSparseMemoryRequirements(device: Device, image: Image, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements) void {
+    return vkGetImageSparseMemoryRequirements(device, image, p_sparse_memory_requirement_count, p_sparse_memory_requirements);
+}
+pub extern fn vkGetPhysicalDeviceSparseImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, samples: SampleCountFlags, usage: ImageUsageFlags, tiling: ImageTiling, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties) void;
+pub inline fn getPhysicalDeviceSparseImageFormatProperties(physical_device: PhysicalDevice, format: Format, @"type": ImageType, samples: SampleCountFlags, usage: ImageUsageFlags, tiling: ImageTiling, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties) void {
+    return vkGetPhysicalDeviceSparseImageFormatProperties(physical_device, format, @"type", samples, usage, tiling, p_property_count, p_properties);
+}
+pub extern fn vkQueueBindSparse(queue: Queue, bind_info_count: u32, p_bind_info: [*c]const BindSparseInfo, fence: Fence) Result;
+pub inline fn queueBindSparse(queue: Queue, bind_info_count: u32, p_bind_info: [*c]const BindSparseInfo, fence: Fence) Result {
+    return vkQueueBindSparse(queue, bind_info_count, p_bind_info, fence);
+}
+pub extern fn vkCreateFence(device: Device, p_create_info: [*c]const FenceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
+pub inline fn createFence(device: Device, p_create_info: [*c]const FenceCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result {
+    return vkCreateFence(device, p_create_info, p_allocator, p_fence);
+}
+pub extern fn vkDestroyFence(device: Device, fence: Fence, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyFence(device: Device, fence: Fence, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyFence(device, fence, p_allocator);
+}
+pub extern fn vkResetFences(device: Device, fence_count: u32, p_fences: [*c]const Fence) Result;
+pub inline fn resetFences(device: Device, fence_count: u32, p_fences: [*c]const Fence) Result {
+    return vkResetFences(device, fence_count, p_fences);
+}
+pub extern fn vkGetFenceStatus(device: Device, fence: Fence) Result;
+pub inline fn getFenceStatus(device: Device, fence: Fence) Result {
+    return vkGetFenceStatus(device, fence);
+}
+pub extern fn vkWaitForFences(device: Device, fence_count: u32, p_fences: [*c]const Fence, wait_all: Bool32, timeout: u64) Result;
+pub inline fn waitForFences(device: Device, fence_count: u32, p_fences: [*c]const Fence, wait_all: Bool32, timeout: u64) Result {
+    return vkWaitForFences(device, fence_count, p_fences, wait_all, timeout);
+}
+pub extern fn vkCreateSemaphore(device: Device, p_create_info: [*c]const SemaphoreCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_semaphore: [*c]Semaphore) Result;
+pub inline fn createSemaphore(device: Device, p_create_info: [*c]const SemaphoreCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_semaphore: [*c]Semaphore) Result {
+    return vkCreateSemaphore(device, p_create_info, p_allocator, p_semaphore);
+}
+pub extern fn vkDestroySemaphore(device: Device, semaphore: Semaphore, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroySemaphore(device: Device, semaphore: Semaphore, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroySemaphore(device, semaphore, p_allocator);
+}
+pub extern fn vkCreateEvent(device: Device, p_create_info: [*c]const EventCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_event: [*c]Event) Result;
+pub inline fn createEvent(device: Device, p_create_info: [*c]const EventCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_event: [*c]Event) Result {
+    return vkCreateEvent(device, p_create_info, p_allocator, p_event);
+}
+pub extern fn vkDestroyEvent(device: Device, event: Event, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyEvent(device: Device, event: Event, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyEvent(device, event, p_allocator);
+}
+pub extern fn vkGetEventStatus(device: Device, event: Event) Result;
+pub inline fn getEventStatus(device: Device, event: Event) Result {
+    return vkGetEventStatus(device, event);
+}
+pub extern fn vkSetEvent(device: Device, event: Event) Result;
+pub inline fn setEvent(device: Device, event: Event) Result {
+    return vkSetEvent(device, event);
+}
+pub extern fn vkResetEvent(device: Device, event: Event) Result;
+pub inline fn resetEvent(device: Device, event: Event) Result {
+    return vkResetEvent(device, event);
+}
+pub extern fn vkCreateQueryPool(device: Device, p_create_info: [*c]const QueryPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_query_pool: [*c]QueryPool) Result;
+pub inline fn createQueryPool(device: Device, p_create_info: [*c]const QueryPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_query_pool: [*c]QueryPool) Result {
+    return vkCreateQueryPool(device, p_create_info, p_allocator, p_query_pool);
+}
+pub extern fn vkDestroyQueryPool(device: Device, query_pool: QueryPool, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyQueryPool(device: Device, query_pool: QueryPool, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyQueryPool(device, query_pool, p_allocator);
+}
+pub extern fn vkGetQueryPoolResults(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32, data_size: usize, p_data: ?*anyopaque, stride: DeviceSize, flags: QueryResultFlags) Result;
+pub inline fn getQueryPoolResults(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32, data_size: usize, p_data: ?*anyopaque, stride: DeviceSize, flags: QueryResultFlags) Result {
+    return vkGetQueryPoolResults(device, query_pool, first_query, query_count, data_size, p_data, stride, flags);
+}
+pub extern fn vkCreateBuffer(device: Device, p_create_info: [*c]const BufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_buffer: [*c]Buffer) Result;
+pub inline fn createBuffer(device: Device, p_create_info: [*c]const BufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_buffer: [*c]Buffer) Result {
+    return vkCreateBuffer(device, p_create_info, p_allocator, p_buffer);
+}
+pub extern fn vkDestroyBuffer(device: Device, buffer: Buffer, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyBuffer(device: Device, buffer: Buffer, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyBuffer(device, buffer, p_allocator);
+}
+pub extern fn vkCreateBufferView(device: Device, p_create_info: [*c]const BufferViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]BufferView) Result;
+pub inline fn createBufferView(device: Device, p_create_info: [*c]const BufferViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]BufferView) Result {
+    return vkCreateBufferView(device, p_create_info, p_allocator, p_view);
+}
+pub extern fn vkDestroyBufferView(device: Device, buffer_view: BufferView, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyBufferView(device: Device, buffer_view: BufferView, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyBufferView(device, buffer_view, p_allocator);
+}
+pub extern fn vkCreateImage(device: Device, p_create_info: [*c]const ImageCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_image: [*c]Image) Result;
+pub inline fn createImage(device: Device, p_create_info: [*c]const ImageCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_image: [*c]Image) Result {
+    return vkCreateImage(device, p_create_info, p_allocator, p_image);
+}
+pub extern fn vkDestroyImage(device: Device, image: Image, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyImage(device: Device, image: Image, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyImage(device, image, p_allocator);
+}
+pub extern fn vkGetImageSubresourceLayout(device: Device, image: Image, p_subresource: [*c]const ImageSubresource, p_layout: [*c]SubresourceLayout) void;
+pub inline fn getImageSubresourceLayout(device: Device, image: Image, p_subresource: [*c]const ImageSubresource, p_layout: [*c]SubresourceLayout) void {
+    return vkGetImageSubresourceLayout(device, image, p_subresource, p_layout);
+}
+pub extern fn vkCreateImageView(device: Device, p_create_info: [*c]const ImageViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]ImageView) Result;
+pub inline fn createImageView(device: Device, p_create_info: [*c]const ImageViewCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_view: [*c]ImageView) Result {
+    return vkCreateImageView(device, p_create_info, p_allocator, p_view);
+}
+pub extern fn vkDestroyImageView(device: Device, image_view: ImageView, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyImageView(device: Device, image_view: ImageView, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyImageView(device, image_view, p_allocator);
+}
+pub extern fn vkCreateShaderModule(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_shader_module: [*c]ShaderModule) Result;
+pub inline fn createShaderModule(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_shader_module: [*c]ShaderModule) Result {
+    return vkCreateShaderModule(device, p_create_info, p_allocator, p_shader_module);
+}
+pub extern fn vkDestroyShaderModule(device: Device, shader_module: ShaderModule, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyShaderModule(device: Device, shader_module: ShaderModule, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyShaderModule(device, shader_module, p_allocator);
+}
+pub extern fn vkCreatePipelineCache(device: Device, p_create_info: [*c]const PipelineCacheCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_cache: [*c]PipelineCache) Result;
+pub inline fn createPipelineCache(device: Device, p_create_info: [*c]const PipelineCacheCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_cache: [*c]PipelineCache) Result {
+    return vkCreatePipelineCache(device, p_create_info, p_allocator, p_pipeline_cache);
+}
+pub extern fn vkDestroyPipelineCache(device: Device, pipeline_cache: PipelineCache, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyPipelineCache(device: Device, pipeline_cache: PipelineCache, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyPipelineCache(device, pipeline_cache, p_allocator);
+}
+pub extern fn vkGetPipelineCacheData(device: Device, pipeline_cache: PipelineCache, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
+pub inline fn getPipelineCacheData(device: Device, pipeline_cache: PipelineCache, p_data_size: [*c]usize, p_data: ?*anyopaque) Result {
+    return vkGetPipelineCacheData(device, pipeline_cache, p_data_size, p_data);
+}
+pub extern fn vkMergePipelineCaches(device: Device, dst_cache: PipelineCache, src_cache_count: u32, p_src_caches: [*c]const PipelineCache) Result;
+pub inline fn mergePipelineCaches(device: Device, dst_cache: PipelineCache, src_cache_count: u32, p_src_caches: [*c]const PipelineCache) Result {
+    return vkMergePipelineCaches(device, dst_cache, src_cache_count, p_src_caches);
+}
+pub extern fn vkCreateGraphicsPipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const GraphicsPipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
+pub inline fn createGraphicsPipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const GraphicsPipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result {
+    return vkCreateGraphicsPipelines(device, pipeline_cache, create_info_count, p_create_infos, p_allocator, p_pipelines);
+}
+pub extern fn vkCreateComputePipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const ComputePipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
+pub inline fn createComputePipelines(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const ComputePipelineCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result {
+    return vkCreateComputePipelines(device, pipeline_cache, create_info_count, p_create_infos, p_allocator, p_pipelines);
+}
+pub extern fn vkDestroyPipeline(device: Device, pipeline: Pipeline, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyPipeline(device: Device, pipeline: Pipeline, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyPipeline(device, pipeline, p_allocator);
+}
+pub extern fn vkCreatePipelineLayout(device: Device, p_create_info: [*c]const PipelineLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_layout: [*c]PipelineLayout) Result;
+pub inline fn createPipelineLayout(device: Device, p_create_info: [*c]const PipelineLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_pipeline_layout: [*c]PipelineLayout) Result {
+    return vkCreatePipelineLayout(device, p_create_info, p_allocator, p_pipeline_layout);
+}
+pub extern fn vkDestroyPipelineLayout(device: Device, pipeline_layout: PipelineLayout, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyPipelineLayout(device: Device, pipeline_layout: PipelineLayout, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyPipelineLayout(device, pipeline_layout, p_allocator);
+}
+pub extern fn vkCreateSampler(device: Device, p_create_info: [*c]const SamplerCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_sampler: [*c]Sampler) Result;
+pub inline fn createSampler(device: Device, p_create_info: [*c]const SamplerCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_sampler: [*c]Sampler) Result {
+    return vkCreateSampler(device, p_create_info, p_allocator, p_sampler);
+}
+pub extern fn vkDestroySampler(device: Device, sampler: Sampler, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroySampler(device: Device, sampler: Sampler, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroySampler(device, sampler, p_allocator);
+}
+pub extern fn vkCreateDescriptorSetLayout(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_set_layout: [*c]DescriptorSetLayout) Result;
+pub inline fn createDescriptorSetLayout(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_set_layout: [*c]DescriptorSetLayout) Result {
+    return vkCreateDescriptorSetLayout(device, p_create_info, p_allocator, p_set_layout);
+}
+pub extern fn vkDestroyDescriptorSetLayout(device: Device, descriptor_set_layout: DescriptorSetLayout, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDescriptorSetLayout(device: Device, descriptor_set_layout: DescriptorSetLayout, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDescriptorSetLayout(device, descriptor_set_layout, p_allocator);
+}
+pub extern fn vkCreateDescriptorPool(device: Device, p_create_info: [*c]const DescriptorPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_pool: [*c]DescriptorPool) Result;
+pub inline fn createDescriptorPool(device: Device, p_create_info: [*c]const DescriptorPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_pool: [*c]DescriptorPool) Result {
+    return vkCreateDescriptorPool(device, p_create_info, p_allocator, p_descriptor_pool);
+}
+pub extern fn vkDestroyDescriptorPool(device: Device, descriptor_pool: DescriptorPool, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDescriptorPool(device: Device, descriptor_pool: DescriptorPool, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDescriptorPool(device, descriptor_pool, p_allocator);
+}
+pub extern fn vkResetDescriptorPool(device: Device, descriptor_pool: DescriptorPool, flags: DescriptorPoolResetFlags) Result;
+pub inline fn resetDescriptorPool(device: Device, descriptor_pool: DescriptorPool, flags: DescriptorPoolResetFlags) Result {
+    return vkResetDescriptorPool(device, descriptor_pool, flags);
+}
+pub extern fn vkAllocateDescriptorSets(device: Device, p_allocate_info: [*c]const DescriptorSetAllocateInfo, p_descriptor_sets: [*c]DescriptorSet) Result;
+pub inline fn allocateDescriptorSets(device: Device, p_allocate_info: [*c]const DescriptorSetAllocateInfo, p_descriptor_sets: [*c]DescriptorSet) Result {
+    return vkAllocateDescriptorSets(device, p_allocate_info, p_descriptor_sets);
+}
+pub extern fn vkFreeDescriptorSets(device: Device, descriptor_pool: DescriptorPool, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet) Result;
+pub inline fn freeDescriptorSets(device: Device, descriptor_pool: DescriptorPool, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet) Result {
+    return vkFreeDescriptorSets(device, descriptor_pool, descriptor_set_count, p_descriptor_sets);
+}
+pub extern fn vkUpdateDescriptorSets(device: Device, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet, descriptor_copy_count: u32, p_descriptor_copies: [*c]const CopyDescriptorSet) void;
+pub inline fn updateDescriptorSets(device: Device, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet, descriptor_copy_count: u32, p_descriptor_copies: [*c]const CopyDescriptorSet) void {
+    return vkUpdateDescriptorSets(device, descriptor_write_count, p_descriptor_writes, descriptor_copy_count, p_descriptor_copies);
+}
+pub extern fn vkCreateFramebuffer(device: Device, p_create_info: [*c]const FramebufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_framebuffer: [*c]Framebuffer) Result;
+pub inline fn createFramebuffer(device: Device, p_create_info: [*c]const FramebufferCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_framebuffer: [*c]Framebuffer) Result {
+    return vkCreateFramebuffer(device, p_create_info, p_allocator, p_framebuffer);
+}
+pub extern fn vkDestroyFramebuffer(device: Device, framebuffer: Framebuffer, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyFramebuffer(device: Device, framebuffer: Framebuffer, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyFramebuffer(device, framebuffer, p_allocator);
+}
+pub extern fn vkCreateRenderPass(device: Device, p_create_info: [*c]const RenderPassCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result;
+pub inline fn createRenderPass(device: Device, p_create_info: [*c]const RenderPassCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result {
+    return vkCreateRenderPass(device, p_create_info, p_allocator, p_render_pass);
+}
+pub extern fn vkDestroyRenderPass(device: Device, render_pass: RenderPass, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyRenderPass(device: Device, render_pass: RenderPass, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyRenderPass(device, render_pass, p_allocator);
+}
+pub extern fn vkGetRenderAreaGranularity(device: Device, render_pass: RenderPass, p_granularity: [*c]Extent2D) void;
+pub inline fn getRenderAreaGranularity(device: Device, render_pass: RenderPass, p_granularity: [*c]Extent2D) void {
+    return vkGetRenderAreaGranularity(device, render_pass, p_granularity);
+}
+pub extern fn vkCreateCommandPool(device: Device, p_create_info: [*c]const CommandPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_command_pool: [*c]CommandPool) Result;
+pub inline fn createCommandPool(device: Device, p_create_info: [*c]const CommandPoolCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_command_pool: [*c]CommandPool) Result {
+    return vkCreateCommandPool(device, p_create_info, p_allocator, p_command_pool);
+}
+pub extern fn vkDestroyCommandPool(device: Device, command_pool: CommandPool, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyCommandPool(device: Device, command_pool: CommandPool, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyCommandPool(device, command_pool, p_allocator);
+}
+pub extern fn vkResetCommandPool(device: Device, command_pool: CommandPool, flags: CommandPoolResetFlags) Result;
+pub inline fn resetCommandPool(device: Device, command_pool: CommandPool, flags: CommandPoolResetFlags) Result {
+    return vkResetCommandPool(device, command_pool, flags);
+}
+pub extern fn vkAllocateCommandBuffers(device: Device, p_allocate_info: [*c]const CommandBufferAllocateInfo, p_command_buffers: [*c]CommandBuffer) Result;
+pub inline fn allocateCommandBuffers(device: Device, p_allocate_info: [*c]const CommandBufferAllocateInfo, p_command_buffers: [*c]CommandBuffer) Result {
+    return vkAllocateCommandBuffers(device, p_allocate_info, p_command_buffers);
+}
+pub extern fn vkFreeCommandBuffers(device: Device, command_pool: CommandPool, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void;
+pub inline fn freeCommandBuffers(device: Device, command_pool: CommandPool, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void {
+    return vkFreeCommandBuffers(device, command_pool, command_buffer_count, p_command_buffers);
+}
+pub extern fn vkBeginCommandBuffer(command_buffer: CommandBuffer, p_begin_info: [*c]const CommandBufferBeginInfo) Result;
+pub inline fn beginCommandBuffer(command_buffer: CommandBuffer, p_begin_info: [*c]const CommandBufferBeginInfo) Result {
+    return vkBeginCommandBuffer(command_buffer, p_begin_info);
+}
+pub extern fn vkEndCommandBuffer(command_buffer: CommandBuffer) Result;
+pub inline fn endCommandBuffer(command_buffer: CommandBuffer) Result {
+    return vkEndCommandBuffer(command_buffer);
+}
+pub extern fn vkResetCommandBuffer(command_buffer: CommandBuffer, flags: CommandBufferResetFlags) Result;
+pub inline fn resetCommandBuffer(command_buffer: CommandBuffer, flags: CommandBufferResetFlags) Result {
+    return vkResetCommandBuffer(command_buffer, flags);
+}
+pub extern fn vkCmdBindPipeline(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void;
+pub inline fn cmdBindPipeline(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void {
+    return vkCmdBindPipeline(command_buffer, pipeline_bind_point, pipeline);
+}
+pub extern fn vkCmdSetViewport(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewports: [*c]const Viewport) void;
+pub inline fn cmdSetViewport(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewports: [*c]const Viewport) void {
+    return vkCmdSetViewport(command_buffer, first_viewport, viewport_count, p_viewports);
+}
+pub extern fn vkCmdSetScissor(command_buffer: CommandBuffer, first_scissor: u32, scissor_count: u32, p_scissors: [*c]const Rect2D) void;
+pub inline fn cmdSetScissor(command_buffer: CommandBuffer, first_scissor: u32, scissor_count: u32, p_scissors: [*c]const Rect2D) void {
+    return vkCmdSetScissor(command_buffer, first_scissor, scissor_count, p_scissors);
+}
+pub extern fn vkCmdSetLineWidth(command_buffer: CommandBuffer, line_width: f32) void;
+pub inline fn cmdSetLineWidth(command_buffer: CommandBuffer, line_width: f32) void {
+    return vkCmdSetLineWidth(command_buffer, line_width);
+}
+pub extern fn vkCmdSetDepthBias(command_buffer: CommandBuffer, depth_bias_constant_factor: f32, depth_bias_clamp: f32, depth_bias_slope_factor: f32) void;
+pub inline fn cmdSetDepthBias(command_buffer: CommandBuffer, depth_bias_constant_factor: f32, depth_bias_clamp: f32, depth_bias_slope_factor: f32) void {
+    return vkCmdSetDepthBias(command_buffer, depth_bias_constant_factor, depth_bias_clamp, depth_bias_slope_factor);
+}
+pub extern fn vkCmdSetBlendConstants(command_buffer: CommandBuffer, blend_constants: [*c]const f32) void;
+pub inline fn cmdSetBlendConstants(command_buffer: CommandBuffer, blend_constants: [*c]const f32) void {
+    return vkCmdSetBlendConstants(command_buffer, blend_constants);
+}
+pub extern fn vkCmdSetDepthBounds(command_buffer: CommandBuffer, min_depth_bounds: f32, max_depth_bounds: f32) void;
+pub inline fn cmdSetDepthBounds(command_buffer: CommandBuffer, min_depth_bounds: f32, max_depth_bounds: f32) void {
+    return vkCmdSetDepthBounds(command_buffer, min_depth_bounds, max_depth_bounds);
+}
+pub extern fn vkCmdSetStencilCompareMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, compare_mask: u32) void;
+pub inline fn cmdSetStencilCompareMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, compare_mask: u32) void {
+    return vkCmdSetStencilCompareMask(command_buffer, face_mask, compare_mask);
+}
+pub extern fn vkCmdSetStencilWriteMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, write_mask: u32) void;
+pub inline fn cmdSetStencilWriteMask(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, write_mask: u32) void {
+    return vkCmdSetStencilWriteMask(command_buffer, face_mask, write_mask);
+}
+pub extern fn vkCmdSetStencilReference(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, reference: u32) void;
+pub inline fn cmdSetStencilReference(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, reference: u32) void {
+    return vkCmdSetStencilReference(command_buffer, face_mask, reference);
+}
+pub extern fn vkCmdBindDescriptorSets(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet, dynamic_offset_count: u32, p_dynamic_offsets: [*c]const u32) void;
+pub inline fn cmdBindDescriptorSets(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, descriptor_set_count: u32, p_descriptor_sets: [*c]const DescriptorSet, dynamic_offset_count: u32, p_dynamic_offsets: [*c]const u32) void {
+    return vkCmdBindDescriptorSets(command_buffer, pipeline_bind_point, layout, first_set, descriptor_set_count, p_descriptor_sets, dynamic_offset_count, p_dynamic_offsets);
+}
+pub extern fn vkCmdBindIndexBuffer(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, index_type: IndexType) void;
+pub inline fn cmdBindIndexBuffer(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, index_type: IndexType) void {
+    return vkCmdBindIndexBuffer(command_buffer, buffer, offset, index_type);
+}
+pub extern fn vkCmdBindVertexBuffers(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize) void;
+pub inline fn cmdBindVertexBuffers(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize) void {
+    return vkCmdBindVertexBuffers(command_buffer, first_binding, binding_count, p_buffers, p_offsets);
+}
+pub extern fn vkCmdDraw(command_buffer: CommandBuffer, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) void;
+pub inline fn cmdDraw(command_buffer: CommandBuffer, vertex_count: u32, instance_count: u32, first_vertex: u32, first_instance: u32) void {
+    return vkCmdDraw(command_buffer, vertex_count, instance_count, first_vertex, first_instance);
+}
+pub extern fn vkCmdDrawIndexed(command_buffer: CommandBuffer, index_count: u32, instance_count: u32, first_index: u32, vertex_offset: i32, first_instance: u32) void;
+pub inline fn cmdDrawIndexed(command_buffer: CommandBuffer, index_count: u32, instance_count: u32, first_index: u32, vertex_offset: i32, first_instance: u32) void {
+    return vkCmdDrawIndexed(command_buffer, index_count, instance_count, first_index, vertex_offset, first_instance);
+}
+pub extern fn vkCmdDrawIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndirect(command_buffer, buffer, offset, draw_count, stride);
+}
+pub extern fn vkCmdDrawIndexedIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndexedIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndexedIndirect(command_buffer, buffer, offset, draw_count, stride);
+}
+pub extern fn vkCmdDispatch(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
+pub inline fn cmdDispatch(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void {
+    return vkCmdDispatch(command_buffer, group_count_x, group_count_y, group_count_z);
+}
+pub extern fn vkCmdDispatchIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void;
+pub inline fn cmdDispatchIndirect(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void {
+    return vkCmdDispatchIndirect(command_buffer, buffer, offset);
+}
+pub extern fn vkCmdCopyBuffer(command_buffer: CommandBuffer, src_buffer: Buffer, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferCopy) void;
+pub inline fn cmdCopyBuffer(command_buffer: CommandBuffer, src_buffer: Buffer, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferCopy) void {
+    return vkCmdCopyBuffer(command_buffer, src_buffer, dst_buffer, region_count, p_regions);
+}
+pub extern fn vkCmdCopyImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageCopy) void;
+pub inline fn cmdCopyImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageCopy) void {
+    return vkCmdCopyImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, region_count, p_regions);
+}
+pub extern fn vkCmdBlitImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageBlit, filter: Filter) void;
+pub inline fn cmdBlitImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageBlit, filter: Filter) void {
+    return vkCmdBlitImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, region_count, p_regions, filter);
+}
+pub extern fn vkCmdCopyBufferToImage(command_buffer: CommandBuffer, src_buffer: Buffer, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const BufferImageCopy) void;
+pub inline fn cmdCopyBufferToImage(command_buffer: CommandBuffer, src_buffer: Buffer, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const BufferImageCopy) void {
+    return vkCmdCopyBufferToImage(command_buffer, src_buffer, dst_image, dst_image_layout, region_count, p_regions);
+}
+pub extern fn vkCmdCopyImageToBuffer(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferImageCopy) void;
+pub inline fn cmdCopyImageToBuffer(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_buffer: Buffer, region_count: u32, p_regions: [*c]const BufferImageCopy) void {
+    return vkCmdCopyImageToBuffer(command_buffer, src_image, src_image_layout, dst_buffer, region_count, p_regions);
+}
+pub extern fn vkCmdUpdateBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, data_size: DeviceSize, p_data: ?*const anyopaque) void;
+pub inline fn cmdUpdateBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, data_size: DeviceSize, p_data: ?*const anyopaque) void {
+    return vkCmdUpdateBuffer(command_buffer, dst_buffer, dst_offset, data_size, p_data);
+}
+pub extern fn vkCmdFillBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, size: DeviceSize, data: u32) void;
+pub inline fn cmdFillBuffer(command_buffer: CommandBuffer, dst_buffer: Buffer, dst_offset: DeviceSize, size: DeviceSize, data: u32) void {
+    return vkCmdFillBuffer(command_buffer, dst_buffer, dst_offset, size, data);
+}
+pub extern fn vkCmdClearColorImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_color: [*c]const ClearColorValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void;
+pub inline fn cmdClearColorImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_color: [*c]const ClearColorValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void {
+    return vkCmdClearColorImage(command_buffer, image, image_layout, p_color, range_count, p_ranges);
+}
+pub extern fn vkCmdClearDepthStencilImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_depth_stencil: [*c]const ClearDepthStencilValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void;
+pub inline fn cmdClearDepthStencilImage(command_buffer: CommandBuffer, image: Image, image_layout: ImageLayout, p_depth_stencil: [*c]const ClearDepthStencilValue, range_count: u32, p_ranges: [*c]const ImageSubresourceRange) void {
+    return vkCmdClearDepthStencilImage(command_buffer, image, image_layout, p_depth_stencil, range_count, p_ranges);
+}
+pub extern fn vkCmdClearAttachments(command_buffer: CommandBuffer, attachment_count: u32, p_attachments: [*c]const ClearAttachment, rect_count: u32, p_rects: [*c]const ClearRect) void;
+pub inline fn cmdClearAttachments(command_buffer: CommandBuffer, attachment_count: u32, p_attachments: [*c]const ClearAttachment, rect_count: u32, p_rects: [*c]const ClearRect) void {
+    return vkCmdClearAttachments(command_buffer, attachment_count, p_attachments, rect_count, p_rects);
+}
+pub extern fn vkCmdResolveImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageResolve) void;
+pub inline fn cmdResolveImage(command_buffer: CommandBuffer, src_image: Image, src_image_layout: ImageLayout, dst_image: Image, dst_image_layout: ImageLayout, region_count: u32, p_regions: [*c]const ImageResolve) void {
+    return vkCmdResolveImage(command_buffer, src_image, src_image_layout, dst_image, dst_image_layout, region_count, p_regions);
+}
+pub extern fn vkCmdSetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void;
+pub inline fn cmdSetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void {
+    return vkCmdSetEvent(command_buffer, event, stage_mask);
+}
+pub extern fn vkCmdResetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void;
+pub inline fn cmdResetEvent(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags) void {
+    return vkCmdResetEvent(command_buffer, event, stage_mask);
+}
+pub extern fn vkCmdWaitEvents(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void;
+pub inline fn cmdWaitEvents(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void {
+    return vkCmdWaitEvents(command_buffer, event_count, p_events, src_stage_mask, dst_stage_mask, memory_barrier_count, p_memory_barriers, buffer_memory_barrier_count, p_buffer_memory_barriers, image_memory_barrier_count, p_image_memory_barriers);
+}
+pub extern fn vkCmdPipelineBarrier(command_buffer: CommandBuffer, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, dependency_flags: DependencyFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void;
+pub inline fn cmdPipelineBarrier(command_buffer: CommandBuffer, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, dependency_flags: DependencyFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void {
+    return vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, dependency_flags, memory_barrier_count, p_memory_barriers, p_image_memory_barriers, buffer_memory_barrier_count, p_buffer_memory_barriers, image_memory_barrier_count, p_image_memory_barriers);
+}
+pub extern fn vkCmdBeginQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags) void;
+pub inline fn cmdBeginQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags) void {
+    return vkCmdBeginQuery(command_buffer, query_pool, query, flags);
+}
+pub extern fn vkCmdEndQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32) void;
+pub inline fn cmdEndQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32) void {
+    return vkCmdEndQuery(command_buffer, query_pool, query);
+}
+pub extern fn vkCmdResetQueryPool(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32) void;
+pub inline fn cmdResetQueryPool(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32) void {
+    return vkCmdResetQueryPool(command_buffer, query_pool, first_query, query_count);
+}
+pub extern fn vkCmdWriteTimestamp(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, query_pool: QueryPool, query: u32) void;
+pub inline fn cmdWriteTimestamp(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, query_pool: QueryPool, query: u32) void {
+    return vkCmdWriteTimestamp(command_buffer, pipeline_stage, query_pool, query);
+}
+pub extern fn vkCmdCopyQueryPoolResults(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32, dst_buffer: Buffer, dst_offset: DeviceSize, stride: DeviceSize, flags: QueryResultFlags) void;
+pub inline fn cmdCopyQueryPoolResults(command_buffer: CommandBuffer, query_pool: QueryPool, first_query: u32, query_count: u32, dst_buffer: Buffer, dst_offset: DeviceSize, stride: DeviceSize, flags: QueryResultFlags) void {
+    return vkCmdCopyQueryPoolResults(command_buffer, query_pool, first_query, query_count, dst_buffer, dst_offset, stride, flags);
+}
+pub extern fn vkCmdPushConstants(command_buffer: CommandBuffer, layout: PipelineLayout, stage_flags: ShaderStageFlags, offset: u32, size: u32, p_values: ?*const anyopaque) void;
+pub inline fn cmdPushConstants(command_buffer: CommandBuffer, layout: PipelineLayout, stage_flags: ShaderStageFlags, offset: u32, size: u32, p_values: ?*const anyopaque) void {
+    return vkCmdPushConstants(command_buffer, layout, stage_flags, offset, size, p_values);
+}
+pub extern fn vkCmdBeginRenderPass(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, contents: SubpassContents) void;
+pub inline fn cmdBeginRenderPass(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, contents: SubpassContents) void {
+    return vkCmdBeginRenderPass(command_buffer, p_render_pass_begin, contents);
+}
+pub extern fn vkCmdNextSubpass(command_buffer: CommandBuffer, contents: SubpassContents) void;
+pub inline fn cmdNextSubpass(command_buffer: CommandBuffer, contents: SubpassContents) void {
+    return vkCmdNextSubpass(command_buffer, contents);
+}
+pub extern fn vkCmdEndRenderPass(command_buffer: CommandBuffer) void;
+pub inline fn cmdEndRenderPass(command_buffer: CommandBuffer) void {
+    return vkCmdEndRenderPass(command_buffer);
+}
+pub extern fn vkCmdExecuteCommands(command_buffer: CommandBuffer, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void;
+pub inline fn cmdExecuteCommands(command_buffer: CommandBuffer, command_buffer_count: u32, p_command_buffers: [*c]const CommandBuffer) void {
+    return vkCmdExecuteCommands(command_buffer, command_buffer_count, p_command_buffers);
+}
 pub const SamplerYcbcrConversion = enum(u64) { null = 0, _ };
 pub const DescriptorUpdateTemplate = enum(u64) { null = 0, _ };
 pub const PointClippingBehavior = enum(u32) {

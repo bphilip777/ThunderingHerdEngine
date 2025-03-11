@@ -1,4 +1,4 @@
-const Vertex = @import("../Vertex.zig");
+const Vertex = @import("./Vertex.zig");
 
 pub const vertices = [_]Vertex{
     .{ .pos = .{ -0.5, -0.5 }, .color = .{ 1.0, 0.0, 0.0 } },

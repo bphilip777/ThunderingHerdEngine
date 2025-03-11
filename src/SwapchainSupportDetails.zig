@@ -1,8 +1,9 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
-const isSuccess = @import("helpers.zig").isSuccess;
 
-const vk = @import("libs.zig").vk;
+const vk = @import("vulkan/vulkan.zig");
+const isSuccess = vk.isSuccess;
+// const vk = @import("libs.zig").vk;
 
 const Self = @This();
 

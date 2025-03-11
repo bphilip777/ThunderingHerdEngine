@@ -74,6 +74,10 @@
         //    // actually used.
         //    .lazy = false,
         //},
+        .zstbi = .{
+            .url = "git+https://github.com/foxnne/zstbi.git#d9a0947365b1ee8131fcf518feac8dfe896cfcfa",
+            .hash = "zstbi-0.10.0-AAAAAIrnBwDOOB04-c5ttChAW3iE0TnKuBc9O_fZUFgp",
+        },
     },
 
     // Specifies the set of files and directories that are included in this package.
