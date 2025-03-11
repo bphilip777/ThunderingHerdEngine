@@ -27,6 +27,7 @@ const vk = @import("vulkan/vulkan3.zig");
 const isSuccess = @import("vulkan/vulkan3.zig").isSuccess;
 
 const math = @import("math/math.zig");
+const d2r = std.math.degreesToRadians;
 
 // sdl - huge library that may not be what i want
 const sdl = @cImport({
@@ -576,8 +577,8 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
         const score = rateDeviceSuitability(&props, &feats);
 
         if (is_debug_mode) {
-            const device_name_len = std.mem.indexOfScalar(u8, &props.deviceName, 0) orelse props.deviceName.len;
-            const device_name = props.deviceName[0..device_name_len];
+            const device_name_len = std.mem.indexOfScalar(u8, &props.device_name, 0) orelse props.device_name.len;
+            const device_name = props.device_name[0..device_name_len];
             std.debug.print("\t{s}: {}\n", .{ device_name, score });
         }
 
@@ -592,8 +593,8 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
             var props: vk.PhysicalDeviceProperties = undefined;
             vk.getPhysicalDeviceProperties(devices[ind], &props);
 
-            const device_name_len = std.mem.indexOfScalar(u8, &props.deviceName, 0) orelse props.deviceName.len;
-            const device_name = props.deviceName[0..device_name_len];
+            const device_name_len = std.mem.indexOfScalar(u8, &props.device_name, 0) orelse props.device_name.len;
+            const device_name = props.device_name[0..device_name_len];
             std.debug.print("Device Chosen: {s}\n", .{device_name});
         }
         return devices[ind];
@@ -640,7 +641,7 @@ fn printDeviceExtensions(device: vk.PhysicalDevice) !void {
 
     std.debug.print("Available Device Extensions:\n", .{});
     for (available_device_extensions[0..n_exts]) |extension| {
-        const name = extension.extensionName;
+        const name = extension.extension_name;
         const ext_name_len = std.mem.indexOfScalar(u8, &name, 0) orelse name.len;
         const ext_name = name[0..ext_name_len];
         std.debug.print("\t{s}\n", .{ext_name});
@@ -663,7 +664,7 @@ fn checkDeviceExtensionSupport(device: vk.PhysicalDevice) !bool {
     blk: for (required_device_extensions) |req_ext| {
         const req_ext_name = std.mem.span(req_ext);
         for (available_device_extensions[0..n_exts]) |extension| {
-            const name = extension.extensionName;
+            const name = extension.extension_name;
             const ext_name_len = std.mem.indexOfScalar(u8, &name, 0) orelse name.len;
             const ext_name = name[0..ext_name_len];
             if (std.mem.eql(u8, req_ext_name, ext_name)) continue :blk;
@@ -681,7 +682,7 @@ fn rateDeviceSuitability(
 ) i32 {
     var score: i32 = 0;
 
-    score += switch (props.deviceType) {
+    score += switch (props.device_type) {
         .other => 0,
         .integrated_gpu => 100,
         .discrete_gpu => 1000,
@@ -689,11 +690,11 @@ fn rateDeviceSuitability(
         .cpu => 1,
     };
 
-    score += @intCast(props.limits.maxImageDimension2D);
-    score += @as(i32, @intCast(props.limits.maxImageDimension3D)) * 8; // prefer 3d
+    score += @intCast(props.limits.max_image_dimension2d);
+    score += @as(i32, @intCast(props.limits.max_image_dimension3d)) * 8; // prefer 3d
     //
     // required features
-    if (feats.geometryShader == 0) return 0;
+    if (feats.geometry_shader == .false) return 0;
 
     return score;
 }
@@ -725,7 +726,7 @@ fn createLogicalDevice(
         .p_queue_create_infos = if (is_same_family) &qcis[0] else &qcis,
         .p_enabled_features = &feats,
         .enabled_extension_count = @truncate(required_device_extensions.len),
-        .pp_enabled_exgtension_names = &required_device_extensions,
+        .pp_enabled_extension_names = &required_device_extensions,
         .enabled_layer_count = 0,
         .pp_enabled_layer_names = null,
     };
@@ -780,8 +781,8 @@ fn createSwapchain(
     const extent = ssd.chooseSwapExtent(width, height);
     // if (is_debug_mode) std.debug.print("Extent: {any}\n", .{extent});
 
-    const min = ssd.capabilities.minImageCount + 1;
-    const max = ssd.capabilities.maxImageCount;
+    const min = ssd.capabilities.min_image_count + 1;
+    const max = ssd.capabilities.max_image_count;
     const n_images = if (max != 0) @min(max, min) else min;
     // if (is_debug_mode) std.debug.print("Swapchain # of Images: {}\n", .{n_images});
 
@@ -1927,10 +1928,10 @@ fn drawFrame(self: *Self) !void {
 fn updateUniformBuffer(self: *Self) void {
     const elapsed_time = @as(f32, @floatFromInt(self.time.elapsed()));
 
-    const model = math.rotation(std.math.degreesToRadians(90) * elapsed_time, math.VZ);
+    const model = math.rotation(std.math.d2r(90) * elapsed_time, math.VZ);
     const view = math.lookAt(math.Vector(3, f32).ones().mulScalar(2), math.Vector(3, f32).zeros(), math.VZ);
     const aspect_ratio = @as(f32, @floatFromInt(self.extent.width)) / @as(f32, @floatFromInt(self.extent.height));
-    const proj = math.perspective(std.math.degreesToRadians(45), aspect_ratio, 0.1, 10);
+    const proj = math.perspective(std.math.d2r(45), aspect_ratio, 0.1, 10);
 
     // need to compute basics
     var ubo = [_]UBO{
