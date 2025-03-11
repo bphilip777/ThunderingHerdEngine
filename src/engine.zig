@@ -82,54 +82,54 @@ allo: Allocator,
 window: *sdl.SDL_Window,
 
 instance: vk.Instance,
-// surface: vk.VkSurfaceKHR,
-//
-// physical_device: vk.VkPhysicalDevice,
-// device: vk.VkDevice,
-//
-// graphics_queue: vk.VkQueue,
-// present_queue: vk.VkQueue,
-//
-// swapchain: vk.VkSwapchainKHR,
-// images: []vk.VkImage,
-// format: vk.VkFormat,
-// extent: vk.VkExtent2D,
-// views: []vk.VkImageView,
-// frame_buffers: []vk.VkFramebuffer,
-//
-// render_pass: vk.VkRenderPass,
-// descriptor_set_layout: vk.VkDescriptorSetLayout,
-// pipeline_layout: vk.VkPipelineLayout,
-// pipeline: vk.VkPipeline,
-//
-// command_pool: vk.VkCommandPool,
-//
-// texture_image: vk.VkImage,
-// texture_image_memory: vk.VkDeviceMemory,
-//
-// vertex_buffer: vk.VkBuffer,
-// vertex_buffer_memory: vk.VkDeviceMemory,
-//
-// index_buffer: vk.VkBuffer,
-// index_buffer_memory: vk.VkDeviceMemory,
-//
-// uniform_buffers: []vk.VkBuffer,
-// uniform_buffers_memory: []vk.VkDeviceMemory,
-// uniform_buffers_mapped: []?*anyopaque,
-//
-// descriptor_pool: vk.VkDescriptorPool,
-// descriptor_sets: []vk.VkDescriptorSet,
-//
-// command_buffers: []vk.VkCommandBuffer,
-//
-// image_available_semaphores: []vk.VkSemaphore,
-// render_finished_semaphores: []vk.VkSemaphore,
-// in_flight_fences: []vk.VkFence,
-//
-// current_frame: u32 = 0,
-// resize: bool = false,
-// fps: FPS = .sixty,
-// time: Stopwatch,
+surface: vk.SurfaceKHR,
+
+physical_device: vk.PhysicalDevice,
+device: vk.Device,
+
+graphics_queue: vk.Queue,
+present_queue: vk.Queue,
+
+swapchain: vk.SwapchainKHR,
+images: []vk.Image,
+format: vk.Format,
+extent: vk.Extent2D,
+views: []vk.ImageView,
+frame_buffers: []vk.Framebuffer,
+
+render_pass: vk.RenderPass,
+descriptor_set_layout: vk.DescriptorSetLayout,
+pipeline_layout: vk.PipelineLayout,
+pipeline: vk.Pipeline,
+
+command_pool: vk.CommandPool,
+
+texture_image: vk.Image,
+texture_image_memory: vk.DeviceMemory,
+
+vertex_buffer: vk.Buffer,
+vertex_buffer_memory: vk.DeviceMemory,
+
+index_buffer: vk.Buffer,
+index_buffer_memory: vk.DeviceMemory,
+
+uniform_buffers: []vk.Buffer,
+uniform_buffers_memory: []vk.DeviceMemory,
+uniform_buffers_mapped: []?*anyopaque,
+
+descriptor_pool: vk.DescriptorPool,
+descriptor_sets: []vk.DescriptorSet,
+
+command_buffers: []vk.CommandBuffer,
+
+image_available_semaphores: []vk.Semaphore,
+render_finished_semaphores: []vk.Semaphore,
+in_flight_fences: []vk.Fence,
+
+current_frame: u32 = 0,
+resize: bool = false,
+fps: FPS = .sixty,
+time: Stopwatch,
 
 // public functions
 pub fn init(
@@ -159,142 +159,142 @@ pub fn init(
     };
 
     const instance = try createInstance(allo);
-    // const surface = try createSurface(window, instance);
-    // const physical_device: vk.VkPhysicalDevice = try pickPhysicalDevice(instance, surface);
-    // const device = try createLogicalDevice(surface, physical_device);
-    //
-    // const graphics_queue = createQueue(surface, physical_device, device, .graphics);
-    // const present_queue = createQueue(surface, physical_device, device, .present);
-    //
-    // var ssd = try SSD.init(allo, surface, physical_device);
-    // defer ssd.deinit(allo);
-    // if (is_debug_mode) std.debug.print("# of Formats: {}\n", .{ssd.formats.len});
-    // if (is_debug_mode) std.debug.print("# of Present Modes: {}\n", .{ssd.present_modes.len});
-    //
-    // const extent = ssd.chooseSwapExtent(width, height);
-    // const format = ssd.chooseSwapSurfaceFormat();
-    //
-    // const swapchain = try createSwapchain(allo, surface, physical_device, device, width, height);
-    //
-    // // allocate memory outside of the fn - one time call at initialization rather than every time recreate is called
-    // var n_images = try getNumberOfSwapchainImages(device, swapchain);
-    // const images = try allo.alloc(vk.VkImage, n_images);
-    // const views = try allo.alloc(vk.VkImageView, n_images);
-    // const frame_buffers = try allo.alloc(vk.VkFramebuffer, n_images);
-    //
-    // const descriptor_set_layout = try createDescriptorSetLayout(device);
-    // const pipeline_layout = try createGraphicsPipelineLayout(device, &.{descriptor_set_layout});
-    // const render_pass = try createRenderPass(device, format.format);
-    //
-    // try getSwapchainImages(device, swapchain, &n_images, images);
-    // try createImageViews(device, images, format.format, views);
-    // try createFramebuffers(device, extent, views, render_pass, frame_buffers);
-    // const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
-    //
-    // const command_pool = try createCommandPool(surface, physical_device, device);
-    // createTextureImage();
-    //
-    // var vertex_buffer: vk.VkBuffer = undefined;
-    // var vertex_buffer_memory: vk.VkDeviceMemory = undefined;
-    // try createVertexBuffer(
-    //     physical_device,
-    //     device,
-    //     &vertex_buffer,
-    //     &vertex_buffer_memory,
-    //     command_pool,
-    //     graphics_queue,
-    //     // &triangle_vertices,
-    //     &square_vertices,
-    // );
-    //
-    // var index_buffer: vk.VkBuffer = undefined;
-    // var index_buffer_memory: vk.VkDeviceMemory = undefined;
-    // try createIndexBuffer(
-    //     physical_device,
-    //     device,
-    //     &index_buffer,
-    //     &index_buffer_memory,
-    //     command_pool,
-    //     graphics_queue,
-    //     // &triangle_indices, // makes no sense since only 1 triangle
-    //     &square_indices,
-    // );
-    //
-    // // probably want to pass this into this fn
-    // const uniform_buffers = try allo.alloc(vk.VkBuffer, MAX_FRAMES_IN_FLIGHT);
-    // const uniform_buffers_memory = try allo.alloc(vk.VkDeviceMemory, MAX_FRAMES_IN_FLIGHT);
-    // const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
-    // try createUniformBuffers(
-    //     physical_device,
-    //     device,
-    //     uniform_buffers,
-    //     uniform_buffers_memory,
-    //     uniform_buffers_mapped,
-    // );
-    //
-    // const descriptor_pool = try createDescriptorPool(device);
-    // const descriptor_sets = try createDescriptorSets(
-    //     allo,
-    //     device,
-    //     descriptor_set_layout,
-    //     descriptor_pool,
-    //     uniform_buffers,
-    // );
-    //
-    // const command_buffers = try createCommandBuffers(allo, device, command_pool);
-    //
-    // const image_available_semaphores = try createSemaphores(allo, device);
-    // const render_finished_semaphores = try createSemaphores(allo, device);
-    // const in_flight_fences = try createFences(allo, device);
-    //
-    // const time = Stopwatch.init();
+    const surface = try createSurface(window, instance);
+    const physical_device: vk.PhysicalDevice = try pickPhysicalDevice(instance, surface);
+    const device = try createLogicalDevice(surface, physical_device);
+
+    const graphics_queue = createQueue(surface, physical_device, device, .graphics);
+    const present_queue = createQueue(surface, physical_device, device, .present);
+
+    var ssd = try SSD.init(allo, surface, physical_device);
+    defer ssd.deinit(allo);
+    if (is_debug_mode) std.debug.print("# of Formats: {}\n", .{ssd.formats.len});
+    if (is_debug_mode) std.debug.print("# of Present Modes: {}\n", .{ssd.present_modes.len});
+
+    const extent = ssd.chooseSwapExtent(width, height);
+    const format = ssd.chooseSwapSurfaceFormat();
+
+    const swapchain = try createSwapchain(allo, surface, physical_device, device, width, height);
+
+    // allocate memory outside of the fn - one time call at initialization rather than every time recreate is called
+    var n_images = try getNumberOfSwapchainImages(device, swapchain);
+    const images = try allo.alloc(vk.VkImage, n_images);
+    const views = try allo.alloc(vk.VkImageView, n_images);
+    const frame_buffers = try allo.alloc(vk.VkFramebuffer, n_images);
+
+    const descriptor_set_layout = try createDescriptorSetLayout(device);
+    const pipeline_layout = try createGraphicsPipelineLayout(device, &.{descriptor_set_layout});
+    const render_pass = try createRenderPass(device, format.format);
+
+    try getSwapchainImages(device, swapchain, &n_images, images);
+    try createImageViews(device, images, format.format, views);
+    try createFramebuffers(device, extent, views, render_pass, frame_buffers);
+    const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
+
+    const command_pool = try createCommandPool(surface, physical_device, device);
+    createTextureImage();
+
+    var vertex_buffer: vk.Buffer = undefined;
+    var vertex_buffer_memory: vk.DeviceMemory = undefined;
+    try createVertexBuffer(
+        physical_device,
+        device,
+        &vertex_buffer,
+        &vertex_buffer_memory,
+        command_pool,
+        graphics_queue,
+        // &triangle_vertices,
+        &square_vertices,
+    );
+
+    var index_buffer: vk.Buffer = undefined;
+    var index_buffer_memory: vk.DeviceMemory = undefined;
+    try createIndexBuffer(
+        physical_device,
+        device,
+        &index_buffer,
+        &index_buffer_memory,
+        command_pool,
+        graphics_queue,
+        // &triangle_indices, // makes no sense since only 1 triangle
+        &square_indices,
+    );
+
+    // probably want to pass this into this fn
+    const uniform_buffers = try allo.alloc(vk.VkBuffer, MAX_FRAMES_IN_FLIGHT);
+    const uniform_buffers_memory = try allo.alloc(vk.VkDeviceMemory, MAX_FRAMES_IN_FLIGHT);
+    const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
+    try createUniformBuffers(
+        physical_device,
+        device,
+        uniform_buffers,
+        uniform_buffers_memory,
+        uniform_buffers_mapped,
+    );
+
+    const descriptor_pool = try createDescriptorPool(device);
+    const descriptor_sets = try createDescriptorSets(
+        allo,
+        device,
+        descriptor_set_layout,
+        descriptor_pool,
+        uniform_buffers,
+    );
+
+    const command_buffers = try createCommandBuffers(allo, device, command_pool);
+
+    const image_available_semaphores = try createSemaphores(allo, device);
+    const render_finished_semaphores = try createSemaphores(allo, device);
+    const in_flight_fences = try createFences(allo, device);
+
+    const time = Stopwatch.init();
 
     return Self{
         .allo = allo,
 
         .window = window,
         .instance = instance,
-        // .surface = surface,
-        // .physical_device = physical_device,
-        // .device = device,
-        //
-        // .graphics_queue = graphics_queue,
-        // .present_queue = present_queue,
-        //
-        // .swapchain = swapchain,
-        // .images = images,
-        // .format = format.format,
-        // .extent = extent,
-        // .views = views,
-        // .frame_buffers = frame_buffers,
-        //
-        // .descriptor_set_layout = descriptor_set_layout,
-        // .pipeline_layout = pipeline_layout,
-        // .render_pass = render_pass,
-        // .pipeline = pipeline,
-        //
-        // .command_pool = command_pool,
-        //
-        // .vertex_buffer = vertex_buffer,
-        // .vertex_buffer_memory = vertex_buffer_memory,
-        //
-        // .index_buffer = index_buffer,
-        // .index_buffer_memory = index_buffer_memory,
-        //
-        // .uniform_buffers = uniform_buffers,
-        // .uniform_buffers_memory = uniform_buffers_memory,
-        // .uniform_buffers_mapped = uniform_buffers_mapped,
-        //
-        // .descriptor_pool = descriptor_pool,
-        // .descriptor_sets = descriptor_sets,
-        //
-        // .command_buffers = command_buffers,
-        //
-        // .image_available_semaphores = image_available_semaphores,
-        // .render_finished_semaphores = render_finished_semaphores,
-        // .in_flight_fences = in_flight_fences,
-        //
-        // .time = time,
+        .surface = surface,
+        .physical_device = physical_device,
+        .device = device,
+
+        .graphics_queue = graphics_queue,
+        .present_queue = present_queue,
+
+        .swapchain = swapchain,
+        .images = images,
+        .format = format.format,
+        .extent = extent,
+        .views = views,
+        .frame_buffers = frame_buffers,
+
+        .descriptor_set_layout = descriptor_set_layout,
+        .pipeline_layout = pipeline_layout,
+        .render_pass = render_pass,
+        .pipeline = pipeline,
+
+        .command_pool = command_pool,
+
+        .vertex_buffer = vertex_buffer,
+        .vertex_buffer_memory = vertex_buffer_memory,
+
+        .index_buffer = index_buffer,
+        .index_buffer_memory = index_buffer_memory,
+
+        .uniform_buffers = uniform_buffers,
+        .uniform_buffers_memory = uniform_buffers_memory,
+        .uniform_buffers_mapped = uniform_buffers_mapped,
+
+        .descriptor_pool = descriptor_pool,
+        .descriptor_sets = descriptor_sets,
+
+        .command_buffers = command_buffers,
+
+        .image_available_semaphores = image_available_semaphores,
+        .render_finished_semaphores = render_finished_semaphores,
+        .in_flight_fences = in_flight_fences,
+
+        .time = time,
     };
 }
 
@@ -516,8 +516,8 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
     return instance;
 }
 
-fn createSurface(window: *sdl.SDL_Window, instance: vk.VkInstance) !vk.VkSurfaceKHR {
-    var surface: vk.VkSurfaceKHR = undefined;
+fn createSurface(window: *sdl.SDL_Window, instance: vk.Instance) !vk.SurfaceKHR {
+    var surface: vk.SurfaceKHR = undefined;
     if (!sdl.SDL_Vulkan_CreateSurface(window, @ptrCast(instance), null, @ptrCast(&surface))) {
         std.debug.print("Failed to create surface: {s}\n", .{sdl.SDL_GetError()});
         return error.FailedToCreateSurface;
@@ -554,8 +554,8 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
     try isSuccess(vk.vkEnumeratePhysicalDevices(instance, &n_devices, null));
     if (n_devices == 0) return error.FailedToVulkanSupportingGPUs;
 
-    var devices: [16]vk.VkPhysicalDevice = undefined;
-    try isSuccess(vk.vkEnumeratePhysicalDevices(instance, &n_devices, &devices));
+    var devices: [16]vk.PhysicalDevice = undefined;
+    try isSuccess(vk.enumeratePhysicalDevices(instance, &n_devices, &devices));
 
     if (is_debug_mode) try printDeviceExtensions(devices[0]);
     if (is_debug_mode) std.debug.print("Device Scores:\n", .{});
@@ -566,10 +566,10 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
         if (!(isDeviceSuitable(surface, device) catch continue)) continue;
 
         // Get device props + feats outside fn for printing values in debug mode
-        var props: vk.VkPhysicalDeviceProperties = undefined;
-        vk.vkGetPhysicalDeviceProperties(device, &props);
-        var feats: vk.VkPhysicalDeviceFeatures = undefined;
-        vk.vkGetPhysicalDeviceFeatures(device, &feats);
+        var props: vk.PhysicalDeviceProperties = undefined;
+        vk.getPhysicalDeviceProperties(device, &props);
+        var feats: vk.PhysicalDeviceFeatures = undefined;
+        vk.getPhysicalDeviceFeatures(device, &feats);
 
         const score = rateDeviceSuitability(&props, &feats);
 
@@ -587,8 +587,8 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
 
     if (index) |ind| {
         if (is_debug_mode) {
-            var props: vk.VkPhysicalDeviceProperties = undefined;
-            vk.vkGetPhysicalDeviceProperties(devices[ind], &props);
+            var props: vk.PhysicalDeviceProperties = undefined;
+            vk.getPhysicalDeviceProperties(devices[ind], &props);
             const device_name_len = std.mem.indexOfScalar(u8, &props.deviceName, 0) orelse props.deviceName.len;
             const device_name = props.deviceName[0..device_name_len];
             std.debug.print("Device Chosen: {s}\n", .{device_name});
@@ -600,8 +600,8 @@ fn pickPhysicalDevice(instance: vk.Instance, surface: vk.SurfaceKHR) !vk.Physica
 }
 
 fn isDeviceSuitable(
-    surface: vk.VkSurfaceKHR,
-    device: vk.VkPhysicalDevice,
+    surface: vk.SurfaceKHR,
+    device: vk.PhysicalDevice,
 ) !bool {
     const are_extensions_supported = checkDeviceExtensionSupport(device) catch return false;
     if (is_debug_mode) std.debug.print("Are extensions supported? {}\n", .{are_extensions_supported});
@@ -616,7 +616,7 @@ fn isDeviceSuitable(
     return are_queues_complete and is_swapchain_adequate;
 }
 
-fn printDeviceExtensions(device: vk.VkPhysicalDevice) !void {
+fn printDeviceExtensions(device: vk.PhysicalDevice) !void {
     std.debug.print("Required Device Extensions:\n", .{});
     for (required_device_extensions) |rde| {
         const name = std.mem.span(rde);
@@ -624,11 +624,11 @@ fn printDeviceExtensions(device: vk.VkPhysicalDevice) !void {
     }
 
     var n_exts: u32 = 0;
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(device, null, &n_exts, null));
+    try isSuccess(vk.enumerateDeviceExtensionProperties(device, null, &n_exts, null));
     std.debug.assert(n_exts > 0);
 
-    var available_device_extensions: [128]vk.VkExtensionProperties = undefined; // init to alternating 1s and 0s
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(
+    var available_device_extensions: [128]vk.ExtensionProperties = undefined; // init to alternating 1s and 0s
+    try isSuccess(vk.enumerateDeviceExtensionProperties(
         device,
         null,
         &n_exts,
@@ -644,13 +644,13 @@ fn printDeviceExtensions(device: vk.VkPhysicalDevice) !void {
     }
 }
 
-fn checkDeviceExtensionSupport(device: vk.VkPhysicalDevice) !bool {
+fn checkDeviceExtensionSupport(device: vk.PhysicalDevice) !bool {
     var n_exts: u32 = 0;
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(device, null, &n_exts, null));
+    try isSuccess(vk.EnumerateDeviceExtensionProperties(device, null, &n_exts, null));
     std.debug.assert(n_exts > 0);
 
-    var available_device_extensions: [128]vk.VkExtensionProperties = undefined; // init to alternating 1s and 0s
-    try isSuccess(vk.vkEnumerateDeviceExtensionProperties(
+    var available_device_extensions: [128]vk.ExtensionProperties = undefined; // init to alternating 1s and 0s
+    try isSuccess(vk.enumerateDeviceExtensionProperties(
         device,
         null,
         &n_exts,
@@ -673,18 +673,18 @@ fn checkDeviceExtensionSupport(device: vk.VkPhysicalDevice) !bool {
 }
 
 fn rateDeviceSuitability(
-    props: *const vk.VkPhysicalDeviceProperties,
-    feats: *const vk.VkPhysicalDeviceFeatures,
+    props: *const vk.PhysicalDeviceProperties,
+    feats: *const vk.PhysicalDeviceFeatures,
 ) i32 {
     var score: i32 = 0;
 
     score += switch (props.deviceType) {
-        vk.VK_PHYSICAL_DEVICE_TYPE_OTHER => 0,
-        vk.VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU => 100,
-        vk.VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU => 1000,
-        vk.VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU => 10,
-        vk.VK_PHYSICAL_DEVICE_TYPE_CPU => 1,
-        else => unreachable,
+other = 0,
+    integrated_gpu = 100,
+    discrete_gpu = 1000,
+    virtual_gpu = 10,
+    cpu = 1,
+    else => unreachable,
     };
 
     score += @intCast(props.limits.maxImageDimension2D);
