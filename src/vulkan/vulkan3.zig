@@ -2315,12 +2315,13 @@ pub const PipelineCacheCreateFlags = enum(u32) {
     pub const Self = @This();
     pub const externally_synchronized_bit = Self.externally_synchronized_bit_ext;
 };
-pub const ColorComponentFlags = enum(u32) {
-    null = 0,
-    r_bit = 1,
-    g_bit = 2,
-    b_bit = 4,
-    a_bit = 8,
+pub const ColorComponentFlags = packed struct(u32) {
+    mask: u32 = 0,
+    pub const @"null" = 0;
+    pub const r_bit = 1;
+    pub const g_bit = 2;
+    pub const b_bit = 4;
+    pub const a_bit = 8;
 };
 pub const PipelineCreateFlags = enum(u32) {
     null = 0,

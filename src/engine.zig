@@ -900,8 +900,8 @@ fn createImageViews(
                 .b = .identity,
                 .a = .identity,
             },
-            .subresourceRange = .{
-                .aspect_mask = .color_bit, // vk._IMAGE_ASPECT_COLOR_BIT,
+            .subresource_range = .{
+                .aspect_mask = .color_bit,
                 .base_mip_level = 0,
                 .level_count = 1,
                 .base_array_layer = 0,
@@ -977,10 +977,10 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
         .{
             .src_subpass = vk.subpass_external,
             .dst_subpass = 0,
-            .src_stage_mask = .output_bit,
-            .src_access_mask = 0,
-            .dst_stage_mask = .output_bit,
-            .dst_access_mask = .write_bit,
+            .src_stage_mask = .color_attachment_output_bit,
+            .src_access_mask = .none_khr,
+            .dst_stage_mask = .color_attachment_output_bit,
+            .dst_access_mask = .color_attachment_write_bit,
         },
     };
 
@@ -1062,8 +1062,8 @@ fn createGraphicsPipelines(
     };
 
     const input_assembly = vk.PipelineInputAssemblyStateCreateInfo{
-        .topology = .triangle_list, // vk._PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        .primitive_restart_enable = 0,
+        .topology = .triangle_list,
+        .primitive_restart_enable = .false,
     };
 
     // const viewport = vk.Viewport{
@@ -1081,7 +1081,6 @@ fn createGraphicsPipelines(
     // };
 
     const viewport_state = vk.PipelineViewportStateCreateInfo{
-        .s_type = vk._STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
         .viewport_count = 1,
         // .pViewports = @ptrCast(&viewport),
         .scissor_count = 1,
@@ -1089,44 +1088,43 @@ fn createGraphicsPipelines(
     };
 
     const rasterizer = vk.PipelineRasterizationStateCreateInfo{
-        .s_type = vk._STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-        .dpeth_clamp_enable = 0,
-        .rasterizer_discard_enabled = 0,
-        .polygon_mode = .fill, // vk._POLYGON_MODE_FILL,
+        .depth_clamp_enable = .false,
+        .rasterizer_discard_enable = .false,
+        .polygon_mode = .fill,
         .line_width = 1.0,
-        .cull_mode = .back_bit, // vk._CULL_MODE_BACK_BIT, // vk._CULL_MODE_FRONT_BIT, // defines what is culled - front or back
-        .front_face = .counter_clockwise, // vk._FRONT_FACE_COUNTER_CLOCKWISE, // vk._FRONT_FACE_CLOCKWISE, defines what is front/back
-        .depth_bias_enable = 0,
+        .cull_mode = .back_bit,
+        .front_face = .counter_clockwise,
+        .depth_bias_enable = .false,
         // .depthBiasConstantFactor = 0.0,
         // .depthBiasClamp = 0.0,
         // .depthBiasSlopeFactor = 0.0,
     };
 
     const multisampling = vk.PipelineMultisampleStateCreateInfo{
-        .sample_shading_enable = 0,
-        .rasterization_sample = .@"1_bit", // vk._SAMPLE_COUNT_1_BIT,
+        .sample_shading_enable = .false,
+        .rasterization_samples = .@"1_bit",
         .min_sample_shading = 1.0,
         .p_sample_mask = null,
-        .alpha_to_converage_enable = 0,
-        .alpha_to_one_enable = 0,
+        .alpha_to_coverage_enable = .false,
+        .alpha_to_one_enable = .false,
     };
 
     const color_blend_attachments = [1]vk.PipelineColorBlendAttachmentState{
         .{
-            .color_write_mask = .r_bit | .g_bit | .b_bit | .a_bit, // vk._COLOR_COMPONENT_R_BIT | vk._COLOR_COMPONENT_G_BIT | vk._COLOR_COMPONENT_B_BIT | vk._COLOR_COMPONENT_A_BIT,
-            .blend_enable = 0,
-            .src_color_blend_factor = .one, // vk._BLEND_FACTOR_ONE,
-            .dst_color_blend_factor = .zero, // vk._BLEND_FACTOR_ZERO,
-            .color_blend_op = .add, // vk._BLEND_OP_ADD,
-            .src_alpha_blend_factor = .one, // vk._BLEND_FACTOR_ONE,
-            .dst_alpha_blend_factor = .one, // vk._BLEND_FACTOR_ONE,
-            .alpha_blend_op = .add, // vk._BLEND_OP_ADD,
+            .color_write_mask = vk.ColorComponentFlags{ .mask = vk.ColorComponentFlags.r_bit | vk.ColorComponentFlags.g_bit | vk.ColorComponentFlags.b_bit | vk.ColorComponentFlags.a_bit },
+            .blend_enable = .false,
+            .src_color_blend_factor = .one,
+            .dst_color_blend_factor = .zero,
+            .color_blend_op = .add,
+            .src_alpha_blend_factor = .one,
+            .dst_alpha_blend_factor = .one,
+            .alpha_blend_op = .add,
         },
     };
 
     const color_blending = vk.PipelineColorBlendStateCreateInfo{
-        .logic_op_enable = 0,
-        .logic_op = vk._LOGIC_OP_COPY,
+        .logic_op_enable = .false,
+        .logic_op = .copy,
         .attachment_count = @truncate(color_blend_attachments.len),
         .p_attachments = &color_blend_attachments,
         .blend_constants = [4]f32{ 0, 0, 0, 0 },
@@ -1157,13 +1155,13 @@ fn createGraphicsPipelines(
             .layout = layout,
             .render_pass = render_pass,
             .subpass = 0,
-            .base_pipeline_handle = null,
+            .base_pipeline_handle = .null,
             .base_pipeline_index = -1,
         },
     };
 
     var pipeline: vk.Pipeline = undefined;
-    try isSuccess(vk.createGraphicsPipelines(device, null, @truncate(gpci.len), &gpci, null, &pipeline));
+    try isSuccess(vk.createGraphicsPipelines(device, .null, @truncate(gpci.len), &gpci, null, &pipeline));
     return pipeline;
 }
 
