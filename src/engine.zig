@@ -193,8 +193,12 @@ pub fn init(
     const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
 
     const command_pool = try createCommandPool(surface, physical_device, device);
-    createTextureImage();
 
+    var texture_image: vk.Image = undefined;
+    var texture_image_memory: vk.DeviceMemory = undefined;
+    try createTextureImage(physical_device, device, &texture_image, &texture_image_memory);
+
+    // change the way this function occurs
     var vertex_buffer: vk.Buffer = undefined;
     var vertex_buffer_memory: vk.DeviceMemory = undefined;
     try createVertexBuffer(
@@ -205,7 +209,7 @@ pub fn init(
         command_pool,
         graphics_queue,
         // &triangle_vertices,
-        &square_vertices,
+        @ptrCast(&square_vertices),
     );
 
     var index_buffer: vk.Buffer = undefined;
@@ -218,7 +222,7 @@ pub fn init(
         command_pool,
         graphics_queue,
         // &triangle_indices, // makes no sense since only 1 triangle
-        &square_indices,
+        @ptrCast(&square_indices),
     );
 
     // probably want to pass this into this fn
@@ -275,6 +279,9 @@ pub fn init(
         .pipeline = pipeline,
 
         .command_pool = command_pool,
+
+        .texture_image = texture_image,
+        .texture_image_memory = texture_image_memory,
 
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
@@ -1208,58 +1215,74 @@ fn createCommandPool(
 fn createTextureImage(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    texture_image: vk.Image,
-    texture_image_memory: vk.DeviceMemory,
+    texture_image: *vk.Image,
+    texture_image_memory: *vk.DeviceMemory,
 ) !void {
-    var width: i32, var height: i32, var channels: i32 = .{ undefined, undefined, undefined };
-    const pixels = zstbi.load("textures/texture.jpg", &width, &height, &channels, zstbi.STBI_rgb_alpha);
-    defer zstbi.free(pixels);
+    _ = physical_device;
+    _ = device;
+    _ = texture_image;
+    _ = texture_image_memory;
 
-    const image_size: vk.DeviceSize = width * height * 4;
-    if (!pixels) {
-        return error.FailedToLoadTextureImage;
-    }
+    const width: i32, const height: i32, const channels: i32 = .{ undefined, undefined, undefined };
+    _ = width;
+    _ = height;
+    _ = channels;
 
-    // buffers
-    var staging_buffer: vk.Buffer = undefined;
-    var staging_buffer_memory: vk.BufferMemory = undefined;
-    try createBuffer(
-        physical_device,
-        device,
-        image_size,
-        vk._BUFFER_USAGE_TRANSFER_SRC_BIT,
-        vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
-        &staging_buffer,
-        &staging_buffer_memory,
-    );
+    const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\src\\textures\\texture.jpg";
 
-    {
-        var data = ?*anyopaque;
-        vk.mapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-        vk.unmapMemory(device, staging_buffer_memory);
+    const info = zstbi.Image.info(filepath);
+    std.debug.print("Image Info: {any}\n", .{info});
 
-        const T = @TypeOf(pixels);
-        const image_data: [*]T = @ptrCast(@alignCast(data));
-        @memcpy(image_data, pixels);
-    }
+    const data = try zstbi.Image.loadFromFile(filepath, info.num_components);
+    std.debug.print("Data: {any}\n", .{data});
 
-    createImage(
-        width,
-        height,
-        vk._FORMAT_R8G8B8A8_SRGB,
-        vk._IMAGE_TILING_OPTIMAL,
-        vk._IMAGE_USAGE_TRANSFER_DST_BIT | vk._IMAGE_USAGE_SAMPLED_BIT,
-        vk._MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-        texture_image,
-        texture_image_memory,
-    );
+    return error.Incomplete;
 
-    transitionImageLayout(texture_image, vk._FORMAT_R8G8B8A8_SRGB, vk._IMAGE_LAYOUT_UNDEFINED, vk._IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(staging_buffer, texture_image, @as(u32, width), @as(u32, height));
-    transitionImageLayout(texture_image, vk._FORMAT_R8G8B8A8_SRGB, vk._IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, vk._IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    vk.destroyBuffer(device, staging_buffer, null);
-    vk.freeMemory(device, staging_buffer_memory, null);
+    // const image_size: vk.DeviceSize = width * height * 4;
+    // if (!pixels) {
+    //     return error.FailedToLoadTextureImage;
+    // }
+    //
+    // // buffers
+    // var staging_buffer: vk.Buffer = undefined;
+    // var staging_buffer_memory: vk.BufferMemory = undefined;
+    // try createBuffer(
+    //     physical_device,
+    //     device,
+    //     image_size,
+    //     vk._BUFFER_USAGE_TRANSFER_SRC_BIT,
+    //     vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    //     &staging_buffer,
+    //     &staging_buffer_memory,
+    // );
+    //
+    // defer vk.destroyBuffer(device, staging_buffer, null);
+    // defer vk.freeMemory(device, staging_buffer_memory, null);
+    //
+    // {
+    //     var data = ?*anyopaque;
+    //     vk.mapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
+    //     vk.unmapMemory(device, staging_buffer_memory);
+    //
+    //     const T = @TypeOf(pixels);
+    //     const image_data: [*]T = @ptrCast(@alignCast(data));
+    //     @memcpy(image_data, pixels);
+    // }
+    //
+    // createImage(
+    //     width,
+    //     height,
+    //     vk._FORMAT_R8G8B8A8_SRGB,
+    //     vk._IMAGE_TILING_OPTIMAL,
+    //     vk._IMAGE_USAGE_TRANSFER_DST_BIT | vk._IMAGE_USAGE_SAMPLED_BIT,
+    //     vk._MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+    //     texture_image,
+    //     texture_image_memory,
+    // );
+    //
+    // transitionImageLayout(texture_image, .r8g8b8a8_srgb, .undefined, .transfer_dst_optimal);
+    // copyBufferToImage(staging_buffer, texture_image, @as(u32, width), @as(u32, height));
+    // transitionImageLayout(texture_image, .r8g8b8a8_srgb, .transfer_dst_optimal, .shader_read_only_optimal);
 }
 
 fn createImage(
@@ -1452,7 +1475,7 @@ fn createVertexBuffer(
         physical_device,
         device,
         buffer_size,
-        vk._BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .usage_transfer_src_bit,
         vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
         &staging_buffer,
         &staging_buffer_memory,
