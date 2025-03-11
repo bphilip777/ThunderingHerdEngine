@@ -511,7 +511,7 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
 
     const ici = vk.InstanceCreateInfo{
         .p_next = null,
-        .flags = .null,
+        .flags = vk.InstanceCreateFlags{ .mask = vk.InstanceCreateFlags.null },
         .p_application_info = &ai,
         .enabled_layer_count = 0,
         .pp_enabled_layer_names = null,
@@ -805,7 +805,7 @@ fn createSwapchain(
         .image_color_space = format.color_space,
         .image_extent = extent,
         .image_array_layers = 1,
-        .image_usage = .color_attachment_bit,
+        .image_usage = vk.ImageUsageFlags{ .mask = vk.ImageUsageFlags.color_attachment_bit },
 
         .image_sharing_mode = if (is_same_family) .exclusive else .concurrent,
         .queue_family_index_count = if (is_same_family) 1 else 2,
@@ -908,7 +908,7 @@ fn createImageViews(
                 .a = .identity,
             },
             .subresource_range = .{
-                .aspect_mask = .color_bit,
+                .aspect_mask = vk.ImageAspectFlags{ .mask = vk.ImageAspectFlags.color_bit },
                 .base_mip_level = 0,
                 .level_count = 1,
                 .base_array_layer = 0,
@@ -955,7 +955,7 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
     const color_attachment = [1]vk.AttachmentDescription{
         .{
             .format = format,
-            .samples = .@"1_bit", // vk._SAMPLE_COUNT_1_BIT,
+            .samples = vk.SampleCountFlags{ .mask = vk.SampleCountFlags.@"1_bit" },
             .load_op = .clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
             .store_op = .store, // vk._ATTACHMENT_STORE_OP_STORE,
             .stencil_load_op = .dont_care, // vk._ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -984,10 +984,10 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
         .{
             .src_subpass = vk.subpass_external,
             .dst_subpass = 0,
-            .src_stage_mask = .color_attachment_output_bit,
-            .src_access_mask = .none_khr,
-            .dst_stage_mask = .color_attachment_output_bit,
-            .dst_access_mask = .color_attachment_write_bit,
+            .src_stage_mask = vk.PipelineStageFlags{ .mask = vk.PipelineStageFlags.color_attachment_output_bit },
+            .src_access_mask = vk.AccessFlags{ .mask = vk.AccessFlags.none },
+            .dst_stage_mask = vk.PipelineStageFlags{ .mask = vk.PipelineStageFlags.color_attachment_output_bit },
+            .dst_access_mask = vk.AccessFlags{ .mask = vk.AccessFlags.color_attachment_write_bit },
         },
     };
 
@@ -1013,9 +1013,10 @@ fn createDescriptorSetLayout(device: vk.Device) !vk.DescriptorSetLayout {
             .descriptor_count = 1,
             .descriptor_type = .uniform_buffer, // vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .p_immutable_samplers = null,
-            .stage_flags = .vertex_bit, // vk._SHADER_STAGE_VERTEX_BIT,
+            .stage_flags = .vertex_bit,
         },
     };
+    // syntax i want is .{.vertex_bit, .fragment_bit, ...}
 
     const dslci = vk.DescriptorSetLayoutCreateInfo{
         .binding_count = @truncate(dslb.len),
@@ -1047,12 +1048,12 @@ fn createGraphicsPipelines(
 
     const shader_stages = [2]vk.PipelineShaderStageCreateInfo{
         .{ // vert
-            .stage = .vertex_bit, // vk._SHADER_STAGE_VERTEX_BIT,
+            .stage = .vertex_bit,
             .module = vert,
             .p_name = "main",
         },
         .{ // frag
-            .stage = .fragment_bit, // vk._SHADER_STAGE_FRAGMENT_BIT,
+            .stage = .fragment_bit,
             .module = frag,
             .p_name = "main",
         },
@@ -1476,7 +1477,7 @@ fn createVertexBuffer(
         device,
         buffer_size,
         .usage_transfer_src_bit,
-        vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        .host_visible_bit | .host_coherent_bit,
         &staging_buffer,
         &staging_buffer_memory,
     );
@@ -1494,8 +1495,8 @@ fn createVertexBuffer(
         physical_device,
         device,
         buffer_size,
-        vk._BUFFER_USAGE_TRANSFER_DST_BIT | vk._BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        vk._MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vk.BufferUsageFlags{ .mask = .transfer_dst_bit | .vertex_buffer_bit },
+        .device_local_bit,
         vertex_buffer,
         vertex_buffer_memory,
     );
