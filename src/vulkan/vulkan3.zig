@@ -8032,8 +8032,14 @@ pub const MultiviewPerViewAttributesInfoNVX = extern struct {
 };
 pub const PFN_cmdBeginRenderingKHR = ?*const fn (CommandBuffer, [*c]const RenderingInfo) callconv(.c) void;
 pub const PFN_cmdEndRenderingKHR = ?*const fn (CommandBuffer) callconv(.c) void;
-pub extern fn cmdBeginRenderingKHR(command_buffer: CommandBuffer, p_rendering_info: [*c]const RenderingInfo) void;
-pub extern fn cmdEndRenderingKHR(command_buffer: CommandBuffer) void;
+pub extern fn vkCmdBeginRenderingKHR(command_buffer: CommandBuffer, p_rendering_info: [*c]const RenderingInfo) void;
+pub inline fn cmdBeginRenderingKHR(command_buffer: CommandBuffer, p_rendering_info: [*c]const RenderingInfo) void {
+    return vkCmdBeginRenderingKHR(command_buffer, p_rendering_info);
+}
+pub extern fn vkCmdEndRenderingKHR(command_buffer: CommandBuffer) void;
+pub inline fn cmdEndRenderingKHR(command_buffer: CommandBuffer) void {
+    return vkCmdEndRenderingKHR(command_buffer);
+}
 pub const RenderPassMultiviewCreateInfoKHR = RenderPassMultiviewCreateInfo;
 pub const PhysicalDeviceMultiviewFeaturesKHR = PhysicalDeviceMultiviewFeatures;
 pub const PhysicalDeviceMultiviewPropertiesKHR = PhysicalDeviceMultiviewProperties;
@@ -8053,13 +8059,34 @@ pub const PFN_getPhysicalDeviceImageFormatProperties2KHR = ?*const fn (PhysicalD
 pub const PFN_getPhysicalDeviceQueueFamilyProperties2KHR = ?*const fn (PhysicalDevice, [*c]u32, [*c]QueueFamilyProperties2) callconv(.c) void;
 pub const PFN_getPhysicalDeviceMemoryProperties2KHR = ?*const fn (PhysicalDevice, [*c]PhysicalDeviceMemoryProperties2) callconv(.c) void;
 pub const PFN_getPhysicalDeviceSparseImageFormatProperties2KHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceSparseImageFormatInfo2, [*c]u32, [*c]SparseImageFormatProperties2) callconv(.c) void;
-pub extern fn getPhysicalDeviceFeatures2KHR(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures2) void;
-pub extern fn getPhysicalDeviceProperties2KHR(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties2) void;
-pub extern fn getPhysicalDeviceFormatProperties2KHR(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties2) void;
-pub extern fn getPhysicalDeviceImageFormatProperties2KHR(physical_device: PhysicalDevice, p_image_format_info: [*c]const PhysicalDeviceImageFormatInfo2, p_image_format_properties: [*c]ImageFormatProperties2) Result;
-pub extern fn getPhysicalDeviceQueueFamilyProperties2KHR(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties2) void;
-pub extern fn getPhysicalDeviceMemoryProperties2KHR(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties2) void;
-pub extern fn getPhysicalDeviceSparseImageFormatProperties2KHR(physical_device: PhysicalDevice, p_format_info: [*c]const PhysicalDeviceSparseImageFormatInfo2, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties2) void;
+pub extern fn vkGetPhysicalDeviceFeatures2KHR(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures2) void;
+pub inline fn getPhysicalDeviceFeatures2KHR(physical_device: PhysicalDevice, p_features: [*c]PhysicalDeviceFeatures2) void {
+    return vkGetPhysicalDeviceFeatures2KHR(physical_device, p_features);
+}
+pub extern fn vkGetPhysicalDeviceProperties2KHR(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties2) void;
+pub inline fn getPhysicalDeviceProperties2KHR(physical_device: PhysicalDevice, p_properties: [*c]PhysicalDeviceProperties2) void {
+    return vkGetPhysicalDeviceProperties2KHR(physical_device, p_properties);
+}
+pub extern fn vkGetPhysicalDeviceFormatProperties2KHR(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties2) void;
+pub inline fn getPhysicalDeviceFormatProperties2KHR(physical_device: PhysicalDevice, format: Format, p_format_properties: [*c]FormatProperties2) void {
+    return vkGetPhysicalDeviceFormatProperties2KHR(physical_device, format, p_format_properties);
+}
+pub extern fn vkGetPhysicalDeviceImageFormatProperties2KHR(physical_device: PhysicalDevice, p_image_format_info: [*c]const PhysicalDeviceImageFormatInfo2, p_image_format_properties: [*c]ImageFormatProperties2) Result;
+pub inline fn getPhysicalDeviceImageFormatProperties2KHR(physical_device: PhysicalDevice, p_image_format_info: [*c]const PhysicalDeviceImageFormatInfo2, p_image_format_properties: [*c]ImageFormatProperties2) Result {
+    return vkGetPhysicalDeviceImageFormatProperties2KHR(physical_device, p_image_format_info, p_image_format_properties);
+}
+pub extern fn vkGetPhysicalDeviceQueueFamilyProperties2KHR(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties2) void;
+pub inline fn getPhysicalDeviceQueueFamilyProperties2KHR(physical_device: PhysicalDevice, p_queue_family_property_count: [*c]u32, p_queue_family_properties: [*c]QueueFamilyProperties2) void {
+    return vkGetPhysicalDeviceQueueFamilyProperties2KHR(physical_device, p_queue_family_property_count, p_queue_family_properties);
+}
+pub extern fn vkGetPhysicalDeviceMemoryProperties2KHR(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties2) void;
+pub inline fn getPhysicalDeviceMemoryProperties2KHR(physical_device: PhysicalDevice, p_memory_properties: [*c]PhysicalDeviceMemoryProperties2) void {
+    return vkGetPhysicalDeviceMemoryProperties2KHR(physical_device, p_memory_properties);
+}
+pub extern fn vkGetPhysicalDeviceSparseImageFormatProperties2KHR(physical_device: PhysicalDevice, p_format_info: [*c]const PhysicalDeviceSparseImageFormatInfo2, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties2) void;
+pub inline fn getPhysicalDeviceSparseImageFormatProperties2KHR(physical_device: PhysicalDevice, p_format_info: [*c]const PhysicalDeviceSparseImageFormatInfo2, p_property_count: [*c]u32, p_properties: [*c]SparseImageFormatProperties2) void {
+    return vkGetPhysicalDeviceSparseImageFormatProperties2KHR(physical_device, p_format_info, p_property_count, p_properties);
+}
 pub const PeerMemoryFeatureFlagsKHR = PeerMemoryFeatureFlags;
 pub const MemoryAllocateFlagsKHR = MemoryAllocateFlags;
 pub const MemoryAllocateFlagsInfoKHR = MemoryAllocateFlagsInfo;
@@ -8072,16 +8099,31 @@ pub const BindImageMemoryDeviceGroupInfoKHR = BindImageMemoryDeviceGroupInfo;
 pub const PFN_getDeviceGroupPeerMemoryFeaturesKHR = ?*const fn (Device, u32, u32, u32, [*c]PeerMemoryFeatureFlags) callconv(.c) void;
 pub const PFN_cmdSetDeviceMaskKHR = ?*const fn (CommandBuffer, u32) callconv(.c) void;
 pub const PFN_cmdDispatchBaseKHR = ?*const fn (CommandBuffer, u32, u32, u32, u32, u32, u32) callconv(.c) void;
-pub extern fn getDeviceGroupPeerMemoryFeaturesKHR(device: Device, heap_index: u32, local_device_index: u32, remote_device_index: u32, p_peer_memory_features: [*c]PeerMemoryFeatureFlags) void;
-pub extern fn cmdSetDeviceMaskKHR(command_buffer: CommandBuffer, device_mask: u32) void;
-pub extern fn cmdDispatchBaseKHR(command_buffer: CommandBuffer, base_group_x: u32, base_group_y: u32, base_group_z: u32, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
+pub extern fn vkGetDeviceGroupPeerMemoryFeaturesKHR(device: Device, heap_index: u32, local_device_index: u32, remote_device_index: u32, p_peer_memory_features: [*c]PeerMemoryFeatureFlags) void;
+pub inline fn getDeviceGroupPeerMemoryFeaturesKHR(device: Device, heap_index: u32, local_device_index: u32, remote_device_index: u32, p_peer_memory_features: [*c]PeerMemoryFeatureFlags) void {
+    return vkGetDeviceGroupPeerMemoryFeaturesKHR(device, heap_index, local_device_index, remote_device_index, p_peer_memory_features);
+}
+pub extern fn vkCmdSetDeviceMaskKHR(command_buffer: CommandBuffer, device_mask: u32) void;
+pub inline fn cmdSetDeviceMaskKHR(command_buffer: CommandBuffer, device_mask: u32) void {
+    return vkCmdSetDeviceMaskKHR(command_buffer, device_mask);
+}
+pub extern fn vkCmdDispatchBaseKHR(command_buffer: CommandBuffer, base_group_x: u32, base_group_y: u32, base_group_z: u32, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
+pub inline fn cmdDispatchBaseKHR(command_buffer: CommandBuffer, base_group_x: u32, base_group_y: u32, base_group_z: u32, group_count_x: u32, group_count_y: u32, group_count_z: u32) void {
+    return vkCmdDispatchBaseKHR(command_buffer, base_group_x, base_group_y, base_group_z, group_count_x, group_count_y, group_count_z);
+}
 pub const CommandPoolTrimFlagsKHR = CommandPoolTrimFlags;
 pub const PFN_trimCommandPoolKHR = ?*const fn (Device, CommandPool, CommandPoolTrimFlags) callconv(.c) void;
-pub extern fn trimCommandPoolKHR(device: Device, command_pool: CommandPool, flags: CommandPoolTrimFlags) void;
+pub extern fn vkTrimCommandPoolKHR(device: Device, command_pool: CommandPool, flags: CommandPoolTrimFlags) void;
+pub inline fn trimCommandPoolKHR(device: Device, command_pool: CommandPool, flags: CommandPoolTrimFlags) void {
+    return vkTrimCommandPoolKHR(device, command_pool, flags);
+}
 pub const PhysicalDeviceGroupPropertiesKHR = PhysicalDeviceGroupProperties;
 pub const DeviceGroupDeviceCreateInfoKHR = DeviceGroupDeviceCreateInfo;
 pub const PFN_enumeratePhysicalDeviceGroupsKHR = ?*const fn (Instance, [*c]u32, [*c]PhysicalDeviceGroupProperties) callconv(.c) Result;
-pub extern fn enumeratePhysicalDeviceGroupsKHR(instance: Instance, p_physical_device_group_count: [*c]u32, p_physical_device_group_properties: [*c]PhysicalDeviceGroupProperties) Result;
+pub extern fn vkEnumeratePhysicalDeviceGroupsKHR(instance: Instance, p_physical_device_group_count: [*c]u32, p_physical_device_group_properties: [*c]PhysicalDeviceGroupProperties) Result;
+pub inline fn enumeratePhysicalDeviceGroupsKHR(instance: Instance, p_physical_device_group_count: [*c]u32, p_physical_device_group_properties: [*c]PhysicalDeviceGroupProperties) Result {
+    return vkEnumeratePhysicalDeviceGroupsKHR(instance, p_physical_device_group_count, p_physical_device_group_properties);
+}
 pub const ExternalMemoryHandleTypeFlagsKHR = ExternalMemoryHandleTypeFlags;
 pub const ExternalMemoryFeatureFlagsKHR = ExternalMemoryFeatureFlags;
 pub const ExternalMemoryPropertiesKHR = ExternalMemoryProperties;
@@ -8091,7 +8133,10 @@ pub const PhysicalDeviceExternalBufferInfoKHR = PhysicalDeviceExternalBufferInfo
 pub const ExternalBufferPropertiesKHR = ExternalBufferProperties;
 pub const PhysicalDeviceIDPropertiesKHR = PhysicalDeviceIDProperties;
 pub const PFN_getPhysicalDeviceExternalBufferPropertiesKHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceExternalBufferInfo, [*c]ExternalBufferProperties) callconv(.c) void;
-pub extern fn getPhysicalDeviceExternalBufferPropertiesKHR(physical_device: PhysicalDevice, p_external_buffer_info: [*c]const PhysicalDeviceExternalBufferInfo, p_external_buffer_properties: [*c]ExternalBufferProperties) void;
+pub extern fn vkGetPhysicalDeviceExternalBufferPropertiesKHR(physical_device: PhysicalDevice, p_external_buffer_info: [*c]const PhysicalDeviceExternalBufferInfo, p_external_buffer_properties: [*c]ExternalBufferProperties) void;
+pub inline fn getPhysicalDeviceExternalBufferPropertiesKHR(physical_device: PhysicalDevice, p_external_buffer_info: [*c]const PhysicalDeviceExternalBufferInfo, p_external_buffer_properties: [*c]ExternalBufferProperties) void {
+    return vkGetPhysicalDeviceExternalBufferPropertiesKHR(physical_device, p_external_buffer_info, p_external_buffer_properties);
+}
 pub const ExternalMemoryImageCreateInfoKHR = ExternalMemoryImageCreateInfo;
 pub const ExternalMemoryBufferCreateInfoKHR = ExternalMemoryBufferCreateInfo;
 pub const ExportMemoryAllocateInfoKHR = ExportMemoryAllocateInfo;
@@ -8114,14 +8159,23 @@ pub const MemoryGetFdInfoKHR = extern struct {
 };
 pub const PFN_getMemoryFdKHR = ?*const fn (Device, [*c]const MemoryGetFdInfoKHR, [*c]c_int) callconv(.c) Result;
 pub const PFN_getMemoryFdPropertiesKHR = ?*const fn (Device, ExternalMemoryHandleTypeFlags, c_int, [*c]MemoryFdPropertiesKHR) callconv(.c) Result;
-pub extern fn getMemoryFdKHR(device: Device, p_get_fd_info: [*c]const MemoryGetFdInfoKHR, p_fd: [*c]c_int) Result;
-pub extern fn getMemoryFdPropertiesKHR(device: Device, handle_type: ExternalMemoryHandleTypeFlags, fd: c_int, p_memory_fd_properties: [*c]MemoryFdPropertiesKHR) Result;
+pub extern fn vkGetMemoryFdKHR(device: Device, p_get_fd_info: [*c]const MemoryGetFdInfoKHR, p_fd: [*c]c_int) Result;
+pub inline fn getMemoryFdKHR(device: Device, p_get_fd_info: [*c]const MemoryGetFdInfoKHR, p_fd: [*c]c_int) Result {
+    return vkGetMemoryFdKHR(device, p_get_fd_info, p_fd);
+}
+pub extern fn vkGetMemoryFdPropertiesKHR(device: Device, handle_type: ExternalMemoryHandleTypeFlags, fd: c_int, p_memory_fd_properties: [*c]MemoryFdPropertiesKHR) Result;
+pub inline fn getMemoryFdPropertiesKHR(device: Device, handle_type: ExternalMemoryHandleTypeFlags, fd: c_int, p_memory_fd_properties: [*c]MemoryFdPropertiesKHR) Result {
+    return vkGetMemoryFdPropertiesKHR(device, handle_type, fd, p_memory_fd_properties);
+}
 pub const ExternalSemaphoreHandleTypeFlagsKHR = ExternalSemaphoreHandleTypeFlags;
 pub const ExternalSemaphoreFeatureFlagsKHR = ExternalSemaphoreFeatureFlags;
 pub const PhysicalDeviceExternalSemaphoreInfoKHR = PhysicalDeviceExternalSemaphoreInfo;
 pub const ExternalSemaphorePropertiesKHR = ExternalSemaphoreProperties;
 pub const PFN_getPhysicalDeviceExternalSemaphorePropertiesKHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceExternalSemaphoreInfo, [*c]ExternalSemaphoreProperties) callconv(.c) void;
-pub extern fn getPhysicalDeviceExternalSemaphorePropertiesKHR(physical_device: PhysicalDevice, p_external_semaphore_info: [*c]const PhysicalDeviceExternalSemaphoreInfo, p_external_semaphore_properties: [*c]ExternalSemaphoreProperties) void;
+pub extern fn vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(physical_device: PhysicalDevice, p_external_semaphore_info: [*c]const PhysicalDeviceExternalSemaphoreInfo, p_external_semaphore_properties: [*c]ExternalSemaphoreProperties) void;
+pub inline fn getPhysicalDeviceExternalSemaphorePropertiesKHR(physical_device: PhysicalDevice, p_external_semaphore_info: [*c]const PhysicalDeviceExternalSemaphoreInfo, p_external_semaphore_properties: [*c]ExternalSemaphoreProperties) void {
+    return vkGetPhysicalDeviceExternalSemaphorePropertiesKHR(physical_device, p_external_semaphore_info, p_external_semaphore_properties);
+}
 pub const SemaphoreImportFlagsKHR = SemaphoreImportFlags;
 pub const ExportSemaphoreCreateInfoKHR = ExportSemaphoreCreateInfo;
 pub const ImportSemaphoreFdInfoKHR = extern struct {
@@ -8140,8 +8194,14 @@ pub const SemaphoreGetFdInfoKHR = extern struct {
 };
 pub const PFN_importSemaphoreFdKHR = ?*const fn (Device, [*c]const ImportSemaphoreFdInfoKHR) callconv(.c) Result;
 pub const PFN_getSemaphoreFdKHR = ?*const fn (Device, [*c]const SemaphoreGetFdInfoKHR, [*c]c_int) callconv(.c) Result;
-pub extern fn importSemaphoreFdKHR(device: Device, p_import_semaphore_fd_info: [*c]const ImportSemaphoreFdInfoKHR) Result;
-pub extern fn getSemaphoreFdKHR(device: Device, p_get_fd_info: [*c]const SemaphoreGetFdInfoKHR, p_fd: [*c]c_int) Result;
+pub extern fn vkImportSemaphoreFdKHR(device: Device, p_import_semaphore_fd_info: [*c]const ImportSemaphoreFdInfoKHR) Result;
+pub inline fn importSemaphoreFdKHR(device: Device, p_import_semaphore_fd_info: [*c]const ImportSemaphoreFdInfoKHR) Result {
+    return vkImportSemaphoreFdKHR(device, p_import_semaphore_fd_info);
+}
+pub extern fn vkGetSemaphoreFdKHR(device: Device, p_get_fd_info: [*c]const SemaphoreGetFdInfoKHR, p_fd: [*c]c_int) Result;
+pub inline fn getSemaphoreFdKHR(device: Device, p_get_fd_info: [*c]const SemaphoreGetFdInfoKHR, p_fd: [*c]c_int) Result {
+    return vkGetSemaphoreFdKHR(device, p_get_fd_info, p_fd);
+}
 pub const PhysicalDevicePushDescriptorPropertiesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_push_descriptor_properties_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -8149,8 +8209,14 @@ pub const PhysicalDevicePushDescriptorPropertiesKHR = extern struct {
 };
 pub const PFN_cmdPushDescriptorSetKHR = ?*const fn (CommandBuffer, PipelineBindPoint, PipelineLayout, u32, u32, [*c]const WriteDescriptorSet) callconv(.c) void;
 pub const PFN_cmdPushDescriptorSetWithTemplateKHR = ?*const fn (CommandBuffer, DescriptorUpdateTemplate, PipelineLayout, u32, ?*const anyopaque) callconv(.c) void;
-pub extern fn cmdPushDescriptorSetKHR(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet) void;
-pub extern fn cmdPushDescriptorSetWithTemplateKHR(command_buffer: CommandBuffer, descriptor_update_template: DescriptorUpdateTemplate, layout: PipelineLayout, set: u32, p_data: ?*const anyopaque) void;
+pub extern fn vkCmdPushDescriptorSetKHR(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet) void;
+pub inline fn cmdPushDescriptorSetKHR(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32, descriptor_write_count: u32, p_descriptor_writes: [*c]const WriteDescriptorSet) void {
+    return vkCmdPushDescriptorSetKHR(command_buffer, pipeline_bind_point, layout, set, descriptor_write_count, p_descriptor_writes);
+}
+pub extern fn vkCmdPushDescriptorSetWithTemplateKHR(command_buffer: CommandBuffer, descriptor_update_template: DescriptorUpdateTemplate, layout: PipelineLayout, set: u32, p_data: ?*const anyopaque) void;
+pub inline fn cmdPushDescriptorSetWithTemplateKHR(command_buffer: CommandBuffer, descriptor_update_template: DescriptorUpdateTemplate, layout: PipelineLayout, set: u32, p_data: ?*const anyopaque) void {
+    return vkCmdPushDescriptorSetWithTemplateKHR(command_buffer, descriptor_update_template, layout, set, p_data);
+}
 pub const PhysicalDeviceShaderFloat16Int8FeaturesKHR = PhysicalDeviceShaderFloat16Int8Features;
 pub const PhysicalDeviceFloat16Int8FeaturesKHR = PhysicalDeviceShaderFloat16Int8Features;
 pub const PhysicalDevice16BitStorageFeaturesKHR = PhysicalDevice16BitStorageFeatures;
@@ -8177,9 +8243,18 @@ pub const DescriptorUpdateTemplateCreateInfoKHR = DescriptorUpdateTemplateCreate
 pub const PFN_createDescriptorUpdateTemplateKHR = ?*const fn (Device, [*c]const DescriptorUpdateTemplateCreateInfo, [*c]const AllocationCallbacks, [*c]DescriptorUpdateTemplate) callconv(.c) Result;
 pub const PFN_destroyDescriptorUpdateTemplateKHR = ?*const fn (Device, DescriptorUpdateTemplate, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_updateDescriptorSetWithTemplateKHR = ?*const fn (Device, DescriptorSet, DescriptorUpdateTemplate, ?*const anyopaque) callconv(.c) void;
-pub extern fn createDescriptorUpdateTemplateKHR(device: Device, p_create_info: [*c]const DescriptorUpdateTemplateCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_update_template: [*c]DescriptorUpdateTemplate) Result;
-pub extern fn destroyDescriptorUpdateTemplateKHR(device: Device, descriptor_update_template: DescriptorUpdateTemplate, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn updateDescriptorSetWithTemplateKHR(device: Device, descriptor_set: DescriptorSet, descriptor_update_template: DescriptorUpdateTemplate, p_data: ?*const anyopaque) void;
+pub extern fn vkCreateDescriptorUpdateTemplateKHR(device: Device, p_create_info: [*c]const DescriptorUpdateTemplateCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_update_template: [*c]DescriptorUpdateTemplate) Result;
+pub inline fn createDescriptorUpdateTemplateKHR(device: Device, p_create_info: [*c]const DescriptorUpdateTemplateCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_descriptor_update_template: [*c]DescriptorUpdateTemplate) Result {
+    return vkCreateDescriptorUpdateTemplateKHR(device, p_create_info, p_allocator, p_descriptor_update_template);
+}
+pub extern fn vkDestroyDescriptorUpdateTemplateKHR(device: Device, descriptor_update_template: DescriptorUpdateTemplate, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDescriptorUpdateTemplateKHR(device: Device, descriptor_update_template: DescriptorUpdateTemplate, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDescriptorUpdateTemplateKHR(device, descriptor_update_template, p_allocator);
+}
+pub extern fn vkUpdateDescriptorSetWithTemplateKHR(device: Device, descriptor_set: DescriptorSet, descriptor_update_template: DescriptorUpdateTemplate, p_data: ?*const anyopaque) void;
+pub inline fn updateDescriptorSetWithTemplateKHR(device: Device, descriptor_set: DescriptorSet, descriptor_update_template: DescriptorUpdateTemplate, p_data: ?*const anyopaque) void {
+    return vkUpdateDescriptorSetWithTemplateKHR(device, descriptor_set, descriptor_update_template, p_data);
+}
 pub const PhysicalDeviceImagelessFramebufferFeaturesKHR = PhysicalDeviceImagelessFramebufferFeatures;
 pub const FramebufferAttachmentsCreateInfoKHR = FramebufferAttachmentsCreateInfo;
 pub const FramebufferAttachmentImageInfoKHR = FramebufferAttachmentImageInfo;
@@ -8195,23 +8270,41 @@ pub const PFN_createRenderPass2KHR = ?*const fn (Device, [*c]const RenderPassCre
 pub const PFN_cmdBeginRenderPass2KHR = ?*const fn (CommandBuffer, [*c]const RenderPassBeginInfo, [*c]const SubpassBeginInfo) callconv(.c) void;
 pub const PFN_cmdNextSubpass2KHR = ?*const fn (CommandBuffer, [*c]const SubpassBeginInfo, [*c]const SubpassEndInfo) callconv(.c) void;
 pub const PFN_cmdEndRenderPass2KHR = ?*const fn (CommandBuffer, [*c]const SubpassEndInfo) callconv(.c) void;
-pub extern fn createRenderPass2KHR(device: Device, p_create_info: [*c]const RenderPassCreateInfo2, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result;
-pub extern fn cmdBeginRenderPass2KHR(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, p_subpass_begin_info: [*c]const SubpassBeginInfo) void;
-pub extern fn cmdNextSubpass2KHR(command_buffer: CommandBuffer, p_subpass_begin_info: [*c]const SubpassBeginInfo, p_subpass_end_info: [*c]const SubpassEndInfo) void;
-pub extern fn cmdEndRenderPass2KHR(command_buffer: CommandBuffer, p_subpass_end_info: [*c]const SubpassEndInfo) void;
+pub extern fn vkCreateRenderPass2KHR(device: Device, p_create_info: [*c]const RenderPassCreateInfo2, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result;
+pub inline fn createRenderPass2KHR(device: Device, p_create_info: [*c]const RenderPassCreateInfo2, p_allocator: [*c]const AllocationCallbacks, p_render_pass: [*c]RenderPass) Result {
+    return vkCreateRenderPass2KHR(device, p_create_info, p_allocator, p_render_pass);
+}
+pub extern fn vkCmdBeginRenderPass2KHR(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, p_subpass_begin_info: [*c]const SubpassBeginInfo) void;
+pub inline fn cmdBeginRenderPass2KHR(command_buffer: CommandBuffer, p_render_pass_begin: [*c]const RenderPassBeginInfo, p_subpass_begin_info: [*c]const SubpassBeginInfo) void {
+    return vkCmdBeginRenderPass2KHR(command_buffer, p_render_pass_begin, p_subpass_begin_info);
+}
+pub extern fn vkCmdNextSubpass2KHR(command_buffer: CommandBuffer, p_subpass_begin_info: [*c]const SubpassBeginInfo, p_subpass_end_info: [*c]const SubpassEndInfo) void;
+pub inline fn cmdNextSubpass2KHR(command_buffer: CommandBuffer, p_subpass_begin_info: [*c]const SubpassBeginInfo, p_subpass_end_info: [*c]const SubpassEndInfo) void {
+    return vkCmdNextSubpass2KHR(command_buffer, p_subpass_begin_info, p_subpass_end_info);
+}
+pub extern fn vkCmdEndRenderPass2KHR(command_buffer: CommandBuffer, p_subpass_end_info: [*c]const SubpassEndInfo) void;
+pub inline fn cmdEndRenderPass2KHR(command_buffer: CommandBuffer, p_subpass_end_info: [*c]const SubpassEndInfo) void {
+    return vkCmdEndRenderPass2KHR(command_buffer, p_subpass_end_info);
+}
 pub const SharedPresentSurfaceCapabilitiesKHR = extern struct {
     s_type: StructureType = StructureType.shared_present_surface_capabilities_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
     shared_present_supported_usage_flags: ImageUsageFlags = @import("std").mem.zeroes(ImageUsageFlags),
 };
 pub const PFN_getSwapchainStatusKHR = ?*const fn (Device, SwapchainKHR) callconv(.c) Result;
-pub extern fn getSwapchainStatusKHR(device: Device, swapchain: SwapchainKHR) Result;
+pub extern fn vkGetSwapchainStatusKHR(device: Device, swapchain: SwapchainKHR) Result;
+pub inline fn getSwapchainStatusKHR(device: Device, swapchain: SwapchainKHR) Result {
+    return vkGetSwapchainStatusKHR(device, swapchain);
+}
 pub const ExternalFenceHandleTypeFlagsKHR = ExternalFenceHandleTypeFlags;
 pub const ExternalFenceFeatureFlagsKHR = ExternalFenceFeatureFlags;
 pub const PhysicalDeviceExternalFenceInfoKHR = PhysicalDeviceExternalFenceInfo;
 pub const ExternalFencePropertiesKHR = ExternalFenceProperties;
 pub const PFN_getPhysicalDeviceExternalFencePropertiesKHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceExternalFenceInfo, [*c]ExternalFenceProperties) callconv(.c) void;
-pub extern fn getPhysicalDeviceExternalFencePropertiesKHR(physical_device: PhysicalDevice, p_external_fence_info: [*c]const PhysicalDeviceExternalFenceInfo, p_external_fence_properties: [*c]ExternalFenceProperties) void;
+pub extern fn vkGetPhysicalDeviceExternalFencePropertiesKHR(physical_device: PhysicalDevice, p_external_fence_info: [*c]const PhysicalDeviceExternalFenceInfo, p_external_fence_properties: [*c]ExternalFenceProperties) void;
+pub inline fn getPhysicalDeviceExternalFencePropertiesKHR(physical_device: PhysicalDevice, p_external_fence_info: [*c]const PhysicalDeviceExternalFenceInfo, p_external_fence_properties: [*c]ExternalFenceProperties) void {
+    return vkGetPhysicalDeviceExternalFencePropertiesKHR(physical_device, p_external_fence_info, p_external_fence_properties);
+}
 pub const FenceImportFlagsKHR = FenceImportFlags;
 pub const ExportFenceCreateInfoKHR = ExportFenceCreateInfo;
 pub const ImportFenceFdInfoKHR = extern struct {
@@ -8230,8 +8323,14 @@ pub const FenceGetFdInfoKHR = extern struct {
 };
 pub const PFN_importFenceFdKHR = ?*const fn (Device, [*c]const ImportFenceFdInfoKHR) callconv(.c) Result;
 pub const PFN_getFenceFdKHR = ?*const fn (Device, [*c]const FenceGetFdInfoKHR, [*c]c_int) callconv(.c) Result;
-pub extern fn importFenceFdKHR(device: Device, p_import_fence_fd_info: [*c]const ImportFenceFdInfoKHR) Result;
-pub extern fn getFenceFdKHR(device: Device, p_get_fd_info: [*c]const FenceGetFdInfoKHR, p_fd: [*c]c_int) Result;
+pub extern fn vkImportFenceFdKHR(device: Device, p_import_fence_fd_info: [*c]const ImportFenceFdInfoKHR) Result;
+pub inline fn importFenceFdKHR(device: Device, p_import_fence_fd_info: [*c]const ImportFenceFdInfoKHR) Result {
+    return vkImportFenceFdKHR(device, p_import_fence_fd_info);
+}
+pub extern fn vkGetFenceFdKHR(device: Device, p_get_fd_info: [*c]const FenceGetFdInfoKHR, p_fd: [*c]c_int) Result;
+pub inline fn getFenceFdKHR(device: Device, p_get_fd_info: [*c]const FenceGetFdInfoKHR, p_fd: [*c]c_int) Result {
+    return vkGetFenceFdKHR(device, p_get_fd_info, p_fd);
+}
 pub const PerformanceCounterUnitKHR = enum(u32) {
     generic_khr = 0,
     percentage_khr = 1,
@@ -8324,10 +8423,22 @@ pub const PFN_enumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR = ?*
 pub const PFN_getPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR = ?*const fn (PhysicalDevice, [*c]const QueryPoolPerformanceCreateInfoKHR, [*c]u32) callconv(.c) void;
 pub const PFN_acquireProfilingLockKHR = ?*const fn (Device, [*c]const AcquireProfilingLockInfoKHR) callconv(.c) Result;
 pub const PFN_releaseProfilingLockKHR = ?*const fn (Device) callconv(.c) void;
-pub extern fn enumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(physical_device: PhysicalDevice, queue_family_index: u32, p_counter_count: [*c]u32, p_counters: [*c]PerformanceCounterKHR, p_counter_descriptions: [*c]PerformanceCounterDescriptionKHR) Result;
-pub extern fn getPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(physical_device: PhysicalDevice, p_performance_query_create_info: [*c]const QueryPoolPerformanceCreateInfoKHR, p_num_passes: [*c]u32) void;
-pub extern fn acquireProfilingLockKHR(device: Device, p_info: [*c]const AcquireProfilingLockInfoKHR) Result;
-pub extern fn releaseProfilingLockKHR(device: Device) void;
+pub extern fn vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(physical_device: PhysicalDevice, queue_family_index: u32, p_counter_count: [*c]u32, p_counters: [*c]PerformanceCounterKHR, p_counter_descriptions: [*c]PerformanceCounterDescriptionKHR) Result;
+pub inline fn enumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(physical_device: PhysicalDevice, queue_family_index: u32, p_counter_count: [*c]u32, p_counters: [*c]PerformanceCounterKHR, p_counter_descriptions: [*c]PerformanceCounterDescriptionKHR) Result {
+    return vkEnumeratePhysicalDeviceQueueFamilyPerformanceQueryCountersKHR(physical_device, queue_family_index, p_counter_count, p_counters, p_counter_descriptions);
+}
+pub extern fn vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(physical_device: PhysicalDevice, p_performance_query_create_info: [*c]const QueryPoolPerformanceCreateInfoKHR, p_num_passes: [*c]u32) void;
+pub inline fn getPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(physical_device: PhysicalDevice, p_performance_query_create_info: [*c]const QueryPoolPerformanceCreateInfoKHR, p_num_passes: [*c]u32) void {
+    return vkGetPhysicalDeviceQueueFamilyPerformanceQueryPassesKHR(physical_device, p_performance_query_create_info, p_num_passes);
+}
+pub extern fn vkAcquireProfilingLockKHR(device: Device, p_info: [*c]const AcquireProfilingLockInfoKHR) Result;
+pub inline fn acquireProfilingLockKHR(device: Device, p_info: [*c]const AcquireProfilingLockInfoKHR) Result {
+    return vkAcquireProfilingLockKHR(device, p_info);
+}
+pub extern fn vkReleaseProfilingLockKHR(device: Device) void;
+pub inline fn releaseProfilingLockKHR(device: Device) void {
+    return vkReleaseProfilingLockKHR(device);
+}
 pub const PointClippingBehaviorKHR = PointClippingBehavior;
 pub const TessellationDomainOriginKHR = TessellationDomainOrigin;
 pub const PhysicalDevicePointClippingPropertiesKHR = PhysicalDevicePointClippingProperties;
@@ -8352,8 +8463,14 @@ pub const SurfaceFormat2KHR = extern struct {
 };
 pub const PFN_getPhysicalDeviceSurfaceCapabilities2KHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceSurfaceInfo2KHR, [*c]SurfaceCapabilities2KHR) callconv(.c) Result;
 pub const PFN_getPhysicalDeviceSurfaceFormats2KHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceSurfaceInfo2KHR, [*c]u32, [*c]SurfaceFormat2KHR) callconv(.c) Result;
-pub extern fn getPhysicalDeviceSurfaceCapabilities2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_capabilities: [*c]SurfaceCapabilities2KHR) Result;
-pub extern fn getPhysicalDeviceSurfaceFormats2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormat2KHR) Result;
+pub extern fn vkGetPhysicalDeviceSurfaceCapabilities2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_capabilities: [*c]SurfaceCapabilities2KHR) Result;
+pub inline fn getPhysicalDeviceSurfaceCapabilities2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_capabilities: [*c]SurfaceCapabilities2KHR) Result {
+    return vkGetPhysicalDeviceSurfaceCapabilities2KHR(physical_device, p_surface_info, p_surface_capabilities);
+}
+pub extern fn vkGetPhysicalDeviceSurfaceFormats2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormat2KHR) Result;
+pub inline fn getPhysicalDeviceSurfaceFormats2KHR(physical_device: PhysicalDevice, p_surface_info: [*c]const PhysicalDeviceSurfaceInfo2KHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormat2KHR) Result {
+    return vkGetPhysicalDeviceSurfaceFormats2KHR(physical_device, p_surface_info, p_surface_format_count, p_surface_formats);
+}
 pub const PhysicalDeviceVariablePointerFeaturesKHR = PhysicalDeviceVariablePointersFeatures;
 pub const PhysicalDeviceVariablePointersFeaturesKHR = PhysicalDeviceVariablePointersFeatures;
 pub const DisplayProperties2KHR = extern struct {
@@ -8386,10 +8503,22 @@ pub const PFN_getPhysicalDeviceDisplayProperties2KHR = ?*const fn (PhysicalDevic
 pub const PFN_getPhysicalDeviceDisplayPlaneProperties2KHR = ?*const fn (PhysicalDevice, [*c]u32, [*c]DisplayPlaneProperties2KHR) callconv(.c) Result;
 pub const PFN_getDisplayModeProperties2KHR = ?*const fn (PhysicalDevice, DisplayKHR, [*c]u32, [*c]DisplayModeProperties2KHR) callconv(.c) Result;
 pub const PFN_getDisplayPlaneCapabilities2KHR = ?*const fn (PhysicalDevice, [*c]const DisplayPlaneInfo2KHR, [*c]DisplayPlaneCapabilities2KHR) callconv(.c) Result;
-pub extern fn getPhysicalDeviceDisplayProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayProperties2KHR) Result;
-pub extern fn getPhysicalDeviceDisplayPlaneProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlaneProperties2KHR) Result;
-pub extern fn getDisplayModeProperties2KHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModeProperties2KHR) Result;
-pub extern fn getDisplayPlaneCapabilities2KHR(physical_device: PhysicalDevice, p_display_plane_info: [*c]const DisplayPlaneInfo2KHR, p_capabilities: [*c]DisplayPlaneCapabilities2KHR) Result;
+pub extern fn vkGetPhysicalDeviceDisplayProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayProperties2KHR) Result;
+pub inline fn getPhysicalDeviceDisplayProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayProperties2KHR) Result {
+    return vkGetPhysicalDeviceDisplayProperties2KHR(physical_device, p_property_count, p_properties);
+}
+pub extern fn vkGetPhysicalDeviceDisplayPlaneProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlaneProperties2KHR) Result;
+pub inline fn getPhysicalDeviceDisplayPlaneProperties2KHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlaneProperties2KHR) Result {
+    return vkGetPhysicalDeviceDisplayPlaneProperties2KHR(physical_device, p_property_count, p_properties);
+}
+pub extern fn vkGetDisplayModeProperties2KHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModeProperties2KHR) Result;
+pub inline fn getDisplayModeProperties2KHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModeProperties2KHR) Result {
+    return vkGetDisplayModeProperties2KHR(physical_device, display, p_property_count, p_properties);
+}
+pub extern fn vkGetDisplayPlaneCapabilities2KHR(physical_device: PhysicalDevice, p_display_plane_info: [*c]const DisplayPlaneInfo2KHR, p_capabilities: [*c]DisplayPlaneCapabilities2KHR) Result;
+pub inline fn getDisplayPlaneCapabilities2KHR(physical_device: PhysicalDevice, p_display_plane_info: [*c]const DisplayPlaneInfo2KHR, p_capabilities: [*c]DisplayPlaneCapabilities2KHR) Result {
+    return vkGetDisplayPlaneCapabilities2KHR(physical_device, p_display_plane_info, p_capabilities);
+}
 pub const MemoryDedicatedRequirementsKHR = MemoryDedicatedRequirements;
 pub const MemoryDedicatedAllocateInfoKHR = MemoryDedicatedAllocateInfo;
 pub const BufferMemoryRequirementsInfo2KHR = BufferMemoryRequirementsInfo2;
@@ -8400,9 +8529,18 @@ pub const SparseImageMemoryRequirements2KHR = SparseImageMemoryRequirements2;
 pub const PFN_getImageMemoryRequirements2KHR = ?*const fn (Device, [*c]const ImageMemoryRequirementsInfo2, [*c]MemoryRequirements2) callconv(.c) void;
 pub const PFN_getBufferMemoryRequirements2KHR = ?*const fn (Device, [*c]const BufferMemoryRequirementsInfo2, [*c]MemoryRequirements2) callconv(.c) void;
 pub const PFN_getImageSparseMemoryRequirements2KHR = ?*const fn (Device, [*c]const ImageSparseMemoryRequirementsInfo2, [*c]u32, [*c]SparseImageMemoryRequirements2) callconv(.c) void;
-pub extern fn getImageMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn getBufferMemoryRequirements2KHR(device: Device, p_info: [*c]const BufferMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn getImageSparseMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageSparseMemoryRequirementsInfo2, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void;
+pub extern fn vkGetImageMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getImageMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetImageMemoryRequirements2KHR(device, p_info, p_memory_requirements);
+}
+pub extern fn vkGetBufferMemoryRequirements2KHR(device: Device, p_info: [*c]const BufferMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getBufferMemoryRequirements2KHR(device: Device, p_info: [*c]const BufferMemoryRequirementsInfo2, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetBufferMemoryRequirements2KHR(device, p_info, p_memory_requirements);
+}
+pub extern fn vkGetImageSparseMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageSparseMemoryRequirementsInfo2, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void;
+pub inline fn getImageSparseMemoryRequirements2KHR(device: Device, p_info: [*c]const ImageSparseMemoryRequirementsInfo2, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void {
+    return vkGetImageSparseMemoryRequirements2KHR(device, p_info, p_sparse_memory_requirement_count, p_sparse_memory_requirements);
+}
 pub const ImageFormatListCreateInfoKHR = ImageFormatListCreateInfo;
 pub const SamplerYcbcrConversionKHR = SamplerYcbcrConversion;
 pub const SamplerYcbcrModelConversionKHR = SamplerYcbcrModelConversion;
@@ -8416,22 +8554,43 @@ pub const PhysicalDeviceSamplerYcbcrConversionFeaturesKHR = PhysicalDeviceSample
 pub const SamplerYcbcrConversionImageFormatPropertiesKHR = SamplerYcbcrConversionImageFormatProperties;
 pub const PFN_createSamplerYcbcrConversionKHR = ?*const fn (Device, [*c]const SamplerYcbcrConversionCreateInfo, [*c]const AllocationCallbacks, [*c]SamplerYcbcrConversion) callconv(.c) Result;
 pub const PFN_destroySamplerYcbcrConversionKHR = ?*const fn (Device, SamplerYcbcrConversion, [*c]const AllocationCallbacks) callconv(.c) void;
-pub extern fn createSamplerYcbcrConversionKHR(device: Device, p_create_info: [*c]const SamplerYcbcrConversionCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_ycbcr_conversion: [*c]SamplerYcbcrConversion) Result;
-pub extern fn destroySamplerYcbcrConversionKHR(device: Device, ycbcr_conversion: SamplerYcbcrConversion, p_allocator: [*c]const AllocationCallbacks) void;
+pub extern fn vkCreateSamplerYcbcrConversionKHR(device: Device, p_create_info: [*c]const SamplerYcbcrConversionCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_ycbcr_conversion: [*c]SamplerYcbcrConversion) Result;
+pub inline fn createSamplerYcbcrConversionKHR(device: Device, p_create_info: [*c]const SamplerYcbcrConversionCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_ycbcr_conversion: [*c]SamplerYcbcrConversion) Result {
+    return vkCreateSamplerYcbcrConversionKHR(device, p_create_info, p_allocator, p_ycbcr_conversion);
+}
+pub extern fn vkDestroySamplerYcbcrConversionKHR(device: Device, ycbcr_conversion: SamplerYcbcrConversion, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroySamplerYcbcrConversionKHR(device: Device, ycbcr_conversion: SamplerYcbcrConversion, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroySamplerYcbcrConversionKHR(device, ycbcr_conversion, p_allocator);
+}
 pub const BindBufferMemoryInfoKHR = BindBufferMemoryInfo;
 pub const BindImageMemoryInfoKHR = BindImageMemoryInfo;
 pub const PFN_bindBufferMemory2KHR = ?*const fn (Device, u32, [*c]const BindBufferMemoryInfo) callconv(.c) Result;
 pub const PFN_bindImageMemory2KHR = ?*const fn (Device, u32, [*c]const BindImageMemoryInfo) callconv(.c) Result;
-pub extern fn bindBufferMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindBufferMemoryInfo) Result;
-pub extern fn bindImageMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindImageMemoryInfo) Result;
+pub extern fn vkBindBufferMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindBufferMemoryInfo) Result;
+pub inline fn bindBufferMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindBufferMemoryInfo) Result {
+    return vkBindBufferMemory2KHR(device, bind_info_count, p_bind_infos);
+}
+pub extern fn vkBindImageMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindImageMemoryInfo) Result;
+pub inline fn bindImageMemory2KHR(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindImageMemoryInfo) Result {
+    return vkBindImageMemory2KHR(device, bind_info_count, p_bind_infos);
+}
 pub const PhysicalDeviceMaintenance3PropertiesKHR = PhysicalDeviceMaintenance3Properties;
 pub const DescriptorSetLayoutSupportKHR = DescriptorSetLayoutSupport;
 pub const PFN_getDescriptorSetLayoutSupportKHR = ?*const fn (Device, [*c]const DescriptorSetLayoutCreateInfo, [*c]DescriptorSetLayoutSupport) callconv(.c) void;
-pub extern fn getDescriptorSetLayoutSupportKHR(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_support: [*c]DescriptorSetLayoutSupport) void;
+pub extern fn vkGetDescriptorSetLayoutSupportKHR(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_support: [*c]DescriptorSetLayoutSupport) void;
+pub inline fn getDescriptorSetLayoutSupportKHR(device: Device, p_create_info: [*c]const DescriptorSetLayoutCreateInfo, p_support: [*c]DescriptorSetLayoutSupport) void {
+    return vkGetDescriptorSetLayoutSupportKHR(device, p_create_info, p_support);
+}
 pub const PFN_cmdDrawIndirectCountKHR = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawIndexedIndirectCountKHR = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
-pub extern fn cmdDrawIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
-pub extern fn cmdDrawIndexedIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub extern fn vkCmdDrawIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndirectCountKHR(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
+pub extern fn vkCmdDrawIndexedIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndexedIndirectCountKHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndexedIndirectCountKHR(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
 pub const PhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR = PhysicalDeviceShaderSubgroupExtendedTypesFeatures;
 pub const PhysicalDevice8BitStorageFeaturesKHR = PhysicalDevice8BitStorageFeatures;
 pub const PhysicalDeviceShaderAtomicInt64FeaturesKHR = PhysicalDeviceShaderAtomicInt64Features;
@@ -8547,9 +8706,18 @@ pub const SemaphoreSignalInfoKHR = SemaphoreSignalInfo;
 pub const PFN_getSemaphoreCounterValueKHR = ?*const fn (Device, Semaphore, [*c]u64) callconv(.c) Result;
 pub const PFN_waitSemaphoresKHR = ?*const fn (Device, [*c]const SemaphoreWaitInfo, u64) callconv(.c) Result;
 pub const PFN_signalSemaphoreKHR = ?*const fn (Device, [*c]const SemaphoreSignalInfo) callconv(.c) Result;
-pub extern fn getSemaphoreCounterValueKHR(device: Device, semaphore: Semaphore, p_value: [*c]u64) Result;
-pub extern fn waitSemaphoresKHR(device: Device, p_wait_info: [*c]const SemaphoreWaitInfo, timeout: u64) Result;
-pub extern fn signalSemaphoreKHR(device: Device, p_signal_info: [*c]const SemaphoreSignalInfo) Result;
+pub extern fn vkGetSemaphoreCounterValueKHR(device: Device, semaphore: Semaphore, p_value: [*c]u64) Result;
+pub inline fn getSemaphoreCounterValueKHR(device: Device, semaphore: Semaphore, p_value: [*c]u64) Result {
+    return vkGetSemaphoreCounterValueKHR(device, semaphore, p_value);
+}
+pub extern fn vkWaitSemaphoresKHR(device: Device, p_wait_info: [*c]const SemaphoreWaitInfo, timeout: u64) Result;
+pub inline fn waitSemaphoresKHR(device: Device, p_wait_info: [*c]const SemaphoreWaitInfo, timeout: u64) Result {
+    return vkWaitSemaphoresKHR(device, p_wait_info, timeout);
+}
+pub extern fn vkSignalSemaphoreKHR(device: Device, p_signal_info: [*c]const SemaphoreSignalInfo) Result;
+pub inline fn signalSemaphoreKHR(device: Device, p_signal_info: [*c]const SemaphoreSignalInfo) Result {
+    return vkSignalSemaphoreKHR(device, p_signal_info);
+}
 pub const PhysicalDeviceVulkanMemoryModelFeaturesKHR = PhysicalDeviceVulkanMemoryModelFeatures;
 pub const PhysicalDeviceShaderTerminateInvocationFeaturesKHR = PhysicalDeviceShaderTerminateInvocationFeatures;
 pub const FragmentShadingRateCombinerOpKHR = enum(u32) {
@@ -8607,8 +8775,14 @@ pub const PhysicalDeviceFragmentShadingRateKHR = extern struct {
 };
 pub const PFN_getPhysicalDeviceFragmentShadingRatesKHR = ?*const fn (PhysicalDevice, [*c]u32, [*c]PhysicalDeviceFragmentShadingRateKHR) callconv(.c) Result;
 pub const PFN_cmdSetFragmentShadingRateKHR = ?*const fn (CommandBuffer, [*c]const Extent2D, [*c]const FragmentShadingRateCombinerOpKHR) callconv(.c) void;
-pub extern fn getPhysicalDeviceFragmentShadingRatesKHR(physical_device: PhysicalDevice, p_fragment_shading_rate_count: [*c]u32, p_fragment_shading_rates: [*c]PhysicalDeviceFragmentShadingRateKHR) Result;
-pub extern fn cmdSetFragmentShadingRateKHR(command_buffer: CommandBuffer, p_fragment_size: [*c]const Extent2D, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void;
+pub extern fn vkGetPhysicalDeviceFragmentShadingRatesKHR(physical_device: PhysicalDevice, p_fragment_shading_rate_count: [*c]u32, p_fragment_shading_rates: [*c]PhysicalDeviceFragmentShadingRateKHR) Result;
+pub inline fn getPhysicalDeviceFragmentShadingRatesKHR(physical_device: PhysicalDevice, p_fragment_shading_rate_count: [*c]u32, p_fragment_shading_rates: [*c]PhysicalDeviceFragmentShadingRateKHR) Result {
+    return vkGetPhysicalDeviceFragmentShadingRatesKHR(physical_device, p_fragment_shading_rate_count, p_fragment_shading_rates);
+}
+pub extern fn vkCmdSetFragmentShadingRateKHR(command_buffer: CommandBuffer, p_fragment_size: [*c]const Extent2D, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void;
+pub inline fn cmdSetFragmentShadingRateKHR(command_buffer: CommandBuffer, p_fragment_size: [*c]const Extent2D, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void {
+    return vkCmdSetFragmentShadingRateKHR(command_buffer, p_fragment_size, combiner_ops);
+}
 pub const PhysicalDeviceDynamicRenderingLocalReadFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_dynamic_rendering_local_read_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -8630,8 +8804,14 @@ pub const RenderingInputAttachmentIndexInfoKHR = extern struct {
 };
 pub const PFN_cmdSetRenderingAttachmentLocationsKHR = ?*const fn (CommandBuffer, [*c]const RenderingAttachmentLocationInfoKHR) callconv(.c) void;
 pub const PFN_cmdSetRenderingInputAttachmentIndicesKHR = ?*const fn (CommandBuffer, [*c]const RenderingInputAttachmentIndexInfoKHR) callconv(.c) void;
-pub extern fn cmdSetRenderingAttachmentLocationsKHR(command_buffer: CommandBuffer, p_location_info: [*c]const RenderingAttachmentLocationInfoKHR) void;
-pub extern fn cmdSetRenderingInputAttachmentIndicesKHR(command_buffer: CommandBuffer, p_input_attachment_index_info: [*c]const RenderingInputAttachmentIndexInfoKHR) void;
+pub extern fn vkCmdSetRenderingAttachmentLocationsKHR(command_buffer: CommandBuffer, p_location_info: [*c]const RenderingAttachmentLocationInfoKHR) void;
+pub inline fn cmdSetRenderingAttachmentLocationsKHR(command_buffer: CommandBuffer, p_location_info: [*c]const RenderingAttachmentLocationInfoKHR) void {
+    return vkCmdSetRenderingAttachmentLocationsKHR(command_buffer, p_location_info);
+}
+pub extern fn vkCmdSetRenderingInputAttachmentIndicesKHR(command_buffer: CommandBuffer, p_input_attachment_index_info: [*c]const RenderingInputAttachmentIndexInfoKHR) void;
+pub inline fn cmdSetRenderingInputAttachmentIndicesKHR(command_buffer: CommandBuffer, p_input_attachment_index_info: [*c]const RenderingInputAttachmentIndexInfoKHR) void {
+    return vkCmdSetRenderingInputAttachmentIndicesKHR(command_buffer, p_input_attachment_index_info);
+}
 pub const PhysicalDeviceShaderQuadControlFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_quad_control_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -8651,7 +8831,10 @@ pub const PhysicalDevicePresentWaitFeaturesKHR = extern struct {
     present_wait: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_waitForPresentKHR = ?*const fn (Device, SwapchainKHR, u64, u64) callconv(.c) Result;
-pub extern fn waitForPresentKHR(device: Device, swapchain: SwapchainKHR, present_id: u64, timeout: u64) Result;
+pub extern fn vkWaitForPresentKHR(device: Device, swapchain: SwapchainKHR, present_id: u64, timeout: u64) Result;
+pub inline fn waitForPresentKHR(device: Device, swapchain: SwapchainKHR, present_id: u64, timeout: u64) Result {
+    return vkWaitForPresentKHR(device, swapchain, present_id, timeout);
+}
 pub const PhysicalDeviceUniformBufferStandardLayoutFeaturesKHR = PhysicalDeviceUniformBufferStandardLayoutFeatures;
 pub const PhysicalDeviceBufferDeviceAddressFeaturesKHR = PhysicalDeviceBufferDeviceAddressFeatures;
 pub const BufferDeviceAddressInfoKHR = BufferDeviceAddressInfo;
@@ -8661,20 +8844,44 @@ pub const DeviceMemoryOpaqueCaptureAddressInfoKHR = DeviceMemoryOpaqueCaptureAdd
 pub const PFN_getBufferDeviceAddressKHR = ?*const fn (Device, [*c]const BufferDeviceAddressInfo) callconv(.c) DeviceAddress;
 pub const PFN_getBufferOpaqueCaptureAddressKHR = ?*const fn (Device, [*c]const BufferDeviceAddressInfo) callconv(.c) u64;
 pub const PFN_getDeviceMemoryOpaqueCaptureAddressKHR = ?*const fn (Device, [*c]const DeviceMemoryOpaqueCaptureAddressInfo) callconv(.c) u64;
-pub extern fn getBufferDeviceAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress;
-pub extern fn getBufferOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) u64;
-pub extern fn getDeviceMemoryOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const DeviceMemoryOpaqueCaptureAddressInfo) u64;
+pub extern fn vkGetBufferDeviceAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress;
+pub inline fn getBufferDeviceAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress {
+    return vkGetBufferDeviceAddressKHR(device, p_info);
+}
+pub extern fn vkGetBufferOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) u64;
+pub inline fn getBufferOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const BufferDeviceAddressInfo) u64 {
+    return vkGetBufferOpaqueCaptureAddressKHR(device, p_info);
+}
+pub extern fn vkGetDeviceMemoryOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const DeviceMemoryOpaqueCaptureAddressInfo) u64;
+pub inline fn getDeviceMemoryOpaqueCaptureAddressKHR(device: Device, p_info: [*c]const DeviceMemoryOpaqueCaptureAddressInfo) u64 {
+    return vkGetDeviceMemoryOpaqueCaptureAddressKHR(device, p_info);
+}
 pub const DeferredOperationKHR = enum(u64) { null = 0, _ };
 pub const PFN_createDeferredOperationKHR = ?*const fn (Device, [*c]const AllocationCallbacks, [*c]DeferredOperationKHR) callconv(.c) Result;
 pub const PFN_destroyDeferredOperationKHR = ?*const fn (Device, DeferredOperationKHR, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_getDeferredOperationMaxConcurrencyKHR = ?*const fn (Device, DeferredOperationKHR) callconv(.c) u32;
 pub const PFN_getDeferredOperationResultKHR = ?*const fn (Device, DeferredOperationKHR) callconv(.c) Result;
 pub const PFN_deferredOperationJoinKHR = ?*const fn (Device, DeferredOperationKHR) callconv(.c) Result;
-pub extern fn createDeferredOperationKHR(device: Device, p_allocator: [*c]const AllocationCallbacks, p_deferred_operation: [*c]DeferredOperationKHR) Result;
-pub extern fn destroyDeferredOperationKHR(device: Device, operation: DeferredOperationKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getDeferredOperationMaxConcurrencyKHR(device: Device, operation: DeferredOperationKHR) u32;
-pub extern fn getDeferredOperationResultKHR(device: Device, operation: DeferredOperationKHR) Result;
-pub extern fn deferredOperationJoinKHR(device: Device, operation: DeferredOperationKHR) Result;
+pub extern fn vkCreateDeferredOperationKHR(device: Device, p_allocator: [*c]const AllocationCallbacks, p_deferred_operation: [*c]DeferredOperationKHR) Result;
+pub inline fn createDeferredOperationKHR(device: Device, p_allocator: [*c]const AllocationCallbacks, p_deferred_operation: [*c]DeferredOperationKHR) Result {
+    return vkCreateDeferredOperationKHR(device, p_allocator, p_deferred_operation);
+}
+pub extern fn vkDestroyDeferredOperationKHR(device: Device, operation: DeferredOperationKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDeferredOperationKHR(device: Device, operation: DeferredOperationKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDeferredOperationKHR(device, operation, p_allocator);
+}
+pub extern fn vkGetDeferredOperationMaxConcurrencyKHR(device: Device, operation: DeferredOperationKHR) u32;
+pub inline fn getDeferredOperationMaxConcurrencyKHR(device: Device, operation: DeferredOperationKHR) u32 {
+    return vkGetDeferredOperationMaxConcurrencyKHR(device, operation);
+}
+pub extern fn vkGetDeferredOperationResultKHR(device: Device, operation: DeferredOperationKHR) Result;
+pub inline fn getDeferredOperationResultKHR(device: Device, operation: DeferredOperationKHR) Result {
+    return vkGetDeferredOperationResultKHR(device, operation);
+}
+pub extern fn vkDeferredOperationJoinKHR(device: Device, operation: DeferredOperationKHR) Result;
+pub inline fn deferredOperationJoinKHR(device: Device, operation: DeferredOperationKHR) Result {
+    return vkDeferredOperationJoinKHR(device, operation);
+}
 pub const PipelineExecutableStatisticFormatKHR = enum(u32) {
     bool32_khr = 0,
     int64_khr = 1,
@@ -8731,9 +8938,18 @@ pub const PipelineExecutableInternalRepresentationKHR = extern struct {
 pub const PFN_getPipelineExecutablePropertiesKHR = ?*const fn (Device, [*c]const PipelineInfoKHR, [*c]u32, [*c]PipelineExecutablePropertiesKHR) callconv(.c) Result;
 pub const PFN_getPipelineExecutableStatisticsKHR = ?*const fn (Device, [*c]const PipelineExecutableInfoKHR, [*c]u32, [*c]PipelineExecutableStatisticKHR) callconv(.c) Result;
 pub const PFN_getPipelineExecutableInternalRepresentationsKHR = ?*const fn (Device, [*c]const PipelineExecutableInfoKHR, [*c]u32, [*c]PipelineExecutableInternalRepresentationKHR) callconv(.c) Result;
-pub extern fn getPipelineExecutablePropertiesKHR(device: Device, p_pipeline_info: [*c]const PipelineInfoKHR, p_executable_count: [*c]u32, p_properties: [*c]PipelineExecutablePropertiesKHR) Result;
-pub extern fn getPipelineExecutableStatisticsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_statistic_count: [*c]u32, p_statistics: [*c]PipelineExecutableStatisticKHR) Result;
-pub extern fn getPipelineExecutableInternalRepresentationsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_internal_representation_count: [*c]u32, p_internal_representations: [*c]PipelineExecutableInternalRepresentationKHR) Result;
+pub extern fn vkGetPipelineExecutablePropertiesKHR(device: Device, p_pipeline_info: [*c]const PipelineInfoKHR, p_executable_count: [*c]u32, p_properties: [*c]PipelineExecutablePropertiesKHR) Result;
+pub inline fn getPipelineExecutablePropertiesKHR(device: Device, p_pipeline_info: [*c]const PipelineInfoKHR, p_executable_count: [*c]u32, p_properties: [*c]PipelineExecutablePropertiesKHR) Result {
+    return vkGetPipelineExecutablePropertiesKHR(device, p_pipeline_info, p_executable_count, p_properties);
+}
+pub extern fn vkGetPipelineExecutableStatisticsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_statistic_count: [*c]u32, p_statistics: [*c]PipelineExecutableStatisticKHR) Result;
+pub inline fn getPipelineExecutableStatisticsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_statistic_count: [*c]u32, p_statistics: [*c]PipelineExecutableStatisticKHR) Result {
+    return vkGetPipelineExecutableStatisticsKHR(device, p_executable_info, p_statistic_count, p_statistics);
+}
+pub extern fn vkGetPipelineExecutableInternalRepresentationsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_internal_representation_count: [*c]u32, p_internal_representations: [*c]PipelineExecutableInternalRepresentationKHR) Result;
+pub inline fn getPipelineExecutableInternalRepresentationsKHR(device: Device, p_executable_info: [*c]const PipelineExecutableInfoKHR, p_internal_representation_count: [*c]u32, p_internal_representations: [*c]PipelineExecutableInternalRepresentationKHR) Result {
+    return vkGetPipelineExecutableInternalRepresentationsKHR(device, p_executable_info, p_internal_representation_count, p_internal_representations);
+}
 pub const MemoryUnmapFlagsKHR = enum(u32) {
     null = 0,
     reserve_bit_ext = 1,
@@ -8754,8 +8970,14 @@ pub const MemoryUnmapInfoKHR = extern struct {
 };
 pub const PFN_mapMemory2KHR = ?*const fn (Device, [*c]const MemoryMapInfoKHR, [*c]?*anyopaque) callconv(.c) Result;
 pub const PFN_unmapMemory2KHR = ?*const fn (Device, [*c]const MemoryUnmapInfoKHR) callconv(.c) Result;
-pub extern fn mapMemory2KHR(device: Device, p_memory_map_info: [*c]const MemoryMapInfoKHR, pp_data: [*c]?*anyopaque) Result;
-pub extern fn unmapMemory2KHR(device: Device, p_memory_unmap_info: [*c]const MemoryUnmapInfoKHR) Result;
+pub extern fn vkMapMemory2KHR(device: Device, p_memory_map_info: [*c]const MemoryMapInfoKHR, pp_data: [*c]?*anyopaque) Result;
+pub inline fn mapMemory2KHR(device: Device, p_memory_map_info: [*c]const MemoryMapInfoKHR, pp_data: [*c]?*anyopaque) Result {
+    return vkMapMemory2KHR(device, p_memory_map_info, pp_data);
+}
+pub extern fn vkUnmapMemory2KHR(device: Device, p_memory_unmap_info: [*c]const MemoryUnmapInfoKHR) Result;
+pub inline fn unmapMemory2KHR(device: Device, p_memory_unmap_info: [*c]const MemoryUnmapInfoKHR) Result {
+    return vkUnmapMemory2KHR(device, p_memory_unmap_info);
+}
 pub const PhysicalDeviceShaderIntegerDotProductFeaturesKHR = PhysicalDeviceShaderIntegerDotProductFeatures;
 pub const PhysicalDeviceShaderIntegerDotProductPropertiesKHR = PhysicalDeviceShaderIntegerDotProductProperties;
 pub const PipelineLibraryCreateInfoKHR = extern struct {
@@ -8898,9 +9120,18 @@ pub const VideoEncodeSessionParametersFeedbackInfoKHR = extern struct {
 pub const PFN_getPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR = ?*const fn (PhysicalDevice, [*c]const PhysicalDeviceVideoEncodeQualityLevelInfoKHR, [*c]VideoEncodeQualityLevelPropertiesKHR) callconv(.c) Result;
 pub const PFN_getEncodedVideoSessionParametersKHR = ?*const fn (Device, [*c]const VideoEncodeSessionParametersGetInfoKHR, [*c]VideoEncodeSessionParametersFeedbackInfoKHR, [*c]usize, ?*anyopaque) callconv(.c) Result;
 pub const PFN_cmdEncodeVideoKHR = ?*const fn (CommandBuffer, [*c]const VideoEncodeInfoKHR) callconv(.c) void;
-pub extern fn getPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR(physical_device: PhysicalDevice, p_quality_level_info: [*c]const PhysicalDeviceVideoEncodeQualityLevelInfoKHR, p_quality_level_properties: [*c]VideoEncodeQualityLevelPropertiesKHR) Result;
-pub extern fn getEncodedVideoSessionParametersKHR(device: Device, p_video_session_parameters_info: [*c]const VideoEncodeSessionParametersGetInfoKHR, p_feedback_info: [*c]VideoEncodeSessionParametersFeedbackInfoKHR, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
-pub extern fn cmdEncodeVideoKHR(command_buffer: CommandBuffer, p_encode_info: [*c]const VideoEncodeInfoKHR) void;
+pub extern fn vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR(physical_device: PhysicalDevice, p_quality_level_info: [*c]const PhysicalDeviceVideoEncodeQualityLevelInfoKHR, p_quality_level_properties: [*c]VideoEncodeQualityLevelPropertiesKHR) Result;
+pub inline fn getPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR(physical_device: PhysicalDevice, p_quality_level_info: [*c]const PhysicalDeviceVideoEncodeQualityLevelInfoKHR, p_quality_level_properties: [*c]VideoEncodeQualityLevelPropertiesKHR) Result {
+    return vkGetPhysicalDeviceVideoEncodeQualityLevelPropertiesKHR(physical_device, p_quality_level_info, p_quality_level_properties);
+}
+pub extern fn vkGetEncodedVideoSessionParametersKHR(device: Device, p_video_session_parameters_info: [*c]const VideoEncodeSessionParametersGetInfoKHR, p_feedback_info: [*c]VideoEncodeSessionParametersFeedbackInfoKHR, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
+pub inline fn getEncodedVideoSessionParametersKHR(device: Device, p_video_session_parameters_info: [*c]const VideoEncodeSessionParametersGetInfoKHR, p_feedback_info: [*c]VideoEncodeSessionParametersFeedbackInfoKHR, p_data_size: [*c]usize, p_data: ?*anyopaque) Result {
+    return vkGetEncodedVideoSessionParametersKHR(device, p_video_session_parameters_info, p_feedback_info, p_data_size, p_data);
+}
+pub extern fn vkCmdEncodeVideoKHR(command_buffer: CommandBuffer, p_encode_info: [*c]const VideoEncodeInfoKHR) void;
+pub inline fn cmdEncodeVideoKHR(command_buffer: CommandBuffer, p_encode_info: [*c]const VideoEncodeInfoKHR) void {
+    return vkCmdEncodeVideoKHR(command_buffer, p_encode_info);
+}
 pub const SubmitFlagsKHR = SubmitFlags;
 pub const MemoryBarrier2KHR = MemoryBarrier2;
 pub const BufferMemoryBarrier2KHR = BufferMemoryBarrier2;
@@ -8929,14 +9160,38 @@ pub const PFN_cmdWriteTimestamp2KHR = ?*const fn (CommandBuffer, PipelineStageFl
 pub const PFN_queueSubmit2KHR = ?*const fn (Queue, u32, [*c]const SubmitInfo2, Fence) callconv(.c) Result;
 pub const PFN_cmdWriteBufferMarker2AMD = ?*const fn (CommandBuffer, PipelineStageFlags2, Buffer, DeviceSize, u32) callconv(.c) void;
 pub const PFN_getQueueCheckpointData2NV = ?*const fn (Queue, [*c]u32, [*c]CheckpointData2NV) callconv(.c) void;
-pub extern fn cmdSetEvent2KHR(command_buffer: CommandBuffer, event: Event, p_dependency_info: [*c]const DependencyInfo) void;
-pub extern fn cmdResetEvent2KHR(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags2) void;
-pub extern fn cmdWaitEvents2KHR(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, p_dependency_infos: [*c]const DependencyInfo) void;
-pub extern fn cmdPipelineBarrier2KHR(command_buffer: CommandBuffer, p_dependency_info: [*c]const DependencyInfo) void;
-pub extern fn cmdWriteTimestamp2KHR(command_buffer: CommandBuffer, stage: PipelineStageFlags2, query_pool: QueryPool, query: u32) void;
-pub extern fn queueSubmit2KHR(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo2, fence: Fence) Result;
-pub extern fn cmdWriteBufferMarker2AMD(command_buffer: CommandBuffer, stage: PipelineStageFlags2, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void;
-pub extern fn getQueueCheckpointData2NV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointData2NV) void;
+pub extern fn vkCmdSetEvent2KHR(command_buffer: CommandBuffer, event: Event, p_dependency_info: [*c]const DependencyInfo) void;
+pub inline fn cmdSetEvent2KHR(command_buffer: CommandBuffer, event: Event, p_dependency_info: [*c]const DependencyInfo) void {
+    return vkCmdSetEvent2KHR(command_buffer, event, p_dependency_info);
+}
+pub extern fn vkCmdResetEvent2KHR(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags2) void;
+pub inline fn cmdResetEvent2KHR(command_buffer: CommandBuffer, event: Event, stage_mask: PipelineStageFlags2) void {
+    return vkCmdResetEvent2KHR(command_buffer, event, stage_mask);
+}
+pub extern fn vkCmdWaitEvents2KHR(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, p_dependency_infos: [*c]const DependencyInfo) void;
+pub inline fn cmdWaitEvents2KHR(command_buffer: CommandBuffer, event_count: u32, p_events: [*c]const Event, p_dependency_infos: [*c]const DependencyInfo) void {
+    return vkCmdWaitEvents2KHR(command_buffer, event_count, p_events, p_dependency_infos);
+}
+pub extern fn vkCmdPipelineBarrier2KHR(command_buffer: CommandBuffer, p_dependency_info: [*c]const DependencyInfo) void;
+pub inline fn cmdPipelineBarrier2KHR(command_buffer: CommandBuffer, p_dependency_info: [*c]const DependencyInfo) void {
+    return vkCmdPipelineBarrier2KHR(command_buffer, p_dependency_info);
+}
+pub extern fn vkCmdWriteTimestamp2KHR(command_buffer: CommandBuffer, stage: PipelineStageFlags2, query_pool: QueryPool, query: u32) void;
+pub inline fn cmdWriteTimestamp2KHR(command_buffer: CommandBuffer, stage: PipelineStageFlags2, query_pool: QueryPool, query: u32) void {
+    return vkCmdWriteTimestamp2KHR(command_buffer, stage, query_pool, query);
+}
+pub extern fn vkQueueSubmit2KHR(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo2, fence: Fence) Result;
+pub inline fn queueSubmit2KHR(queue: Queue, submit_count: u32, p_submits: [*c]const SubmitInfo2, fence: Fence) Result {
+    return vkQueueSubmit2KHR(queue, submit_count, p_submits, fence);
+}
+pub extern fn vkCmdWriteBufferMarker2AMD(command_buffer: CommandBuffer, stage: PipelineStageFlags2, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void;
+pub inline fn cmdWriteBufferMarker2AMD(command_buffer: CommandBuffer, stage: PipelineStageFlags2, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void {
+    return vkCmdWriteBufferMarker2AMD(command_buffer, stage, dst_buffer, dst_offset, marker);
+}
+pub extern fn vkGetQueueCheckpointData2NV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointData2NV) void;
+pub inline fn getQueueCheckpointData2NV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointData2NV) void {
+    return vkGetQueueCheckpointData2NV(queue, p_checkpoint_data_count, p_checkpoint_data);
+}
 pub const PhysicalDeviceFragmentShaderBarycentricFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_fragment_shader_barycentric_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -8978,12 +9233,30 @@ pub const PFN_cmdCopyBufferToImage2KHR = ?*const fn (CommandBuffer, [*c]const Co
 pub const PFN_cmdCopyImageToBuffer2KHR = ?*const fn (CommandBuffer, [*c]const CopyImageToBufferInfo2) callconv(.c) void;
 pub const PFN_cmdBlitImage2KHR = ?*const fn (CommandBuffer, [*c]const BlitImageInfo2) callconv(.c) void;
 pub const PFN_cmdResolveImage2KHR = ?*const fn (CommandBuffer, [*c]const ResolveImageInfo2) callconv(.c) void;
-pub extern fn cmdCopyBuffer2KHR(command_buffer: CommandBuffer, p_copy_buffer_info: [*c]const CopyBufferInfo2) void;
-pub extern fn cmdCopyImage2KHR(command_buffer: CommandBuffer, p_copy_image_info: [*c]const CopyImageInfo2) void;
-pub extern fn cmdCopyBufferToImage2KHR(command_buffer: CommandBuffer, p_copy_buffer_to_image_info: [*c]const CopyBufferToImageInfo2) void;
-pub extern fn cmdCopyImageToBuffer2KHR(command_buffer: CommandBuffer, p_copy_image_to_buffer_info: [*c]const CopyImageToBufferInfo2) void;
-pub extern fn cmdBlitImage2KHR(command_buffer: CommandBuffer, p_blit_image_info: [*c]const BlitImageInfo2) void;
-pub extern fn cmdResolveImage2KHR(command_buffer: CommandBuffer, p_resolve_image_info: [*c]const ResolveImageInfo2) void;
+pub extern fn vkCmdCopyBuffer2KHR(command_buffer: CommandBuffer, p_copy_buffer_info: [*c]const CopyBufferInfo2) void;
+pub inline fn cmdCopyBuffer2KHR(command_buffer: CommandBuffer, p_copy_buffer_info: [*c]const CopyBufferInfo2) void {
+    return vkCmdCopyBuffer2KHR(command_buffer, p_copy_buffer_info);
+}
+pub extern fn vkCmdCopyImage2KHR(command_buffer: CommandBuffer, p_copy_image_info: [*c]const CopyImageInfo2) void;
+pub inline fn cmdCopyImage2KHR(command_buffer: CommandBuffer, p_copy_image_info: [*c]const CopyImageInfo2) void {
+    return vkCmdCopyImage2KHR(command_buffer, p_copy_image_info);
+}
+pub extern fn vkCmdCopyBufferToImage2KHR(command_buffer: CommandBuffer, p_copy_buffer_to_image_info: [*c]const CopyBufferToImageInfo2) void;
+pub inline fn cmdCopyBufferToImage2KHR(command_buffer: CommandBuffer, p_copy_buffer_to_image_info: [*c]const CopyBufferToImageInfo2) void {
+    return vkCmdCopyBufferToImage2KHR(command_buffer, p_copy_buffer_to_image_info);
+}
+pub extern fn vkCmdCopyImageToBuffer2KHR(command_buffer: CommandBuffer, p_copy_image_to_buffer_info: [*c]const CopyImageToBufferInfo2) void;
+pub inline fn cmdCopyImageToBuffer2KHR(command_buffer: CommandBuffer, p_copy_image_to_buffer_info: [*c]const CopyImageToBufferInfo2) void {
+    return vkCmdCopyImageToBuffer2KHR(command_buffer, p_copy_image_to_buffer_info);
+}
+pub extern fn vkCmdBlitImage2KHR(command_buffer: CommandBuffer, p_blit_image_info: [*c]const BlitImageInfo2) void;
+pub inline fn cmdBlitImage2KHR(command_buffer: CommandBuffer, p_blit_image_info: [*c]const BlitImageInfo2) void {
+    return vkCmdBlitImage2KHR(command_buffer, p_blit_image_info);
+}
+pub extern fn vkCmdResolveImage2KHR(command_buffer: CommandBuffer, p_resolve_image_info: [*c]const ResolveImageInfo2) void;
+pub inline fn cmdResolveImage2KHR(command_buffer: CommandBuffer, p_resolve_image_info: [*c]const ResolveImageInfo2) void {
+    return vkCmdResolveImage2KHR(command_buffer, p_resolve_image_info);
+}
 pub const FormatProperties3KHR = FormatProperties3;
 pub const PhysicalDeviceRayTracingMaintenance1FeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_ray_tracing_maintenance1features_khr,
@@ -9008,7 +9281,10 @@ pub const TraceRaysIndirectCommand2KHR = extern struct {
     depth: u32 = @import("std").mem.zeroes(u32),
 };
 pub const PFN_cmdTraceRaysIndirect2KHR = ?*const fn (CommandBuffer, DeviceAddress) callconv(.c) void;
-pub extern fn cmdTraceRaysIndirect2KHR(command_buffer: CommandBuffer, indirect_device_address: DeviceAddress) void;
+pub extern fn vkCmdTraceRaysIndirect2KHR(command_buffer: CommandBuffer, indirect_device_address: DeviceAddress) void;
+pub inline fn cmdTraceRaysIndirect2KHR(command_buffer: CommandBuffer, indirect_device_address: DeviceAddress) void {
+    return vkCmdTraceRaysIndirect2KHR(command_buffer, indirect_device_address);
+}
 pub const PhysicalDeviceMaintenance4FeaturesKHR = PhysicalDeviceMaintenance4Features;
 pub const PhysicalDeviceMaintenance4PropertiesKHR = PhysicalDeviceMaintenance4Properties;
 pub const DeviceBufferMemoryRequirementsKHR = DeviceBufferMemoryRequirements;
@@ -9016,9 +9292,18 @@ pub const DeviceImageMemoryRequirementsKHR = DeviceImageMemoryRequirements;
 pub const PFN_getDeviceBufferMemoryRequirementsKHR = ?*const fn (Device, [*c]const DeviceBufferMemoryRequirements, [*c]MemoryRequirements2) callconv(.c) void;
 pub const PFN_getDeviceImageMemoryRequirementsKHR = ?*const fn (Device, [*c]const DeviceImageMemoryRequirements, [*c]MemoryRequirements2) callconv(.c) void;
 pub const PFN_getDeviceImageSparseMemoryRequirementsKHR = ?*const fn (Device, [*c]const DeviceImageMemoryRequirements, [*c]u32, [*c]SparseImageMemoryRequirements2) callconv(.c) void;
-pub extern fn getDeviceBufferMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceBufferMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn getDeviceImageMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn getDeviceImageSparseMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void;
+pub extern fn vkGetDeviceBufferMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceBufferMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getDeviceBufferMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceBufferMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetDeviceBufferMemoryRequirementsKHR(device, p_info, p_memory_requirements);
+}
+pub extern fn vkGetDeviceImageMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getDeviceImageMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetDeviceImageMemoryRequirementsKHR(device, p_info, p_memory_requirements);
+}
+pub extern fn vkGetDeviceImageSparseMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void;
+pub inline fn getDeviceImageSparseMemoryRequirementsKHR(device: Device, p_info: [*c]const DeviceImageMemoryRequirements, p_sparse_memory_requirement_count: [*c]u32, p_sparse_memory_requirements: [*c]SparseImageMemoryRequirements2) void {
+    return vkGetDeviceImageSparseMemoryRequirementsKHR(device, p_info, p_sparse_memory_requirement_count, p_sparse_memory_requirements);
+}
 pub const PhysicalDeviceShaderSubgroupRotateFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_subgroup_rotate_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -9151,10 +9436,22 @@ pub const PFN_cmdBindIndexBuffer2KHR = ?*const fn (CommandBuffer, Buffer, Device
 pub const PFN_getRenderingAreaGranularityKHR = ?*const fn (Device, [*c]const RenderingAreaInfoKHR, [*c]Extent2D) callconv(.c) void;
 pub const PFN_getDeviceImageSubresourceLayoutKHR = ?*const fn (Device, [*c]const DeviceImageSubresourceInfoKHR, [*c]SubresourceLayout2KHR) callconv(.c) void;
 pub const PFN_getImageSubresourceLayout2KHR = ?*const fn (Device, Image, [*c]const ImageSubresource2KHR, [*c]SubresourceLayout2KHR) callconv(.c) void;
-pub extern fn cmdBindIndexBuffer2KHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, size: DeviceSize, index_type: IndexType) void;
-pub extern fn getRenderingAreaGranularityKHR(device: Device, p_rendering_area_info: [*c]const RenderingAreaInfoKHR, p_granularity: [*c]Extent2D) void;
-pub extern fn getDeviceImageSubresourceLayoutKHR(device: Device, p_info: [*c]const DeviceImageSubresourceInfoKHR, p_layout: [*c]SubresourceLayout2KHR) void;
-pub extern fn getImageSubresourceLayout2KHR(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void;
+pub extern fn vkCmdBindIndexBuffer2KHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, size: DeviceSize, index_type: IndexType) void;
+pub inline fn cmdBindIndexBuffer2KHR(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, size: DeviceSize, index_type: IndexType) void {
+    return vkCmdBindIndexBuffer2KHR(command_buffer, buffer, offset, size, index_type);
+}
+pub extern fn vkGetRenderingAreaGranularityKHR(device: Device, p_rendering_area_info: [*c]const RenderingAreaInfoKHR, p_granularity: [*c]Extent2D) void;
+pub inline fn getRenderingAreaGranularityKHR(device: Device, p_rendering_area_info: [*c]const RenderingAreaInfoKHR, p_granularity: [*c]Extent2D) void {
+    return vkGetRenderingAreaGranularityKHR(device, p_rendering_area_info, p_granularity);
+}
+pub extern fn vkGetDeviceImageSubresourceLayoutKHR(device: Device, p_info: [*c]const DeviceImageSubresourceInfoKHR, p_layout: [*c]SubresourceLayout2KHR) void;
+pub inline fn getDeviceImageSubresourceLayoutKHR(device: Device, p_info: [*c]const DeviceImageSubresourceInfoKHR, p_layout: [*c]SubresourceLayout2KHR) void {
+    return vkGetDeviceImageSubresourceLayoutKHR(device, p_info, p_layout);
+}
+pub extern fn vkGetImageSubresourceLayout2KHR(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void;
+pub inline fn getImageSubresourceLayout2KHR(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void {
+    return vkGetImageSubresourceLayout2KHR(device, image, p_subresource, p_layout);
+}
 pub const PhysicalDeviceRayTracingPositionFetchFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_ray_tracing_position_fetch_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -9233,11 +9530,26 @@ pub const PFN_destroyPipelineBinaryKHR = ?*const fn (Device, PipelineBinaryKHR, 
 pub const PFN_getPipelineKeyKHR = ?*const fn (Device, [*c]const PipelineCreateInfoKHR, [*c]PipelineBinaryKeyKHR) callconv(.c) Result;
 pub const PFN_getPipelineBinaryDataKHR = ?*const fn (Device, [*c]const PipelineBinaryDataInfoKHR, [*c]PipelineBinaryKeyKHR, [*c]usize, ?*anyopaque) callconv(.c) Result;
 pub const PFN_releaseCapturedPipelineDataKHR = ?*const fn (Device, [*c]const ReleaseCapturedPipelineDataInfoKHR, [*c]const AllocationCallbacks) callconv(.c) Result;
-pub extern fn createPipelineBinariesKHR(device: Device, p_create_info: [*c]const PipelineBinaryCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_binaries: [*c]PipelineBinaryHandlesInfoKHR) Result;
-pub extern fn destroyPipelineBinaryKHR(device: Device, pipeline_binary: PipelineBinaryKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getPipelineKeyKHR(device: Device, p_pipeline_create_info: [*c]const PipelineCreateInfoKHR, p_pipeline_key: [*c]PipelineBinaryKeyKHR) Result;
-pub extern fn getPipelineBinaryDataKHR(device: Device, p_info: [*c]const PipelineBinaryDataInfoKHR, p_pipeline_binary_key: [*c]PipelineBinaryKeyKHR, p_pipeline_binary_data_size: [*c]usize, p_pipeline_binary_data: ?*anyopaque) Result;
-pub extern fn releaseCapturedPipelineDataKHR(device: Device, p_info: [*c]const ReleaseCapturedPipelineDataInfoKHR, p_allocator: [*c]const AllocationCallbacks) Result;
+pub extern fn vkCreatePipelineBinariesKHR(device: Device, p_create_info: [*c]const PipelineBinaryCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_binaries: [*c]PipelineBinaryHandlesInfoKHR) Result;
+pub inline fn createPipelineBinariesKHR(device: Device, p_create_info: [*c]const PipelineBinaryCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_binaries: [*c]PipelineBinaryHandlesInfoKHR) Result {
+    return vkCreatePipelineBinariesKHR(device, p_create_info, p_allocator, p_binaries);
+}
+pub extern fn vkDestroyPipelineBinaryKHR(device: Device, pipeline_binary: PipelineBinaryKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyPipelineBinaryKHR(device: Device, pipeline_binary: PipelineBinaryKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyPipelineBinaryKHR(device, pipeline_binary, p_allocator);
+}
+pub extern fn vkGetPipelineKeyKHR(device: Device, p_pipeline_create_info: [*c]const PipelineCreateInfoKHR, p_pipeline_key: [*c]PipelineBinaryKeyKHR) Result;
+pub inline fn getPipelineKeyKHR(device: Device, p_pipeline_create_info: [*c]const PipelineCreateInfoKHR, p_pipeline_key: [*c]PipelineBinaryKeyKHR) Result {
+    return vkGetPipelineKeyKHR(device, p_pipeline_create_info, p_pipeline_key);
+}
+pub extern fn vkGetPipelineBinaryDataKHR(device: Device, p_info: [*c]const PipelineBinaryDataInfoKHR, p_pipeline_binary_key: [*c]PipelineBinaryKeyKHR, p_pipeline_binary_data_size: [*c]usize, p_pipeline_binary_data: ?*anyopaque) Result;
+pub inline fn getPipelineBinaryDataKHR(device: Device, p_info: [*c]const PipelineBinaryDataInfoKHR, p_pipeline_binary_key: [*c]PipelineBinaryKeyKHR, p_pipeline_binary_data_size: [*c]usize, p_pipeline_binary_data: ?*anyopaque) Result {
+    return vkGetPipelineBinaryDataKHR(device, p_info, p_pipeline_binary_key, p_pipeline_binary_data_size, p_pipeline_binary_data);
+}
+pub extern fn vkReleaseCapturedPipelineDataKHR(device: Device, p_info: [*c]const ReleaseCapturedPipelineDataInfoKHR, p_allocator: [*c]const AllocationCallbacks) Result;
+pub inline fn releaseCapturedPipelineDataKHR(device: Device, p_info: [*c]const ReleaseCapturedPipelineDataInfoKHR, p_allocator: [*c]const AllocationCallbacks) Result {
+    return vkReleaseCapturedPipelineDataKHR(device, p_info, p_allocator);
+}
 pub const ComponentTypeKHR = enum(u32) {
     float16_nv = 0,
     float32_nv = 1,
@@ -9300,7 +9612,10 @@ pub const PhysicalDeviceCooperativeMatrixPropertiesKHR = extern struct {
     cooperative_matrix_supported_stages: ShaderStageFlags = @import("std").mem.zeroes(ShaderStageFlags),
 };
 pub const PFN_getPhysicalDeviceCooperativeMatrixPropertiesKHR = ?*const fn (PhysicalDevice, [*c]u32, [*c]CooperativeMatrixPropertiesKHR) callconv(.c) Result;
-pub extern fn getPhysicalDeviceCooperativeMatrixPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesKHR) Result;
+pub extern fn vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesKHR) Result;
+pub inline fn getPhysicalDeviceCooperativeMatrixPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesKHR) Result {
+    return vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR(physical_device, p_property_count, p_properties);
+}
 pub const PhysicalDeviceComputeShaderDerivativesFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_compute_shader_derivatives_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -9712,7 +10027,10 @@ pub const PipelineRasterizationLineStateCreateInfoKHR = extern struct {
     line_stipple_pattern: u16 = @import("std").mem.zeroes(u16),
 };
 pub const PFN_cmdSetLineStippleKHR = ?*const fn (CommandBuffer, u32, u16) callconv(.c) void;
-pub extern fn cmdSetLineStippleKHR(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void;
+pub extern fn vkCmdSetLineStippleKHR(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void;
+pub inline fn cmdSetLineStippleKHR(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void {
+    return vkCmdSetLineStippleKHR(command_buffer, line_stipple_factor, line_stipple_pattern);
+}
 pub const TimeDomainKHR = enum(u32) {
     device_ext = 0,
     clock_monotonic_ext = 1,
@@ -9731,8 +10049,14 @@ pub const CalibratedTimestampInfoKHR = extern struct {
 };
 pub const PFN_getPhysicalDeviceCalibrateableTimeDomainsKHR = ?*const fn (PhysicalDevice, [*c]u32, [*c]TimeDomainKHR) callconv(.c) Result;
 pub const PFN_getCalibratedTimestampsKHR = ?*const fn (Device, u32, [*c]const CalibratedTimestampInfoKHR, [*c]u64, [*c]u64) callconv(.c) Result;
-pub extern fn getPhysicalDeviceCalibrateableTimeDomainsKHR(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result;
-pub extern fn getCalibratedTimestampsKHR(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result;
+pub extern fn vkGetPhysicalDeviceCalibrateableTimeDomainsKHR(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result;
+pub inline fn getPhysicalDeviceCalibrateableTimeDomainsKHR(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result {
+    return vkGetPhysicalDeviceCalibrateableTimeDomainsKHR(physical_device, p_time_domain_count, p_time_domains);
+}
+pub extern fn vkGetCalibratedTimestampsKHR(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result;
+pub inline fn getCalibratedTimestampsKHR(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result {
+    return vkGetCalibratedTimestampsKHR(device, timestamp_count, p_timestamp_infos, p_timestamps, p_max_deviation);
+}
 pub const PhysicalDeviceShaderExpectAssumeFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_expect_assume_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -9815,12 +10139,30 @@ pub const PFN_cmdPushDescriptorSet2KHR = ?*const fn (CommandBuffer, [*c]const Pu
 pub const PFN_cmdPushDescriptorSetWithTemplate2KHR = ?*const fn (CommandBuffer, [*c]const PushDescriptorSetWithTemplateInfoKHR) callconv(.c) void;
 pub const PFN_cmdSetDescriptorBufferOffsets2EXT = ?*const fn (CommandBuffer, [*c]const SetDescriptorBufferOffsetsInfoEXT) callconv(.c) void;
 pub const PFN_cmdBindDescriptorBufferEmbeddedSamplers2EXT = ?*const fn (CommandBuffer, [*c]const BindDescriptorBufferEmbeddedSamplersInfoEXT) callconv(.c) void;
-pub extern fn cmdBindDescriptorSets2KHR(command_buffer: CommandBuffer, p_bind_descriptor_sets_info: [*c]const BindDescriptorSetsInfoKHR) void;
-pub extern fn cmdPushConstants2KHR(command_buffer: CommandBuffer, p_push_constants_info: [*c]const PushConstantsInfoKHR) void;
-pub extern fn cmdPushDescriptorSet2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_info: [*c]const PushDescriptorSetInfoKHR) void;
-pub extern fn cmdPushDescriptorSetWithTemplate2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_with_template_info: [*c]const PushDescriptorSetWithTemplateInfoKHR) void;
-pub extern fn cmdSetDescriptorBufferOffsets2EXT(command_buffer: CommandBuffer, p_set_descriptor_buffer_offsets_info: [*c]const SetDescriptorBufferOffsetsInfoEXT) void;
-pub extern fn cmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer: CommandBuffer, p_bind_descriptor_buffer_embedded_samplers_info: [*c]const BindDescriptorBufferEmbeddedSamplersInfoEXT) void;
+pub extern fn vkCmdBindDescriptorSets2KHR(command_buffer: CommandBuffer, p_bind_descriptor_sets_info: [*c]const BindDescriptorSetsInfoKHR) void;
+pub inline fn cmdBindDescriptorSets2KHR(command_buffer: CommandBuffer, p_bind_descriptor_sets_info: [*c]const BindDescriptorSetsInfoKHR) void {
+    return vkCmdBindDescriptorSets2KHR(command_buffer, p_bind_descriptor_sets_info);
+}
+pub extern fn vkCmdPushConstants2KHR(command_buffer: CommandBuffer, p_push_constants_info: [*c]const PushConstantsInfoKHR) void;
+pub inline fn cmdPushConstants2KHR(command_buffer: CommandBuffer, p_push_constants_info: [*c]const PushConstantsInfoKHR) void {
+    return vkCmdPushConstants2KHR(command_buffer, p_push_constants_info);
+}
+pub extern fn vkCmdPushDescriptorSet2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_info: [*c]const PushDescriptorSetInfoKHR) void;
+pub inline fn cmdPushDescriptorSet2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_info: [*c]const PushDescriptorSetInfoKHR) void {
+    return vkCmdPushDescriptorSet2KHR(command_buffer, p_push_descriptor_set_info);
+}
+pub extern fn vkCmdPushDescriptorSetWithTemplate2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_with_template_info: [*c]const PushDescriptorSetWithTemplateInfoKHR) void;
+pub inline fn cmdPushDescriptorSetWithTemplate2KHR(command_buffer: CommandBuffer, p_push_descriptor_set_with_template_info: [*c]const PushDescriptorSetWithTemplateInfoKHR) void {
+    return vkCmdPushDescriptorSetWithTemplate2KHR(command_buffer, p_push_descriptor_set_with_template_info);
+}
+pub extern fn vkCmdSetDescriptorBufferOffsets2EXT(command_buffer: CommandBuffer, p_set_descriptor_buffer_offsets_info: [*c]const SetDescriptorBufferOffsetsInfoEXT) void;
+pub inline fn cmdSetDescriptorBufferOffsets2EXT(command_buffer: CommandBuffer, p_set_descriptor_buffer_offsets_info: [*c]const SetDescriptorBufferOffsetsInfoEXT) void {
+    return vkCmdSetDescriptorBufferOffsets2EXT(command_buffer, p_set_descriptor_buffer_offsets_info);
+}
+pub extern fn vkCmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer: CommandBuffer, p_bind_descriptor_buffer_embedded_samplers_info: [*c]const BindDescriptorBufferEmbeddedSamplersInfoEXT) void;
+pub inline fn cmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer: CommandBuffer, p_bind_descriptor_buffer_embedded_samplers_info: [*c]const BindDescriptorBufferEmbeddedSamplersInfoEXT) void {
+    return vkCmdBindDescriptorBufferEmbeddedSamplers2EXT(command_buffer, p_bind_descriptor_buffer_embedded_samplers_info);
+}
 pub const PhysicalDeviceShaderRelaxedExtendedInstructionFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_relaxed_extended_instruction_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -9937,9 +10279,18 @@ pub const DebugReportCallbackCreateInfoEXT = extern struct {
 pub const PFN_createDebugReportCallbackEXT = ?*const fn (Instance, [*c]const DebugReportCallbackCreateInfoEXT, [*c]const AllocationCallbacks, [*c]DebugReportCallbackEXT) callconv(.c) Result;
 pub const PFN_destroyDebugReportCallbackEXT = ?*const fn (Instance, DebugReportCallbackEXT, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_debugReportMessageEXT = ?*const fn (Instance, DebugReportFlagsEXT, DebugReportObjectTypeEXT, u64, usize, i32, [*c]const u8, [*c]const u8) callconv(.c) void;
-pub extern fn createDebugReportCallbackEXT(instance: Instance, p_create_info: [*c]const DebugReportCallbackCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_callback: [*c]DebugReportCallbackEXT) Result;
-pub extern fn destroyDebugReportCallbackEXT(instance: Instance, callback: DebugReportCallbackEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn debugReportMessageEXT(instance: Instance, flags: DebugReportFlagsEXT, object_type: DebugReportObjectTypeEXT, object: u64, location: usize, message_code: i32, p_layer_prefix: [*c]const u8, p_message: [*c]const u8) void;
+pub extern fn vkCreateDebugReportCallbackEXT(instance: Instance, p_create_info: [*c]const DebugReportCallbackCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_callback: [*c]DebugReportCallbackEXT) Result;
+pub inline fn createDebugReportCallbackEXT(instance: Instance, p_create_info: [*c]const DebugReportCallbackCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_callback: [*c]DebugReportCallbackEXT) Result {
+    return vkCreateDebugReportCallbackEXT(instance, p_create_info, p_allocator, p_callback);
+}
+pub extern fn vkDestroyDebugReportCallbackEXT(instance: Instance, callback: DebugReportCallbackEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDebugReportCallbackEXT(instance: Instance, callback: DebugReportCallbackEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDebugReportCallbackEXT(instance, callback, p_allocator);
+}
+pub extern fn vkDebugReportMessageEXT(instance: Instance, flags: DebugReportFlagsEXT, object_type: DebugReportObjectTypeEXT, object: u64, location: usize, message_code: i32, p_layer_prefix: [*c]const u8, p_message: [*c]const u8) void;
+pub inline fn debugReportMessageEXT(instance: Instance, flags: DebugReportFlagsEXT, object_type: DebugReportObjectTypeEXT, object: u64, location: usize, message_code: i32, p_layer_prefix: [*c]const u8, p_message: [*c]const u8) void {
+    return vkDebugReportMessageEXT(instance, flags, object_type, object, location, message_code, p_layer_prefix, p_message);
+}
 pub const RasterizationOrderAMD = enum(u32) {
     strict_amd = 0,
     relaxed_amd = 1,
@@ -9976,11 +10327,26 @@ pub const PFN_debugMarkerSetObjectNameEXT = ?*const fn (Device, [*c]const DebugM
 pub const PFN_cmdDebugMarkerBeginEXT = ?*const fn (CommandBuffer, [*c]const DebugMarkerMarkerInfoEXT) callconv(.c) void;
 pub const PFN_cmdDebugMarkerEndEXT = ?*const fn (CommandBuffer) callconv(.c) void;
 pub const PFN_cmdDebugMarkerInsertEXT = ?*const fn (CommandBuffer, [*c]const DebugMarkerMarkerInfoEXT) callconv(.c) void;
-pub extern fn debugMarkerSetObjectTagEXT(device: Device, p_tag_info: [*c]const DebugMarkerObjectTagInfoEXT) Result;
-pub extern fn debugMarkerSetObjectNameEXT(device: Device, p_name_info: [*c]const DebugMarkerObjectNameInfoEXT) Result;
-pub extern fn cmdDebugMarkerBeginEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void;
-pub extern fn cmdDebugMarkerEndEXT(command_buffer: CommandBuffer) void;
-pub extern fn cmdDebugMarkerInsertEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void;
+pub extern fn vkDebugMarkerSetObjectTagEXT(device: Device, p_tag_info: [*c]const DebugMarkerObjectTagInfoEXT) Result;
+pub inline fn debugMarkerSetObjectTagEXT(device: Device, p_tag_info: [*c]const DebugMarkerObjectTagInfoEXT) Result {
+    return vkDebugMarkerSetObjectTagEXT(device, p_tag_info);
+}
+pub extern fn vkDebugMarkerSetObjectNameEXT(device: Device, p_name_info: [*c]const DebugMarkerObjectNameInfoEXT) Result;
+pub inline fn debugMarkerSetObjectNameEXT(device: Device, p_name_info: [*c]const DebugMarkerObjectNameInfoEXT) Result {
+    return vkDebugMarkerSetObjectNameEXT(device, p_name_info);
+}
+pub extern fn vkCmdDebugMarkerBeginEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void;
+pub inline fn cmdDebugMarkerBeginEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void {
+    return vkCmdDebugMarkerBeginEXT(command_buffer, p_marker_info);
+}
+pub extern fn vkCmdDebugMarkerEndEXT(command_buffer: CommandBuffer) void;
+pub inline fn cmdDebugMarkerEndEXT(command_buffer: CommandBuffer) void {
+    return vkCmdDebugMarkerEndEXT(command_buffer);
+}
+pub extern fn vkCmdDebugMarkerInsertEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void;
+pub inline fn cmdDebugMarkerInsertEXT(command_buffer: CommandBuffer, p_marker_info: [*c]const DebugMarkerMarkerInfoEXT) void {
+    return vkCmdDebugMarkerInsertEXT(command_buffer, p_marker_info);
+}
 pub const DedicatedAllocationImageCreateInfoNV = extern struct {
     s_type: StructureType = StructureType.dedicated_allocation_image_create_info_nv,
     p_next: ?*const anyopaque = @import("std").mem.zeroes(?*const anyopaque),
@@ -10030,12 +10396,30 @@ pub const PFN_cmdEndTransformFeedbackEXT = ?*const fn (CommandBuffer, u32, u32, 
 pub const PFN_cmdBeginQueryIndexedEXT = ?*const fn (CommandBuffer, QueryPool, u32, QueryControlFlags, u32) callconv(.c) void;
 pub const PFN_cmdEndQueryIndexedEXT = ?*const fn (CommandBuffer, QueryPool, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawIndirectByteCountEXT = ?*const fn (CommandBuffer, u32, u32, Buffer, DeviceSize, u32, u32) callconv(.c) void;
-pub extern fn cmdBindTransformFeedbackBuffersEXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize) void;
-pub extern fn cmdBeginTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void;
-pub extern fn cmdEndTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void;
-pub extern fn cmdBeginQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags, index: u32) void;
-pub extern fn cmdEndQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, index: u32) void;
-pub extern fn cmdDrawIndirectByteCountEXT(command_buffer: CommandBuffer, instance_count: u32, first_instance: u32, counter_buffer: Buffer, counter_buffer_offset: DeviceSize, counter_offset: u32, vertex_stride: u32) void;
+pub extern fn vkCmdBindTransformFeedbackBuffersEXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize) void;
+pub inline fn cmdBindTransformFeedbackBuffersEXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize) void {
+    return vkCmdBindTransformFeedbackBuffersEXT(command_buffer, first_binding, binding_count, p_buffers, p_offsets, p_sizes);
+}
+pub extern fn vkCmdBeginTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void;
+pub inline fn cmdBeginTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void {
+    return vkCmdBeginTransformFeedbackEXT(command_buffer, first_counter_buffer, counter_buffer_count, p_counter_buffers, p_counter_buffer_offsets);
+}
+pub extern fn vkCmdEndTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void;
+pub inline fn cmdEndTransformFeedbackEXT(command_buffer: CommandBuffer, first_counter_buffer: u32, counter_buffer_count: u32, p_counter_buffers: [*c]const Buffer, p_counter_buffer_offsets: [*c]const DeviceSize) void {
+    return vkCmdEndTransformFeedbackEXT(command_buffer, first_counter_buffer, counter_buffer_count, p_counter_buffers, p_counter_buffer_offsets);
+}
+pub extern fn vkCmdBeginQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags, index: u32) void;
+pub inline fn cmdBeginQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags, index: u32) void {
+    return vkCmdBeginQueryIndexedEXT(command_buffer, query_pool, query, flags, index);
+}
+pub extern fn vkCmdEndQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, index: u32) void;
+pub inline fn cmdEndQueryIndexedEXT(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, index: u32) void {
+    return vkCmdEndQueryIndexedEXT(command_buffer, query_pool, query, index);
+}
+pub extern fn vkCmdDrawIndirectByteCountEXT(command_buffer: CommandBuffer, instance_count: u32, first_instance: u32, counter_buffer: Buffer, counter_buffer_offset: DeviceSize, counter_offset: u32, vertex_stride: u32) void;
+pub inline fn cmdDrawIndirectByteCountEXT(command_buffer: CommandBuffer, instance_count: u32, first_instance: u32, counter_buffer: Buffer, counter_buffer_offset: DeviceSize, counter_offset: u32, vertex_stride: u32) void {
+    return vkCmdDrawIndirectByteCountEXT(command_buffer, instance_count, first_instance, counter_buffer, counter_buffer_offset, counter_offset, vertex_stride);
+}
 pub const CuModuleNVX = enum(u64) { null = 0, _ };
 pub const CuFunctionNVX = enum(u64) { null = 0, _ };
 pub const CuModuleCreateInfoNVX = extern struct {
@@ -10071,11 +10455,26 @@ pub const PFN_createCuFunctionNVX = ?*const fn (Device, [*c]const CuFunctionCrea
 pub const PFN_destroyCuModuleNVX = ?*const fn (Device, CuModuleNVX, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_destroyCuFunctionNVX = ?*const fn (Device, CuFunctionNVX, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_cmdCuLaunchKernelNVX = ?*const fn (CommandBuffer, [*c]const CuLaunchInfoNVX) callconv(.c) void;
-pub extern fn createCuModuleNVX(device: Device, p_create_info: [*c]const CuModuleCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CuModuleNVX) Result;
-pub extern fn createCuFunctionNVX(device: Device, p_create_info: [*c]const CuFunctionCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CuFunctionNVX) Result;
-pub extern fn destroyCuModuleNVX(device: Device, module: CuModuleNVX, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn destroyCuFunctionNVX(device: Device, function: CuFunctionNVX, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn cmdCuLaunchKernelNVX(command_buffer: CommandBuffer, p_launch_info: [*c]const CuLaunchInfoNVX) void;
+pub extern fn vkCreateCuModuleNVX(device: Device, p_create_info: [*c]const CuModuleCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CuModuleNVX) Result;
+pub inline fn createCuModuleNVX(device: Device, p_create_info: [*c]const CuModuleCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CuModuleNVX) Result {
+    return vkCreateCuModuleNVX(device, p_create_info, p_allocator, p_module);
+}
+pub extern fn vkCreateCuFunctionNVX(device: Device, p_create_info: [*c]const CuFunctionCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CuFunctionNVX) Result;
+pub inline fn createCuFunctionNVX(device: Device, p_create_info: [*c]const CuFunctionCreateInfoNVX, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CuFunctionNVX) Result {
+    return vkCreateCuFunctionNVX(device, p_create_info, p_allocator, p_function);
+}
+pub extern fn vkDestroyCuModuleNVX(device: Device, module: CuModuleNVX, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyCuModuleNVX(device: Device, module: CuModuleNVX, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyCuModuleNVX(device, module, p_allocator);
+}
+pub extern fn vkDestroyCuFunctionNVX(device: Device, function: CuFunctionNVX, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyCuFunctionNVX(device: Device, function: CuFunctionNVX, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyCuFunctionNVX(device, function, p_allocator);
+}
+pub extern fn vkCmdCuLaunchKernelNVX(command_buffer: CommandBuffer, p_launch_info: [*c]const CuLaunchInfoNVX) void;
+pub inline fn cmdCuLaunchKernelNVX(command_buffer: CommandBuffer, p_launch_info: [*c]const CuLaunchInfoNVX) void {
+    return vkCmdCuLaunchKernelNVX(command_buffer, p_launch_info);
+}
 pub const ImageViewHandleInfoNVX = extern struct {
     s_type: StructureType = StructureType.image_view_handle_info_nvx,
     p_next: ?*const anyopaque = @import("std").mem.zeroes(?*const anyopaque),
@@ -10091,12 +10490,24 @@ pub const ImageViewAddressPropertiesNVX = extern struct {
 };
 pub const PFN_getImageViewHandleNVX = ?*const fn (Device, [*c]const ImageViewHandleInfoNVX) callconv(.c) u32;
 pub const PFN_getImageViewAddressNVX = ?*const fn (Device, ImageView, [*c]ImageViewAddressPropertiesNVX) callconv(.c) Result;
-pub extern fn getImageViewHandleNVX(device: Device, p_info: [*c]const ImageViewHandleInfoNVX) u32;
-pub extern fn getImageViewAddressNVX(device: Device, image_view: ImageView, p_properties: [*c]ImageViewAddressPropertiesNVX) Result;
+pub extern fn vkGetImageViewHandleNVX(device: Device, p_info: [*c]const ImageViewHandleInfoNVX) u32;
+pub inline fn getImageViewHandleNVX(device: Device, p_info: [*c]const ImageViewHandleInfoNVX) u32 {
+    return vkGetImageViewHandleNVX(device, p_info);
+}
+pub extern fn vkGetImageViewAddressNVX(device: Device, image_view: ImageView, p_properties: [*c]ImageViewAddressPropertiesNVX) Result;
+pub inline fn getImageViewAddressNVX(device: Device, image_view: ImageView, p_properties: [*c]ImageViewAddressPropertiesNVX) Result {
+    return vkGetImageViewAddressNVX(device, image_view, p_properties);
+}
 pub const PFN_cmdDrawIndirectCountAMD = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawIndexedIndirectCountAMD = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
-pub extern fn cmdDrawIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
-pub extern fn cmdDrawIndexedIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub extern fn vkCmdDrawIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndirectCountAMD(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
+pub extern fn vkCmdDrawIndexedIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawIndexedIndirectCountAMD(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawIndexedIndirectCountAMD(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
 pub const TextureLODGatherFormatPropertiesAMD = extern struct {
     s_type: StructureType = StructureType.texture_lodgather_format_properties_amd,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -10124,7 +10535,10 @@ pub const ShaderStatisticsInfoAMD = extern struct {
     compute_work_group_size: [3]u32 = @import("std").mem.zeroes([3]u32),
 };
 pub const PFN_getShaderInfoAMD = ?*const fn (Device, Pipeline, ShaderStageFlags, ShaderInfoTypeAMD, [*c]usize, ?*anyopaque) callconv(.c) Result;
-pub extern fn getShaderInfoAMD(device: Device, pipeline: Pipeline, shader_stage: ShaderStageFlags, info_type: ShaderInfoTypeAMD, p_info_size: [*c]usize, p_info: ?*anyopaque) Result;
+pub extern fn vkGetShaderInfoAMD(device: Device, pipeline: Pipeline, shader_stage: ShaderStageFlags, info_type: ShaderInfoTypeAMD, p_info_size: [*c]usize, p_info: ?*anyopaque) Result;
+pub inline fn getShaderInfoAMD(device: Device, pipeline: Pipeline, shader_stage: ShaderStageFlags, info_type: ShaderInfoTypeAMD, p_info_size: [*c]usize, p_info: ?*anyopaque) Result {
+    return vkGetShaderInfoAMD(device, pipeline, shader_stage, info_type, p_info_size, p_info);
+}
 pub const PhysicalDeviceCornerSampledImageFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_corner_sampled_image_features_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -10150,7 +10564,10 @@ pub const ExternalImageFormatPropertiesNV = extern struct {
     compatible_handle_types: ExternalMemoryHandleTypeFlagsNV = @import("std").mem.zeroes(ExternalMemoryHandleTypeFlagsNV),
 };
 pub const PFN_getPhysicalDeviceExternalImageFormatPropertiesNV = ?*const fn (PhysicalDevice, Format, ImageType, ImageTiling, ImageUsageFlags, ImageCreateFlags, ExternalMemoryHandleTypeFlagsNV, [*c]ExternalImageFormatPropertiesNV) callconv(.c) Result;
-pub extern fn getPhysicalDeviceExternalImageFormatPropertiesNV(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, external_handle_type: ExternalMemoryHandleTypeFlagsNV, p_external_image_format_properties: [*c]ExternalImageFormatPropertiesNV) Result;
+pub extern fn vkGetPhysicalDeviceExternalImageFormatPropertiesNV(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, external_handle_type: ExternalMemoryHandleTypeFlagsNV, p_external_image_format_properties: [*c]ExternalImageFormatPropertiesNV) Result;
+pub inline fn getPhysicalDeviceExternalImageFormatPropertiesNV(physical_device: PhysicalDevice, format: Format, @"type": ImageType, tiling: ImageTiling, usage: ImageUsageFlags, flags: ImageCreateFlags, external_handle_type: ExternalMemoryHandleTypeFlagsNV, p_external_image_format_properties: [*c]ExternalImageFormatPropertiesNV) Result {
+    return vkGetPhysicalDeviceExternalImageFormatPropertiesNV(physical_device, format, @"type", tiling, usage, flags, external_handle_type, p_external_image_format_properties);
+}
 pub const ExternalMemoryImageCreateInfoNV = extern struct {
     s_type: StructureType = StructureType.external_memory_image_create_info_nv,
     p_next: ?*const anyopaque = @import("std").mem.zeroes(?*const anyopaque),
@@ -10239,8 +10656,14 @@ pub const CommandBufferInheritanceConditionalRenderingInfoEXT = extern struct {
 };
 pub const PFN_cmdBeginConditionalRenderingEXT = ?*const fn (CommandBuffer, [*c]const ConditionalRenderingBeginInfoEXT) callconv(.c) void;
 pub const PFN_cmdEndConditionalRenderingEXT = ?*const fn (CommandBuffer) callconv(.c) void;
-pub extern fn cmdBeginConditionalRenderingEXT(command_buffer: CommandBuffer, p_conditional_rendering_begin: [*c]const ConditionalRenderingBeginInfoEXT) void;
-pub extern fn cmdEndConditionalRenderingEXT(command_buffer: CommandBuffer) void;
+pub extern fn vkCmdBeginConditionalRenderingEXT(command_buffer: CommandBuffer, p_conditional_rendering_begin: [*c]const ConditionalRenderingBeginInfoEXT) void;
+pub inline fn cmdBeginConditionalRenderingEXT(command_buffer: CommandBuffer, p_conditional_rendering_begin: [*c]const ConditionalRenderingBeginInfoEXT) void {
+    return vkCmdBeginConditionalRenderingEXT(command_buffer, p_conditional_rendering_begin);
+}
+pub extern fn vkCmdEndConditionalRenderingEXT(command_buffer: CommandBuffer) void;
+pub inline fn cmdEndConditionalRenderingEXT(command_buffer: CommandBuffer) void {
+    return vkCmdEndConditionalRenderingEXT(command_buffer);
+}
 pub const ViewportWScalingNV = extern struct {
     xcoeff: f32 = @import("std").mem.zeroes(f32),
     ycoeff: f32 = @import("std").mem.zeroes(f32),
@@ -10253,9 +10676,15 @@ pub const PipelineViewportWScalingStateCreateInfoNV = extern struct {
     p_viewport_wscalings: [*c]const ViewportWScalingNV = @import("std").mem.zeroes([*c]const ViewportWScalingNV),
 };
 pub const PFN_cmdSetViewportWScalingNV = ?*const fn (CommandBuffer, u32, u32, [*c]const ViewportWScalingNV) callconv(.c) void;
-pub extern fn cmdSetViewportWScalingNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_wscalings: [*c]const ViewportWScalingNV) void;
+pub extern fn vkCmdSetViewportWScalingNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_wscalings: [*c]const ViewportWScalingNV) void;
+pub inline fn cmdSetViewportWScalingNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_wscalings: [*c]const ViewportWScalingNV) void {
+    return vkCmdSetViewportWScalingNV(command_buffer, first_viewport, viewport_count, p_viewport_wscalings);
+}
 pub const PFN_releaseDisplayEXT = ?*const fn (PhysicalDevice, DisplayKHR) callconv(.c) Result;
-pub extern fn releaseDisplayEXT(physical_device: PhysicalDevice, display: DisplayKHR) Result;
+pub extern fn vkReleaseDisplayEXT(physical_device: PhysicalDevice, display: DisplayKHR) Result;
+pub inline fn releaseDisplayEXT(physical_device: PhysicalDevice, display: DisplayKHR) Result {
+    return vkReleaseDisplayEXT(physical_device, display);
+}
 pub const SurfaceCounterFlagsEXT = enum(u32) {
     null = 0,
     vblank_ext = 1,
@@ -10278,7 +10707,10 @@ pub const SurfaceCapabilities2EXT = extern struct {
     supported_surface_counters: SurfaceCounterFlagsEXT = @import("std").mem.zeroes(SurfaceCounterFlagsEXT),
 };
 pub const PFN_getPhysicalDeviceSurfaceCapabilities2EXT = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]SurfaceCapabilities2EXT) callconv(.c) Result;
-pub extern fn getPhysicalDeviceSurfaceCapabilities2EXT(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilities2EXT) Result;
+pub extern fn vkGetPhysicalDeviceSurfaceCapabilities2EXT(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilities2EXT) Result;
+pub inline fn getPhysicalDeviceSurfaceCapabilities2EXT(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilities2EXT) Result {
+    return vkGetPhysicalDeviceSurfaceCapabilities2EXT(physical_device, surface, p_surface_capabilities);
+}
 pub const DisplayPowerStateEXT = enum(u32) {
     off_ext = 0,
     suspend_ext = 1,
@@ -10314,10 +10746,22 @@ pub const PFN_displayPowerControlEXT = ?*const fn (Device, DisplayKHR, [*c]const
 pub const PFN_registerDeviceEventEXT = ?*const fn (Device, [*c]const DeviceEventInfoEXT, [*c]const AllocationCallbacks, [*c]Fence) callconv(.c) Result;
 pub const PFN_registerDisplayEventEXT = ?*const fn (Device, DisplayKHR, [*c]const DisplayEventInfoEXT, [*c]const AllocationCallbacks, [*c]Fence) callconv(.c) Result;
 pub const PFN_getSwapchainCounterEXT = ?*const fn (Device, SwapchainKHR, SurfaceCounterFlagsEXT, [*c]u64) callconv(.c) Result;
-pub extern fn displayPowerControlEXT(device: Device, display: DisplayKHR, p_display_power_info: [*c]const DisplayPowerInfoEXT) Result;
-pub extern fn registerDeviceEventEXT(device: Device, p_device_event_info: [*c]const DeviceEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
-pub extern fn registerDisplayEventEXT(device: Device, display: DisplayKHR, p_display_event_info: [*c]const DisplayEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
-pub extern fn getSwapchainCounterEXT(device: Device, swapchain: SwapchainKHR, counter: SurfaceCounterFlagsEXT, p_counter_value: [*c]u64) Result;
+pub extern fn vkDisplayPowerControlEXT(device: Device, display: DisplayKHR, p_display_power_info: [*c]const DisplayPowerInfoEXT) Result;
+pub inline fn displayPowerControlEXT(device: Device, display: DisplayKHR, p_display_power_info: [*c]const DisplayPowerInfoEXT) Result {
+    return vkDisplayPowerControlEXT(device, display, p_display_power_info);
+}
+pub extern fn vkRegisterDeviceEventEXT(device: Device, p_device_event_info: [*c]const DeviceEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
+pub inline fn registerDeviceEventEXT(device: Device, p_device_event_info: [*c]const DeviceEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result {
+    return vkRegisterDeviceEventEXT(device, p_device_event_info, p_allocator, p_fence);
+}
+pub extern fn vkRegisterDisplayEventEXT(device: Device, display: DisplayKHR, p_display_event_info: [*c]const DisplayEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result;
+pub inline fn registerDisplayEventEXT(device: Device, display: DisplayKHR, p_display_event_info: [*c]const DisplayEventInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_fence: [*c]Fence) Result {
+    return vkRegisterDisplayEventEXT(device, display, p_display_event_info, p_allocator, p_fence);
+}
+pub extern fn vkGetSwapchainCounterEXT(device: Device, swapchain: SwapchainKHR, counter: SurfaceCounterFlagsEXT, p_counter_value: [*c]u64) Result;
+pub inline fn getSwapchainCounterEXT(device: Device, swapchain: SwapchainKHR, counter: SurfaceCounterFlagsEXT, p_counter_value: [*c]u64) Result {
+    return vkGetSwapchainCounterEXT(device, swapchain, counter, p_counter_value);
+}
 pub const RefreshCycleDurationGOOGLE = extern struct {
     refresh_duration: u64 = @import("std").mem.zeroes(u64),
 };
@@ -10340,8 +10784,14 @@ pub const PresentTimesInfoGOOGLE = extern struct {
 };
 pub const PFN_getRefreshCycleDurationGOOGLE = ?*const fn (Device, SwapchainKHR, [*c]RefreshCycleDurationGOOGLE) callconv(.c) Result;
 pub const PFN_getPastPresentationTimingGOOGLE = ?*const fn (Device, SwapchainKHR, [*c]u32, [*c]PastPresentationTimingGOOGLE) callconv(.c) Result;
-pub extern fn getRefreshCycleDurationGOOGLE(device: Device, swapchain: SwapchainKHR, p_display_timing_properties: [*c]RefreshCycleDurationGOOGLE) Result;
-pub extern fn getPastPresentationTimingGOOGLE(device: Device, swapchain: SwapchainKHR, p_presentation_timing_count: [*c]u32, p_presentation_timings: [*c]PastPresentationTimingGOOGLE) Result;
+pub extern fn vkGetRefreshCycleDurationGOOGLE(device: Device, swapchain: SwapchainKHR, p_display_timing_properties: [*c]RefreshCycleDurationGOOGLE) Result;
+pub inline fn getRefreshCycleDurationGOOGLE(device: Device, swapchain: SwapchainKHR, p_display_timing_properties: [*c]RefreshCycleDurationGOOGLE) Result {
+    return vkGetRefreshCycleDurationGOOGLE(device, swapchain, p_display_timing_properties);
+}
+pub extern fn vkGetPastPresentationTimingGOOGLE(device: Device, swapchain: SwapchainKHR, p_presentation_timing_count: [*c]u32, p_presentation_timings: [*c]PastPresentationTimingGOOGLE) Result;
+pub inline fn getPastPresentationTimingGOOGLE(device: Device, swapchain: SwapchainKHR, p_presentation_timing_count: [*c]u32, p_presentation_timings: [*c]PastPresentationTimingGOOGLE) Result {
+    return vkGetPastPresentationTimingGOOGLE(device, swapchain, p_presentation_timing_count, p_presentation_timings);
+}
 pub const PhysicalDeviceMultiviewPerViewAttributesPropertiesNVX = extern struct {
     s_type: StructureType = StructureType.physical_device_multiview_per_view_attributes_properties_nvx,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -10392,9 +10842,18 @@ pub const PipelineDiscardRectangleStateCreateInfoEXT = extern struct {
 pub const PFN_cmdSetDiscardRectangleEXT = ?*const fn (CommandBuffer, u32, u32, [*c]const Rect2D) callconv(.c) void;
 pub const PFN_cmdSetDiscardRectangleEnableEXT = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetDiscardRectangleModeEXT = ?*const fn (CommandBuffer, DiscardRectangleModeEXT) callconv(.c) void;
-pub extern fn cmdSetDiscardRectangleEXT(command_buffer: CommandBuffer, first_discard_rectangle: u32, discard_rectangle_count: u32, p_discard_rectangles: [*c]const Rect2D) void;
-pub extern fn cmdSetDiscardRectangleEnableEXT(command_buffer: CommandBuffer, discard_rectangle_enable: Bool32) void;
-pub extern fn cmdSetDiscardRectangleModeEXT(command_buffer: CommandBuffer, discard_rectangle_mode: DiscardRectangleModeEXT) void;
+pub extern fn vkCmdSetDiscardRectangleEXT(command_buffer: CommandBuffer, first_discard_rectangle: u32, discard_rectangle_count: u32, p_discard_rectangles: [*c]const Rect2D) void;
+pub inline fn cmdSetDiscardRectangleEXT(command_buffer: CommandBuffer, first_discard_rectangle: u32, discard_rectangle_count: u32, p_discard_rectangles: [*c]const Rect2D) void {
+    return vkCmdSetDiscardRectangleEXT(command_buffer, first_discard_rectangle, discard_rectangle_count, p_discard_rectangles);
+}
+pub extern fn vkCmdSetDiscardRectangleEnableEXT(command_buffer: CommandBuffer, discard_rectangle_enable: Bool32) void;
+pub inline fn cmdSetDiscardRectangleEnableEXT(command_buffer: CommandBuffer, discard_rectangle_enable: Bool32) void {
+    return vkCmdSetDiscardRectangleEnableEXT(command_buffer, discard_rectangle_enable);
+}
+pub extern fn vkCmdSetDiscardRectangleModeEXT(command_buffer: CommandBuffer, discard_rectangle_mode: DiscardRectangleModeEXT) void;
+pub inline fn cmdSetDiscardRectangleModeEXT(command_buffer: CommandBuffer, discard_rectangle_mode: DiscardRectangleModeEXT) void {
+    return vkCmdSetDiscardRectangleModeEXT(command_buffer, discard_rectangle_mode);
+}
 pub const ConservativeRasterizationModeEXT = enum(u32) {
     disabled_ext = 0,
     overestimate_ext = 1,
@@ -10450,7 +10909,10 @@ pub const HdrMetadataEXT = extern struct {
     max_frame_average_light_level: f32 = @import("std").mem.zeroes(f32),
 };
 pub const PFN_setHdrMetadataEXT = ?*const fn (Device, u32, [*c]const SwapchainKHR, [*c]const HdrMetadataEXT) callconv(.c) void;
-pub extern fn setHdrMetadataEXT(device: Device, swapchain_count: u32, p_swapchains: [*c]const SwapchainKHR, p_metadata: [*c]const HdrMetadataEXT) void;
+pub extern fn vkSetHdrMetadataEXT(device: Device, swapchain_count: u32, p_swapchains: [*c]const SwapchainKHR, p_metadata: [*c]const HdrMetadataEXT) void;
+pub inline fn setHdrMetadataEXT(device: Device, swapchain_count: u32, p_swapchains: [*c]const SwapchainKHR, p_metadata: [*c]const HdrMetadataEXT) void {
+    return vkSetHdrMetadataEXT(device, swapchain_count, p_swapchains, p_metadata);
+}
 pub const PhysicalDeviceRelaxedLineRasterizationFeaturesIMG = extern struct {
     s_type: StructureType = StructureType.physical_device_relaxed_line_rasterization_features_img,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -10530,17 +10992,50 @@ pub const PFN_cmdInsertDebugUtilsLabelEXT = ?*const fn (CommandBuffer, [*c]const
 pub const PFN_createDebugUtilsMessengerEXT = ?*const fn (Instance, [*c]const DebugUtilsMessengerCreateInfoEXT, [*c]const AllocationCallbacks, [*c]DebugUtilsMessengerEXT) callconv(.c) Result;
 pub const PFN_destroyDebugUtilsMessengerEXT = ?*const fn (Instance, DebugUtilsMessengerEXT, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_submitDebugUtilsMessageEXT = ?*const fn (Instance, DebugUtilsMessageSeverityFlagsEXT, DebugUtilsMessageTypeFlagsEXT, [*c]const DebugUtilsMessengerCallbackDataEXT) callconv(.c) void;
-pub extern fn setDebugUtilsObjectNameEXT(device: Device, p_name_info: [*c]const DebugUtilsObjectNameInfoEXT) Result;
-pub extern fn setDebugUtilsObjectTagEXT(device: Device, p_tag_info: [*c]const DebugUtilsObjectTagInfoEXT) Result;
-pub extern fn queueBeginDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void;
-pub extern fn queueEndDebugUtilsLabelEXT(queue: Queue) void;
-pub extern fn queueInsertDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void;
-pub extern fn cmdBeginDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void;
-pub extern fn cmdEndDebugUtilsLabelEXT(command_buffer: CommandBuffer) void;
-pub extern fn cmdInsertDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void;
-pub extern fn createDebugUtilsMessengerEXT(instance: Instance, p_create_info: [*c]const DebugUtilsMessengerCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_messenger: [*c]DebugUtilsMessengerEXT) Result;
-pub extern fn destroyDebugUtilsMessengerEXT(instance: Instance, messenger: DebugUtilsMessengerEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn submitDebugUtilsMessageEXT(instance: Instance, message_severity: DebugUtilsMessageSeverityFlagsEXT, message_types: DebugUtilsMessageTypeFlagsEXT, p_callback_data: [*c]const DebugUtilsMessengerCallbackDataEXT) void;
+pub extern fn vkSetDebugUtilsObjectNameEXT(device: Device, p_name_info: [*c]const DebugUtilsObjectNameInfoEXT) Result;
+pub inline fn setDebugUtilsObjectNameEXT(device: Device, p_name_info: [*c]const DebugUtilsObjectNameInfoEXT) Result {
+    return vkSetDebugUtilsObjectNameEXT(device, p_name_info);
+}
+pub extern fn vkSetDebugUtilsObjectTagEXT(device: Device, p_tag_info: [*c]const DebugUtilsObjectTagInfoEXT) Result;
+pub inline fn setDebugUtilsObjectTagEXT(device: Device, p_tag_info: [*c]const DebugUtilsObjectTagInfoEXT) Result {
+    return vkSetDebugUtilsObjectTagEXT(device, p_tag_info);
+}
+pub extern fn vkQueueBeginDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void;
+pub inline fn queueBeginDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void {
+    return vkQueueBeginDebugUtilsLabelEXT(queue, p_label_info);
+}
+pub extern fn vkQueueEndDebugUtilsLabelEXT(queue: Queue) void;
+pub inline fn queueEndDebugUtilsLabelEXT(queue: Queue) void {
+    return vkQueueEndDebugUtilsLabelEXT(queue);
+}
+pub extern fn vkQueueInsertDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void;
+pub inline fn queueInsertDebugUtilsLabelEXT(queue: Queue, p_label_info: [*c]const DebugUtilsLabelEXT) void {
+    return vkQueueInsertDebugUtilsLabelEXT(queue, p_label_info);
+}
+pub extern fn vkCmdBeginDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void;
+pub inline fn cmdBeginDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void {
+    return vkCmdBeginDebugUtilsLabelEXT(command_buffer, p_label_info);
+}
+pub extern fn vkCmdEndDebugUtilsLabelEXT(command_buffer: CommandBuffer) void;
+pub inline fn cmdEndDebugUtilsLabelEXT(command_buffer: CommandBuffer) void {
+    return vkCmdEndDebugUtilsLabelEXT(command_buffer);
+}
+pub extern fn vkCmdInsertDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void;
+pub inline fn cmdInsertDebugUtilsLabelEXT(command_buffer: CommandBuffer, p_label_info: [*c]const DebugUtilsLabelEXT) void {
+    return vkCmdInsertDebugUtilsLabelEXT(command_buffer, p_label_info);
+}
+pub extern fn vkCreateDebugUtilsMessengerEXT(instance: Instance, p_create_info: [*c]const DebugUtilsMessengerCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_messenger: [*c]DebugUtilsMessengerEXT) Result;
+pub inline fn createDebugUtilsMessengerEXT(instance: Instance, p_create_info: [*c]const DebugUtilsMessengerCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_messenger: [*c]DebugUtilsMessengerEXT) Result {
+    return vkCreateDebugUtilsMessengerEXT(instance, p_create_info, p_allocator, p_messenger);
+}
+pub extern fn vkDestroyDebugUtilsMessengerEXT(instance: Instance, messenger: DebugUtilsMessengerEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyDebugUtilsMessengerEXT(instance: Instance, messenger: DebugUtilsMessengerEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyDebugUtilsMessengerEXT(instance, messenger, p_allocator);
+}
+pub extern fn vkSubmitDebugUtilsMessageEXT(instance: Instance, message_severity: DebugUtilsMessageSeverityFlagsEXT, message_types: DebugUtilsMessageTypeFlagsEXT, p_callback_data: [*c]const DebugUtilsMessengerCallbackDataEXT) void;
+pub inline fn submitDebugUtilsMessageEXT(instance: Instance, message_severity: DebugUtilsMessageSeverityFlagsEXT, message_types: DebugUtilsMessageTypeFlagsEXT, p_callback_data: [*c]const DebugUtilsMessengerCallbackDataEXT) void {
+    return vkSubmitDebugUtilsMessageEXT(instance, message_severity, message_types, p_callback_data);
+}
 pub const SamplerReductionModeEXT = SamplerReductionMode;
 pub const SamplerReductionModeCreateInfoEXT = SamplerReductionModeCreateInfo;
 pub const PhysicalDeviceSamplerFilterMinmaxPropertiesEXT = PhysicalDeviceSamplerFilterMinmaxProperties;
@@ -10598,8 +11093,14 @@ pub const MultisamplePropertiesEXT = extern struct {
 };
 pub const PFN_cmdSetSampleLocationsEXT = ?*const fn (CommandBuffer, [*c]const SampleLocationsInfoEXT) callconv(.c) void;
 pub const PFN_getPhysicalDeviceMultisamplePropertiesEXT = ?*const fn (PhysicalDevice, SampleCountFlags, [*c]MultisamplePropertiesEXT) callconv(.c) void;
-pub extern fn cmdSetSampleLocationsEXT(command_buffer: CommandBuffer, p_sample_locations_info: [*c]const SampleLocationsInfoEXT) void;
-pub extern fn getPhysicalDeviceMultisamplePropertiesEXT(physical_device: PhysicalDevice, samples: SampleCountFlags, p_multisample_properties: [*c]MultisamplePropertiesEXT) void;
+pub extern fn vkCmdSetSampleLocationsEXT(command_buffer: CommandBuffer, p_sample_locations_info: [*c]const SampleLocationsInfoEXT) void;
+pub inline fn cmdSetSampleLocationsEXT(command_buffer: CommandBuffer, p_sample_locations_info: [*c]const SampleLocationsInfoEXT) void {
+    return vkCmdSetSampleLocationsEXT(command_buffer, p_sample_locations_info);
+}
+pub extern fn vkGetPhysicalDeviceMultisamplePropertiesEXT(physical_device: PhysicalDevice, samples: SampleCountFlags, p_multisample_properties: [*c]MultisamplePropertiesEXT) void;
+pub inline fn getPhysicalDeviceMultisamplePropertiesEXT(physical_device: PhysicalDevice, samples: SampleCountFlags, p_multisample_properties: [*c]MultisamplePropertiesEXT) void {
+    return vkGetPhysicalDeviceMultisamplePropertiesEXT(physical_device, samples, p_multisample_properties);
+}
 pub const BlendOverlapEXT = enum(u32) {
     uncorrelated_ext = 0,
     disjoint_ext = 1,
@@ -10711,7 +11212,10 @@ pub const DrmFormatModifierPropertiesList2EXT = extern struct {
     p_drm_format_modifier_properties: [*c]DrmFormatModifierProperties2EXT = @import("std").mem.zeroes([*c]DrmFormatModifierProperties2EXT),
 };
 pub const PFN_getImageDrmFormatModifierPropertiesEXT = ?*const fn (Device, Image, [*c]ImageDrmFormatModifierPropertiesEXT) callconv(.c) Result;
-pub extern fn getImageDrmFormatModifierPropertiesEXT(device: Device, image: Image, p_properties: [*c]ImageDrmFormatModifierPropertiesEXT) Result;
+pub extern fn vkGetImageDrmFormatModifierPropertiesEXT(device: Device, image: Image, p_properties: [*c]ImageDrmFormatModifierPropertiesEXT) Result;
+pub inline fn getImageDrmFormatModifierPropertiesEXT(device: Device, image: Image, p_properties: [*c]ImageDrmFormatModifierPropertiesEXT) Result {
+    return vkGetImageDrmFormatModifierPropertiesEXT(device, image, p_properties);
+}
 pub const ValidationCacheEXT = enum(u64) { null = 0, _ };
 pub const ValidationCacheHeaderVersionEXT = enum(u32) {
     null = 0,
@@ -10734,10 +11238,22 @@ pub const PFN_createValidationCacheEXT = ?*const fn (Device, [*c]const Validatio
 pub const PFN_destroyValidationCacheEXT = ?*const fn (Device, ValidationCacheEXT, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_mergeValidationCachesEXT = ?*const fn (Device, ValidationCacheEXT, u32, [*c]const ValidationCacheEXT) callconv(.c) Result;
 pub const PFN_getValidationCacheDataEXT = ?*const fn (Device, ValidationCacheEXT, [*c]usize, ?*anyopaque) callconv(.c) Result;
-pub extern fn createValidationCacheEXT(device: Device, p_create_info: [*c]const ValidationCacheCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_validation_cache: [*c]ValidationCacheEXT) Result;
-pub extern fn destroyValidationCacheEXT(device: Device, validation_cache: ValidationCacheEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn mergeValidationCachesEXT(device: Device, dst_cache: ValidationCacheEXT, src_cache_count: u32, p_src_caches: [*c]const ValidationCacheEXT) Result;
-pub extern fn getValidationCacheDataEXT(device: Device, validation_cache: ValidationCacheEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
+pub extern fn vkCreateValidationCacheEXT(device: Device, p_create_info: [*c]const ValidationCacheCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_validation_cache: [*c]ValidationCacheEXT) Result;
+pub inline fn createValidationCacheEXT(device: Device, p_create_info: [*c]const ValidationCacheCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_validation_cache: [*c]ValidationCacheEXT) Result {
+    return vkCreateValidationCacheEXT(device, p_create_info, p_allocator, p_validation_cache);
+}
+pub extern fn vkDestroyValidationCacheEXT(device: Device, validation_cache: ValidationCacheEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyValidationCacheEXT(device: Device, validation_cache: ValidationCacheEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyValidationCacheEXT(device, validation_cache, p_allocator);
+}
+pub extern fn vkMergeValidationCachesEXT(device: Device, dst_cache: ValidationCacheEXT, src_cache_count: u32, p_src_caches: [*c]const ValidationCacheEXT) Result;
+pub inline fn mergeValidationCachesEXT(device: Device, dst_cache: ValidationCacheEXT, src_cache_count: u32, p_src_caches: [*c]const ValidationCacheEXT) Result {
+    return vkMergeValidationCachesEXT(device, dst_cache, src_cache_count, p_src_caches);
+}
+pub extern fn vkGetValidationCacheDataEXT(device: Device, validation_cache: ValidationCacheEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
+pub inline fn getValidationCacheDataEXT(device: Device, validation_cache: ValidationCacheEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result {
+    return vkGetValidationCacheDataEXT(device, validation_cache, p_data_size, p_data);
+}
 pub const DescriptorBindingFlagsEXT = DescriptorBindingFlags;
 pub const DescriptorSetLayoutBindingFlagsCreateInfoEXT = DescriptorSetLayoutBindingFlagsCreateInfo;
 pub const PhysicalDeviceDescriptorIndexingFeaturesEXT = PhysicalDeviceDescriptorIndexingFeatures;
@@ -10809,9 +11325,18 @@ pub const PipelineViewportCoarseSampleOrderStateCreateInfoNV = extern struct {
 pub const PFN_cmdBindShadingRateImageNV = ?*const fn (CommandBuffer, ImageView, ImageLayout) callconv(.c) void;
 pub const PFN_cmdSetViewportShadingRatePaletteNV = ?*const fn (CommandBuffer, u32, u32, [*c]const ShadingRatePaletteNV) callconv(.c) void;
 pub const PFN_cmdSetCoarseSampleOrderNV = ?*const fn (CommandBuffer, CoarseSampleOrderTypeNV, u32, [*c]const CoarseSampleOrderCustomNV) callconv(.c) void;
-pub extern fn cmdBindShadingRateImageNV(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void;
-pub extern fn cmdSetViewportShadingRatePaletteNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_shading_rate_palettes: [*c]const ShadingRatePaletteNV) void;
-pub extern fn cmdSetCoarseSampleOrderNV(command_buffer: CommandBuffer, sample_order_type: CoarseSampleOrderTypeNV, custom_sample_order_count: u32, p_custom_sample_orders: [*c]const CoarseSampleOrderCustomNV) void;
+pub extern fn vkCmdBindShadingRateImageNV(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void;
+pub inline fn cmdBindShadingRateImageNV(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void {
+    return vkCmdBindShadingRateImageNV(command_buffer, image_view, image_layout);
+}
+pub extern fn vkCmdSetViewportShadingRatePaletteNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_shading_rate_palettes: [*c]const ShadingRatePaletteNV) void;
+pub inline fn cmdSetViewportShadingRatePaletteNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_shading_rate_palettes: [*c]const ShadingRatePaletteNV) void {
+    return vkCmdSetViewportShadingRatePaletteNV(command_buffer, first_viewport, viewport_count, p_shading_rate_palettes);
+}
+pub extern fn vkCmdSetCoarseSampleOrderNV(command_buffer: CommandBuffer, sample_order_type: CoarseSampleOrderTypeNV, custom_sample_order_count: u32, p_custom_sample_orders: [*c]const CoarseSampleOrderCustomNV) void;
+pub inline fn cmdSetCoarseSampleOrderNV(command_buffer: CommandBuffer, sample_order_type: CoarseSampleOrderTypeNV, custom_sample_order_count: u32, p_custom_sample_orders: [*c]const CoarseSampleOrderCustomNV) void {
+    return vkCmdSetCoarseSampleOrderNV(command_buffer, sample_order_type, custom_sample_order_count, p_custom_sample_orders);
+}
 pub const AccelerationStructureNV = enum(u64) { null = 0, _ };
 pub const RayTracingShaderGroupTypeKHR = enum(u32) {
     general_nv = 0,
@@ -11033,19 +11558,58 @@ pub const PFN_getRayTracingShaderGroupHandlesNV = ?*const fn (Device, Pipeline, 
 pub const PFN_getAccelerationStructureHandleNV = ?*const fn (Device, AccelerationStructureNV, usize, ?*anyopaque) callconv(.c) Result;
 pub const PFN_cmdWriteAccelerationStructuresPropertiesNV = ?*const fn (CommandBuffer, u32, [*c]const AccelerationStructureNV, QueryType, QueryPool, u32) callconv(.c) void;
 pub const PFN_compileDeferredNV = ?*const fn (Device, Pipeline, u32) callconv(.c) Result;
-pub extern fn createAccelerationStructureNV(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureNV) Result;
-pub extern fn destroyAccelerationStructureNV(device: Device, acceleration_structure: AccelerationStructureNV, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getAccelerationStructureMemoryRequirementsNV(device: Device, p_info: [*c]const AccelerationStructureMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2KHR) void;
-pub extern fn bindAccelerationStructureMemoryNV(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindAccelerationStructureMemoryInfoNV) Result;
-pub extern fn cmdBuildAccelerationStructureNV(command_buffer: CommandBuffer, p_info: [*c]const AccelerationStructureInfoNV, instance_data: Buffer, instance_offset: DeviceSize, update: Bool32, dst: AccelerationStructureNV, src: AccelerationStructureNV, scratch: Buffer, scratch_offset: DeviceSize) void;
-pub extern fn cmdCopyAccelerationStructureNV(command_buffer: CommandBuffer, dst: AccelerationStructureNV, src: AccelerationStructureNV, mode: CopyAccelerationStructureModeKHR) void;
-pub extern fn cmdTraceRaysNV(command_buffer: CommandBuffer, raygen_shader_binding_table_buffer: Buffer, raygen_shader_binding_offset: DeviceSize, miss_shader_binding_table_buffer: Buffer, miss_shader_binding_offset: DeviceSize, miss_shader_binding_stride: DeviceSize, hit_shader_binding_table_buffer: Buffer, hit_shader_binding_offset: DeviceSize, hit_shader_binding_stride: DeviceSize, callable_shader_binding_table_buffer: Buffer, callable_shader_binding_offset: DeviceSize, callable_shader_binding_stride: DeviceSize, width: u32, height: u32, depth: u32) void;
-pub extern fn createRayTracingPipelinesNV(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
-pub extern fn getRayTracingShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
-pub extern fn getRayTracingShaderGroupHandlesNV(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
-pub extern fn getAccelerationStructureHandleNV(device: Device, acceleration_structure: AccelerationStructureNV, data_size: usize, p_data: ?*anyopaque) Result;
-pub extern fn cmdWriteAccelerationStructuresPropertiesNV(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureNV, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
-pub extern fn compileDeferredNV(device: Device, pipeline: Pipeline, shader: u32) Result;
+pub extern fn vkCreateAccelerationStructureNV(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureNV) Result;
+pub inline fn createAccelerationStructureNV(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureNV) Result {
+    return vkCreateAccelerationStructureNV(device, p_create_info, p_allocator, p_acceleration_structure);
+}
+pub extern fn vkDestroyAccelerationStructureNV(device: Device, acceleration_structure: AccelerationStructureNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyAccelerationStructureNV(device: Device, acceleration_structure: AccelerationStructureNV, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyAccelerationStructureNV(device, acceleration_structure, p_allocator);
+}
+pub extern fn vkGetAccelerationStructureMemoryRequirementsNV(device: Device, p_info: [*c]const AccelerationStructureMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2KHR) void;
+pub inline fn getAccelerationStructureMemoryRequirementsNV(device: Device, p_info: [*c]const AccelerationStructureMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2KHR) void {
+    return vkGetAccelerationStructureMemoryRequirementsNV(device, p_info, p_memory_requirements);
+}
+pub extern fn vkBindAccelerationStructureMemoryNV(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindAccelerationStructureMemoryInfoNV) Result;
+pub inline fn bindAccelerationStructureMemoryNV(device: Device, bind_info_count: u32, p_bind_infos: [*c]const BindAccelerationStructureMemoryInfoNV) Result {
+    return vkBindAccelerationStructureMemoryNV(device, bind_info_count, p_bind_infos);
+}
+pub extern fn vkCmdBuildAccelerationStructureNV(command_buffer: CommandBuffer, p_info: [*c]const AccelerationStructureInfoNV, instance_data: Buffer, instance_offset: DeviceSize, update: Bool32, dst: AccelerationStructureNV, src: AccelerationStructureNV, scratch: Buffer, scratch_offset: DeviceSize) void;
+pub inline fn cmdBuildAccelerationStructureNV(command_buffer: CommandBuffer, p_info: [*c]const AccelerationStructureInfoNV, instance_data: Buffer, instance_offset: DeviceSize, update: Bool32, dst: AccelerationStructureNV, src: AccelerationStructureNV, scratch: Buffer, scratch_offset: DeviceSize) void {
+    return vkCmdBuildAccelerationStructureNV(command_buffer, p_info, instance_data, instance_offset, update, dst, src, scratch, scratch_offset);
+}
+pub extern fn vkCmdCopyAccelerationStructureNV(command_buffer: CommandBuffer, dst: AccelerationStructureNV, src: AccelerationStructureNV, mode: CopyAccelerationStructureModeKHR) void;
+pub inline fn cmdCopyAccelerationStructureNV(command_buffer: CommandBuffer, dst: AccelerationStructureNV, src: AccelerationStructureNV, mode: CopyAccelerationStructureModeKHR) void {
+    return vkCmdCopyAccelerationStructureNV(command_buffer, dst, src, mode);
+}
+pub extern fn vkCmdTraceRaysNV(command_buffer: CommandBuffer, raygen_shader_binding_table_buffer: Buffer, raygen_shader_binding_offset: DeviceSize, miss_shader_binding_table_buffer: Buffer, miss_shader_binding_offset: DeviceSize, miss_shader_binding_stride: DeviceSize, hit_shader_binding_table_buffer: Buffer, hit_shader_binding_offset: DeviceSize, hit_shader_binding_stride: DeviceSize, callable_shader_binding_table_buffer: Buffer, callable_shader_binding_offset: DeviceSize, callable_shader_binding_stride: DeviceSize, width: u32, height: u32, depth: u32) void;
+pub inline fn cmdTraceRaysNV(command_buffer: CommandBuffer, raygen_shader_binding_table_buffer: Buffer, raygen_shader_binding_offset: DeviceSize, miss_shader_binding_table_buffer: Buffer, miss_shader_binding_offset: DeviceSize, miss_shader_binding_stride: DeviceSize, hit_shader_binding_table_buffer: Buffer, hit_shader_binding_offset: DeviceSize, hit_shader_binding_stride: DeviceSize, callable_shader_binding_table_buffer: Buffer, callable_shader_binding_offset: DeviceSize, callable_shader_binding_stride: DeviceSize, width: u32, height: u32, depth: u32) void {
+    return vkCmdTraceRaysNV(command_buffer, raygen_shader_binding_table_buffer, raygen_shader_binding_offset, miss_shader_binding_table_buffer, miss_shader_binding_offset, miss_shader_binding_stride, hit_shader_binding_table_buffer, hit_shader_binding_offset, hit_shader_binding_stride, callable_shader_binding_table_buffer, callable_shader_binding_offset, callable_shader_binding_stride, width, height, depth);
+}
+pub extern fn vkCreateRayTracingPipelinesNV(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
+pub inline fn createRayTracingPipelinesNV(device: Device, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result {
+    return vkCreateRayTracingPipelinesNV(device, pipeline_cache, create_info_count, p_create_infos, p_allocator, p_pipelines);
+}
+pub extern fn vkGetRayTracingShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
+pub inline fn getRayTracingShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result {
+    return vkGetRayTracingShaderGroupHandlesKHR(device, pipeline, first_group, group_count, data_size, p_data);
+}
+pub extern fn vkGetRayTracingShaderGroupHandlesNV(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
+pub inline fn getRayTracingShaderGroupHandlesNV(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result {
+    return vkGetRayTracingShaderGroupHandlesNV(device, pipeline, first_group, group_count, data_size, p_data);
+}
+pub extern fn vkGetAccelerationStructureHandleNV(device: Device, acceleration_structure: AccelerationStructureNV, data_size: usize, p_data: ?*anyopaque) Result;
+pub inline fn getAccelerationStructureHandleNV(device: Device, acceleration_structure: AccelerationStructureNV, data_size: usize, p_data: ?*anyopaque) Result {
+    return vkGetAccelerationStructureHandleNV(device, acceleration_structure, data_size, p_data);
+}
+pub extern fn vkCmdWriteAccelerationStructuresPropertiesNV(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureNV, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
+pub inline fn cmdWriteAccelerationStructuresPropertiesNV(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureNV, query_type: QueryType, query_pool: QueryPool, first_query: u32) void {
+    return vkCmdWriteAccelerationStructuresPropertiesNV(command_buffer, acceleration_structure_count, p_acceleration_structures, query_type, query_pool, first_query);
+}
+pub extern fn vkCompileDeferredNV(device: Device, pipeline: Pipeline, shader: u32) Result;
+pub inline fn compileDeferredNV(device: Device, pipeline: Pipeline, shader: u32) Result {
+    return vkCompileDeferredNV(device, pipeline, shader);
+}
 pub const PhysicalDeviceRepresentativeFragmentTestFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_representative_fragment_test_features_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11086,9 +11650,15 @@ pub const PhysicalDeviceExternalMemoryHostPropertiesEXT = extern struct {
     min_imported_host_pointer_alignment: DeviceSize = @import("std").mem.zeroes(DeviceSize),
 };
 pub const PFN_getMemoryHostPointerPropertiesEXT = ?*const fn (Device, ExternalMemoryHandleTypeFlags, ?*const anyopaque, [*c]MemoryHostPointerPropertiesEXT) callconv(.c) Result;
-pub extern fn getMemoryHostPointerPropertiesEXT(device: Device, handle_type: ExternalMemoryHandleTypeFlags, p_host_pointer: ?*const anyopaque, p_memory_host_pointer_properties: [*c]MemoryHostPointerPropertiesEXT) Result;
+pub extern fn vkGetMemoryHostPointerPropertiesEXT(device: Device, handle_type: ExternalMemoryHandleTypeFlags, p_host_pointer: ?*const anyopaque, p_memory_host_pointer_properties: [*c]MemoryHostPointerPropertiesEXT) Result;
+pub inline fn getMemoryHostPointerPropertiesEXT(device: Device, handle_type: ExternalMemoryHandleTypeFlags, p_host_pointer: ?*const anyopaque, p_memory_host_pointer_properties: [*c]MemoryHostPointerPropertiesEXT) Result {
+    return vkGetMemoryHostPointerPropertiesEXT(device, handle_type, p_host_pointer, p_memory_host_pointer_properties);
+}
 pub const PFN_cmdWriteBufferMarkerAMD = ?*const fn (CommandBuffer, PipelineStageFlags, Buffer, DeviceSize, u32) callconv(.c) void;
-pub extern fn cmdWriteBufferMarkerAMD(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void;
+pub extern fn vkCmdWriteBufferMarkerAMD(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void;
+pub inline fn cmdWriteBufferMarkerAMD(command_buffer: CommandBuffer, pipeline_stage: PipelineStageFlags, dst_buffer: Buffer, dst_offset: DeviceSize, marker: u32) void {
+    return vkCmdWriteBufferMarkerAMD(command_buffer, pipeline_stage, dst_buffer, dst_offset, marker);
+}
 pub const PipelineCompilerControlFlagsAMD = enum(u32) {
     null = 0,
 };
@@ -11101,8 +11671,14 @@ pub const TimeDomainEXT = TimeDomainKHR;
 pub const CalibratedTimestampInfoEXT = CalibratedTimestampInfoKHR;
 pub const PFN_getPhysicalDeviceCalibrateableTimeDomainsEXT = ?*const fn (PhysicalDevice, [*c]u32, [*c]TimeDomainKHR) callconv(.c) Result;
 pub const PFN_getCalibratedTimestampsEXT = ?*const fn (Device, u32, [*c]const CalibratedTimestampInfoKHR, [*c]u64, [*c]u64) callconv(.c) Result;
-pub extern fn getPhysicalDeviceCalibrateableTimeDomainsEXT(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result;
-pub extern fn getCalibratedTimestampsEXT(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result;
+pub extern fn vkGetPhysicalDeviceCalibrateableTimeDomainsEXT(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result;
+pub inline fn getPhysicalDeviceCalibrateableTimeDomainsEXT(physical_device: PhysicalDevice, p_time_domain_count: [*c]u32, p_time_domains: [*c]TimeDomainKHR) Result {
+    return vkGetPhysicalDeviceCalibrateableTimeDomainsEXT(physical_device, p_time_domain_count, p_time_domains);
+}
+pub extern fn vkGetCalibratedTimestampsEXT(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result;
+pub inline fn getCalibratedTimestampsEXT(device: Device, timestamp_count: u32, p_timestamp_infos: [*c]const CalibratedTimestampInfoKHR, p_timestamps: [*c]u64, p_max_deviation: [*c]u64) Result {
+    return vkGetCalibratedTimestampsEXT(device, timestamp_count, p_timestamp_infos, p_timestamps, p_max_deviation);
+}
 pub const PhysicalDeviceShaderCorePropertiesAMD = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_core_properties_amd,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11173,9 +11749,18 @@ pub const DrawMeshTasksIndirectCommandNV = extern struct {
 pub const PFN_cmdDrawMeshTasksNV = ?*const fn (CommandBuffer, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMeshTasksIndirectNV = ?*const fn (CommandBuffer, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMeshTasksIndirectCountNV = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
-pub extern fn cmdDrawMeshTasksNV(command_buffer: CommandBuffer, task_count: u32, first_task: u32) void;
-pub extern fn cmdDrawMeshTasksIndirectNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
-pub extern fn cmdDrawMeshTasksIndirectCountNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub extern fn vkCmdDrawMeshTasksNV(command_buffer: CommandBuffer, task_count: u32, first_task: u32) void;
+pub inline fn cmdDrawMeshTasksNV(command_buffer: CommandBuffer, task_count: u32, first_task: u32) void {
+    return vkCmdDrawMeshTasksNV(command_buffer, task_count, first_task);
+}
+pub extern fn vkCmdDrawMeshTasksIndirectNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawMeshTasksIndirectNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void {
+    return vkCmdDrawMeshTasksIndirectNV(command_buffer, buffer, offset, draw_count, stride);
+}
+pub extern fn vkCmdDrawMeshTasksIndirectCountNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawMeshTasksIndirectCountNV(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawMeshTasksIndirectCountNV(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
 pub const PhysicalDeviceFragmentShaderBarycentricFeaturesNV = PhysicalDeviceFragmentShaderBarycentricFeaturesKHR;
 pub const PhysicalDeviceShaderImageFootprintFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_image_footprint_features_nv,
@@ -11195,8 +11780,14 @@ pub const PhysicalDeviceExclusiveScissorFeaturesNV = extern struct {
 };
 pub const PFN_cmdSetExclusiveScissorEnableNV = ?*const fn (CommandBuffer, u32, u32, [*c]const Bool32) callconv(.c) void;
 pub const PFN_cmdSetExclusiveScissorNV = ?*const fn (CommandBuffer, u32, u32, [*c]const Rect2D) callconv(.c) void;
-pub extern fn cmdSetExclusiveScissorEnableNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissor_enables: [*c]const Bool32) void;
-pub extern fn cmdSetExclusiveScissorNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissors: [*c]const Rect2D) void;
+pub extern fn vkCmdSetExclusiveScissorEnableNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissor_enables: [*c]const Bool32) void;
+pub inline fn cmdSetExclusiveScissorEnableNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissor_enables: [*c]const Bool32) void {
+    return vkCmdSetExclusiveScissorEnableNV(command_buffer, first_exclusive_scissor, exclusive_scissor_count, p_exclusive_scissor_enables);
+}
+pub extern fn vkCmdSetExclusiveScissorNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissors: [*c]const Rect2D) void;
+pub inline fn cmdSetExclusiveScissorNV(command_buffer: CommandBuffer, first_exclusive_scissor: u32, exclusive_scissor_count: u32, p_exclusive_scissors: [*c]const Rect2D) void {
+    return vkCmdSetExclusiveScissorNV(command_buffer, first_exclusive_scissor, exclusive_scissor_count, p_exclusive_scissors);
+}
 pub const QueueFamilyCheckpointPropertiesNV = extern struct {
     s_type: StructureType = StructureType.queue_family_checkpoint_properties_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11210,8 +11801,14 @@ pub const CheckpointDataNV = extern struct {
 };
 pub const PFN_cmdSetCheckpointNV = ?*const fn (CommandBuffer, ?*const anyopaque) callconv(.c) void;
 pub const PFN_getQueueCheckpointDataNV = ?*const fn (Queue, [*c]u32, [*c]CheckpointDataNV) callconv(.c) void;
-pub extern fn cmdSetCheckpointNV(command_buffer: CommandBuffer, p_checkpoint_marker: ?*const anyopaque) void;
-pub extern fn getQueueCheckpointDataNV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointDataNV) void;
+pub extern fn vkCmdSetCheckpointNV(command_buffer: CommandBuffer, p_checkpoint_marker: ?*const anyopaque) void;
+pub inline fn cmdSetCheckpointNV(command_buffer: CommandBuffer, p_checkpoint_marker: ?*const anyopaque) void {
+    return vkCmdSetCheckpointNV(command_buffer, p_checkpoint_marker);
+}
+pub extern fn vkGetQueueCheckpointDataNV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointDataNV) void;
+pub inline fn getQueueCheckpointDataNV(queue: Queue, p_checkpoint_data_count: [*c]u32, p_checkpoint_data: [*c]CheckpointDataNV) void {
+    return vkGetQueueCheckpointDataNV(queue, p_checkpoint_data_count, p_checkpoint_data);
+}
 pub const PhysicalDeviceShaderIntegerFunctions2FeaturesINTEL = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_integer_functions2features_intel,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11292,15 +11889,42 @@ pub const PFN_acquirePerformanceConfigurationINTEL = ?*const fn (Device, [*c]con
 pub const PFN_releasePerformanceConfigurationINTEL = ?*const fn (Device, PerformanceConfigurationINTEL) callconv(.c) Result;
 pub const PFN_queueSetPerformanceConfigurationINTEL = ?*const fn (Queue, PerformanceConfigurationINTEL) callconv(.c) Result;
 pub const PFN_getPerformanceParameterINTEL = ?*const fn (Device, PerformanceParameterTypeINTEL, [*c]PerformanceValueINTEL) callconv(.c) Result;
-pub extern fn initializePerformanceApiINTEL(device: Device, p_initialize_info: [*c]const InitializePerformanceApiInfoINTEL) Result;
-pub extern fn uninitializePerformanceApiINTEL(device: Device) void;
-pub extern fn cmdSetPerformanceMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceMarkerInfoINTEL) Result;
-pub extern fn cmdSetPerformanceStreamMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceStreamMarkerInfoINTEL) Result;
-pub extern fn cmdSetPerformanceOverrideINTEL(command_buffer: CommandBuffer, p_override_info: [*c]const PerformanceOverrideInfoINTEL) Result;
-pub extern fn acquirePerformanceConfigurationINTEL(device: Device, p_acquire_info: [*c]const PerformanceConfigurationAcquireInfoINTEL, p_configuration: [*c]PerformanceConfigurationINTEL) Result;
-pub extern fn releasePerformanceConfigurationINTEL(device: Device, configuration: PerformanceConfigurationINTEL) Result;
-pub extern fn queueSetPerformanceConfigurationINTEL(queue: Queue, configuration: PerformanceConfigurationINTEL) Result;
-pub extern fn getPerformanceParameterINTEL(device: Device, parameter: PerformanceParameterTypeINTEL, p_value: [*c]PerformanceValueINTEL) Result;
+pub extern fn vkInitializePerformanceApiINTEL(device: Device, p_initialize_info: [*c]const InitializePerformanceApiInfoINTEL) Result;
+pub inline fn initializePerformanceApiINTEL(device: Device, p_initialize_info: [*c]const InitializePerformanceApiInfoINTEL) Result {
+    return vkInitializePerformanceApiINTEL(device, p_initialize_info);
+}
+pub extern fn vkUninitializePerformanceApiINTEL(device: Device) void;
+pub inline fn uninitializePerformanceApiINTEL(device: Device) void {
+    return vkUninitializePerformanceApiINTEL(device);
+}
+pub extern fn vkCmdSetPerformanceMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceMarkerInfoINTEL) Result;
+pub inline fn cmdSetPerformanceMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceMarkerInfoINTEL) Result {
+    return vkCmdSetPerformanceMarkerINTEL(command_buffer, p_marker_info);
+}
+pub extern fn vkCmdSetPerformanceStreamMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceStreamMarkerInfoINTEL) Result;
+pub inline fn cmdSetPerformanceStreamMarkerINTEL(command_buffer: CommandBuffer, p_marker_info: [*c]const PerformanceStreamMarkerInfoINTEL) Result {
+    return vkCmdSetPerformanceStreamMarkerINTEL(command_buffer, p_marker_info);
+}
+pub extern fn vkCmdSetPerformanceOverrideINTEL(command_buffer: CommandBuffer, p_override_info: [*c]const PerformanceOverrideInfoINTEL) Result;
+pub inline fn cmdSetPerformanceOverrideINTEL(command_buffer: CommandBuffer, p_override_info: [*c]const PerformanceOverrideInfoINTEL) Result {
+    return vkCmdSetPerformanceOverrideINTEL(command_buffer, p_override_info);
+}
+pub extern fn vkAcquirePerformanceConfigurationINTEL(device: Device, p_acquire_info: [*c]const PerformanceConfigurationAcquireInfoINTEL, p_configuration: [*c]PerformanceConfigurationINTEL) Result;
+pub inline fn acquirePerformanceConfigurationINTEL(device: Device, p_acquire_info: [*c]const PerformanceConfigurationAcquireInfoINTEL, p_configuration: [*c]PerformanceConfigurationINTEL) Result {
+    return vkAcquirePerformanceConfigurationINTEL(device, p_acquire_info, p_configuration);
+}
+pub extern fn vkReleasePerformanceConfigurationINTEL(device: Device, configuration: PerformanceConfigurationINTEL) Result;
+pub inline fn releasePerformanceConfigurationINTEL(device: Device, configuration: PerformanceConfigurationINTEL) Result {
+    return vkReleasePerformanceConfigurationINTEL(device, configuration);
+}
+pub extern fn vkQueueSetPerformanceConfigurationINTEL(queue: Queue, configuration: PerformanceConfigurationINTEL) Result;
+pub inline fn queueSetPerformanceConfigurationINTEL(queue: Queue, configuration: PerformanceConfigurationINTEL) Result {
+    return vkQueueSetPerformanceConfigurationINTEL(queue, configuration);
+}
+pub extern fn vkGetPerformanceParameterINTEL(device: Device, parameter: PerformanceParameterTypeINTEL, p_value: [*c]PerformanceValueINTEL) Result;
+pub inline fn getPerformanceParameterINTEL(device: Device, parameter: PerformanceParameterTypeINTEL, p_value: [*c]PerformanceValueINTEL) Result {
+    return vkGetPerformanceParameterINTEL(device, parameter, p_value);
+}
 pub const PhysicalDevicePCIBusInfoPropertiesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_pcibus_info_properties_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11320,7 +11944,10 @@ pub const SwapchainDisplayNativeHdrCreateInfoAMD = extern struct {
     local_dimming_enable: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_setLocalDimmingAMD = ?*const fn (Device, SwapchainKHR, Bool32) callconv(.c) void;
-pub extern fn setLocalDimmingAMD(device: Device, swap_chain: SwapchainKHR, local_dimming_enable: Bool32) void;
+pub extern fn vkSetLocalDimmingAMD(device: Device, swap_chain: SwapchainKHR, local_dimming_enable: Bool32) void;
+pub inline fn setLocalDimmingAMD(device: Device, swap_chain: SwapchainKHR, local_dimming_enable: Bool32) void {
+    return vkSetLocalDimmingAMD(device, swap_chain, local_dimming_enable);
+}
 pub const PhysicalDeviceFragmentDensityMapFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_fragment_density_map_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11400,11 +12027,17 @@ pub const BufferDeviceAddressCreateInfoEXT = extern struct {
     device_address: DeviceAddress = @import("std").mem.zeroes(DeviceAddress),
 };
 pub const PFN_getBufferDeviceAddressEXT = ?*const fn (Device, [*c]const BufferDeviceAddressInfo) callconv(.c) DeviceAddress;
-pub extern fn getBufferDeviceAddressEXT(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress;
+pub extern fn vkGetBufferDeviceAddressEXT(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress;
+pub inline fn getBufferDeviceAddressEXT(device: Device, p_info: [*c]const BufferDeviceAddressInfo) DeviceAddress {
+    return vkGetBufferDeviceAddressEXT(device, p_info);
+}
 pub const ToolPurposeFlagsEXT = ToolPurposeFlags;
 pub const PhysicalDeviceToolPropertiesEXT = PhysicalDeviceToolProperties;
 pub const PFN_getPhysicalDeviceToolPropertiesEXT = ?*const fn (PhysicalDevice, [*c]u32, [*c]PhysicalDeviceToolProperties) callconv(.c) Result;
-pub extern fn getPhysicalDeviceToolPropertiesEXT(physical_device: PhysicalDevice, p_tool_count: [*c]u32, p_tool_properties: [*c]PhysicalDeviceToolProperties) Result;
+pub extern fn vkGetPhysicalDeviceToolPropertiesEXT(physical_device: PhysicalDevice, p_tool_count: [*c]u32, p_tool_properties: [*c]PhysicalDeviceToolProperties) Result;
+pub inline fn getPhysicalDeviceToolPropertiesEXT(physical_device: PhysicalDevice, p_tool_count: [*c]u32, p_tool_properties: [*c]PhysicalDeviceToolProperties) Result {
+    return vkGetPhysicalDeviceToolPropertiesEXT(physical_device, p_tool_count, p_tool_properties);
+}
 pub const ImageStencilUsageCreateInfoEXT = ImageStencilUsageCreateInfo;
 pub const ValidationFeatureEnableEXT = enum(u32) {
     gpu_assisted_ext = 0,
@@ -11457,7 +12090,10 @@ pub const PhysicalDeviceCooperativeMatrixPropertiesNV = extern struct {
     cooperative_matrix_supported_stages: ShaderStageFlags = @import("std").mem.zeroes(ShaderStageFlags),
 };
 pub const PFN_getPhysicalDeviceCooperativeMatrixPropertiesNV = ?*const fn (PhysicalDevice, [*c]u32, [*c]CooperativeMatrixPropertiesNV) callconv(.c) Result;
-pub extern fn getPhysicalDeviceCooperativeMatrixPropertiesNV(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesNV) Result;
+pub extern fn vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesNV) Result;
+pub inline fn getPhysicalDeviceCooperativeMatrixPropertiesNV(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]CooperativeMatrixPropertiesNV) Result {
+    return vkGetPhysicalDeviceCooperativeMatrixPropertiesNV(physical_device, p_property_count, p_properties);
+}
 pub const CoverageReductionModeNV = enum(u32) {
     merge_nv = 0,
     truncate_nv = 1,
@@ -11483,7 +12119,10 @@ pub const FramebufferMixedSamplesCombinationNV = extern struct {
     color_samples: SampleCountFlags = @import("std").mem.zeroes(SampleCountFlags),
 };
 pub const PFN_getPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV = ?*const fn (PhysicalDevice, [*c]u32, [*c]FramebufferMixedSamplesCombinationNV) callconv(.c) Result;
-pub extern fn getPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV(physical_device: PhysicalDevice, p_combination_count: [*c]u32, p_combinations: [*c]FramebufferMixedSamplesCombinationNV) Result;
+pub extern fn vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV(physical_device: PhysicalDevice, p_combination_count: [*c]u32, p_combinations: [*c]FramebufferMixedSamplesCombinationNV) Result;
+pub inline fn getPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV(physical_device: PhysicalDevice, p_combination_count: [*c]u32, p_combinations: [*c]FramebufferMixedSamplesCombinationNV) Result {
+    return vkGetPhysicalDeviceSupportedFramebufferMixedSamplesCombinationsNV(physical_device, p_combination_count, p_combinations);
+}
 pub const PhysicalDeviceFragmentShaderInterlockFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_fragment_shader_interlock_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11524,13 +12163,19 @@ pub const HeadlessSurfaceCreateInfoEXT = extern struct {
     flags: HeadlessSurfaceCreateFlagsEXT = @import("std").mem.zeroes(HeadlessSurfaceCreateFlagsEXT),
 };
 pub const PFN_createHeadlessSurfaceEXT = ?*const fn (Instance, [*c]const HeadlessSurfaceCreateInfoEXT, [*c]const AllocationCallbacks, [*c]SurfaceKHR) callconv(.c) Result;
-pub extern fn createHeadlessSurfaceEXT(instance: Instance, p_create_info: [*c]const HeadlessSurfaceCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result;
+pub extern fn vkCreateHeadlessSurfaceEXT(instance: Instance, p_create_info: [*c]const HeadlessSurfaceCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result;
+pub inline fn createHeadlessSurfaceEXT(instance: Instance, p_create_info: [*c]const HeadlessSurfaceCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result {
+    return vkCreateHeadlessSurfaceEXT(instance, p_create_info, p_allocator, p_surface);
+}
 pub const LineRasterizationModeEXT = LineRasterizationModeKHR;
 pub const PhysicalDeviceLineRasterizationFeaturesEXT = PhysicalDeviceLineRasterizationFeaturesKHR;
 pub const PhysicalDeviceLineRasterizationPropertiesEXT = PhysicalDeviceLineRasterizationPropertiesKHR;
 pub const PipelineRasterizationLineStateCreateInfoEXT = PipelineRasterizationLineStateCreateInfoKHR;
 pub const PFN_cmdSetLineStippleEXT = ?*const fn (CommandBuffer, u32, u16) callconv(.c) void;
-pub extern fn cmdSetLineStippleEXT(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void;
+pub extern fn vkCmdSetLineStippleEXT(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void;
+pub inline fn cmdSetLineStippleEXT(command_buffer: CommandBuffer, line_stipple_factor: u32, line_stipple_pattern: u16) void {
+    return vkCmdSetLineStippleEXT(command_buffer, line_stipple_factor, line_stipple_pattern);
+}
 pub const PhysicalDeviceShaderAtomicFloatFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_atomic_float_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11549,7 +12194,10 @@ pub const PhysicalDeviceShaderAtomicFloatFeaturesEXT = extern struct {
 };
 pub const PhysicalDeviceHostQueryResetFeaturesEXT = PhysicalDeviceHostQueryResetFeatures;
 pub const PFN_resetQueryPoolEXT = ?*const fn (Device, QueryPool, u32, u32) callconv(.c) void;
-pub extern fn resetQueryPoolEXT(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32) void;
+pub extern fn vkResetQueryPoolEXT(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32) void;
+pub inline fn resetQueryPoolEXT(device: Device, query_pool: QueryPool, first_query: u32, query_count: u32) void {
+    return vkResetQueryPoolEXT(device, query_pool, first_query, query_count);
+}
 pub const PhysicalDeviceIndexTypeUint8FeaturesEXT = PhysicalDeviceIndexTypeUint8FeaturesKHR;
 pub const PhysicalDeviceExtendedDynamicStateFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_extended_dynamic_state_features_ext,
@@ -11568,18 +12216,54 @@ pub const PFN_cmdSetDepthCompareOpEXT = ?*const fn (CommandBuffer, CompareOp) ca
 pub const PFN_cmdSetDepthBoundsTestEnableEXT = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetStencilTestEnableEXT = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetStencilOpEXT = ?*const fn (CommandBuffer, StencilFaceFlags, StencilOp, StencilOp, StencilOp, CompareOp) callconv(.c) void;
-pub extern fn cmdSetCullModeEXT(command_buffer: CommandBuffer, cull_mode: CullModeFlags) void;
-pub extern fn cmdSetFrontFaceEXT(command_buffer: CommandBuffer, front_face: FrontFace) void;
-pub extern fn cmdSetPrimitiveTopologyEXT(command_buffer: CommandBuffer, primitive_topology: PrimitiveTopology) void;
-pub extern fn cmdSetViewportWithCountEXT(command_buffer: CommandBuffer, viewport_count: u32, p_viewports: [*c]const Viewport) void;
-pub extern fn cmdSetScissorWithCountEXT(command_buffer: CommandBuffer, scissor_count: u32, p_scissors: [*c]const Rect2D) void;
-pub extern fn cmdBindVertexBuffers2EXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize, p_strides: [*c]const DeviceSize) void;
-pub extern fn cmdSetDepthTestEnableEXT(command_buffer: CommandBuffer, depth_test_enable: Bool32) void;
-pub extern fn cmdSetDepthWriteEnableEXT(command_buffer: CommandBuffer, depth_write_enable: Bool32) void;
-pub extern fn cmdSetDepthCompareOpEXT(command_buffer: CommandBuffer, depth_compare_op: CompareOp) void;
-pub extern fn cmdSetDepthBoundsTestEnableEXT(command_buffer: CommandBuffer, depth_bounds_test_enable: Bool32) void;
-pub extern fn cmdSetStencilTestEnableEXT(command_buffer: CommandBuffer, stencil_test_enable: Bool32) void;
-pub extern fn cmdSetStencilOpEXT(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, fail_op: StencilOp, pass_op: StencilOp, depth_fail_op: StencilOp, compare_op: CompareOp) void;
+pub extern fn vkCmdSetCullModeEXT(command_buffer: CommandBuffer, cull_mode: CullModeFlags) void;
+pub inline fn cmdSetCullModeEXT(command_buffer: CommandBuffer, cull_mode: CullModeFlags) void {
+    return vkCmdSetCullModeEXT(command_buffer, cull_mode);
+}
+pub extern fn vkCmdSetFrontFaceEXT(command_buffer: CommandBuffer, front_face: FrontFace) void;
+pub inline fn cmdSetFrontFaceEXT(command_buffer: CommandBuffer, front_face: FrontFace) void {
+    return vkCmdSetFrontFaceEXT(command_buffer, front_face);
+}
+pub extern fn vkCmdSetPrimitiveTopologyEXT(command_buffer: CommandBuffer, primitive_topology: PrimitiveTopology) void;
+pub inline fn cmdSetPrimitiveTopologyEXT(command_buffer: CommandBuffer, primitive_topology: PrimitiveTopology) void {
+    return vkCmdSetPrimitiveTopologyEXT(command_buffer, primitive_topology);
+}
+pub extern fn vkCmdSetViewportWithCountEXT(command_buffer: CommandBuffer, viewport_count: u32, p_viewports: [*c]const Viewport) void;
+pub inline fn cmdSetViewportWithCountEXT(command_buffer: CommandBuffer, viewport_count: u32, p_viewports: [*c]const Viewport) void {
+    return vkCmdSetViewportWithCountEXT(command_buffer, viewport_count, p_viewports);
+}
+pub extern fn vkCmdSetScissorWithCountEXT(command_buffer: CommandBuffer, scissor_count: u32, p_scissors: [*c]const Rect2D) void;
+pub inline fn cmdSetScissorWithCountEXT(command_buffer: CommandBuffer, scissor_count: u32, p_scissors: [*c]const Rect2D) void {
+    return vkCmdSetScissorWithCountEXT(command_buffer, scissor_count, p_scissors);
+}
+pub extern fn vkCmdBindVertexBuffers2EXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize, p_strides: [*c]const DeviceSize) void;
+pub inline fn cmdBindVertexBuffers2EXT(command_buffer: CommandBuffer, first_binding: u32, binding_count: u32, p_buffers: [*c]const Buffer, p_offsets: [*c]const DeviceSize, p_sizes: [*c]const DeviceSize, p_strides: [*c]const DeviceSize) void {
+    return vkCmdBindVertexBuffers2EXT(command_buffer, first_binding, binding_count, p_buffers, p_offsets, p_sizes, p_strides);
+}
+pub extern fn vkCmdSetDepthTestEnableEXT(command_buffer: CommandBuffer, depth_test_enable: Bool32) void;
+pub inline fn cmdSetDepthTestEnableEXT(command_buffer: CommandBuffer, depth_test_enable: Bool32) void {
+    return vkCmdSetDepthTestEnableEXT(command_buffer, depth_test_enable);
+}
+pub extern fn vkCmdSetDepthWriteEnableEXT(command_buffer: CommandBuffer, depth_write_enable: Bool32) void;
+pub inline fn cmdSetDepthWriteEnableEXT(command_buffer: CommandBuffer, depth_write_enable: Bool32) void {
+    return vkCmdSetDepthWriteEnableEXT(command_buffer, depth_write_enable);
+}
+pub extern fn vkCmdSetDepthCompareOpEXT(command_buffer: CommandBuffer, depth_compare_op: CompareOp) void;
+pub inline fn cmdSetDepthCompareOpEXT(command_buffer: CommandBuffer, depth_compare_op: CompareOp) void {
+    return vkCmdSetDepthCompareOpEXT(command_buffer, depth_compare_op);
+}
+pub extern fn vkCmdSetDepthBoundsTestEnableEXT(command_buffer: CommandBuffer, depth_bounds_test_enable: Bool32) void;
+pub inline fn cmdSetDepthBoundsTestEnableEXT(command_buffer: CommandBuffer, depth_bounds_test_enable: Bool32) void {
+    return vkCmdSetDepthBoundsTestEnableEXT(command_buffer, depth_bounds_test_enable);
+}
+pub extern fn vkCmdSetStencilTestEnableEXT(command_buffer: CommandBuffer, stencil_test_enable: Bool32) void;
+pub inline fn cmdSetStencilTestEnableEXT(command_buffer: CommandBuffer, stencil_test_enable: Bool32) void {
+    return vkCmdSetStencilTestEnableEXT(command_buffer, stencil_test_enable);
+}
+pub extern fn vkCmdSetStencilOpEXT(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, fail_op: StencilOp, pass_op: StencilOp, depth_fail_op: StencilOp, compare_op: CompareOp) void;
+pub inline fn cmdSetStencilOpEXT(command_buffer: CommandBuffer, face_mask: StencilFaceFlags, fail_op: StencilOp, pass_op: StencilOp, depth_fail_op: StencilOp, compare_op: CompareOp) void {
+    return vkCmdSetStencilOpEXT(command_buffer, face_mask, fail_op, pass_op, depth_fail_op, compare_op);
+}
 pub const HostImageCopyFlagsEXT = enum(u32) {
     null = 0,
     memcpy_ext = 1,
@@ -11674,11 +12358,26 @@ pub const PFN_copyImageToMemoryEXT = ?*const fn (Device, [*c]const CopyImageToMe
 pub const PFN_copyImageToImageEXT = ?*const fn (Device, [*c]const CopyImageToImageInfoEXT) callconv(.c) Result;
 pub const PFN_transitionImageLayoutEXT = ?*const fn (Device, u32, [*c]const HostImageLayoutTransitionInfoEXT) callconv(.c) Result;
 pub const PFN_getImageSubresourceLayout2EXT = ?*const fn (Device, Image, [*c]const ImageSubresource2KHR, [*c]SubresourceLayout2KHR) callconv(.c) void;
-pub extern fn copyMemoryToImageEXT(device: Device, p_copy_memory_to_image_info: [*c]const CopyMemoryToImageInfoEXT) Result;
-pub extern fn copyImageToMemoryEXT(device: Device, p_copy_image_to_memory_info: [*c]const CopyImageToMemoryInfoEXT) Result;
-pub extern fn copyImageToImageEXT(device: Device, p_copy_image_to_image_info: [*c]const CopyImageToImageInfoEXT) Result;
-pub extern fn transitionImageLayoutEXT(device: Device, transition_count: u32, p_transitions: [*c]const HostImageLayoutTransitionInfoEXT) Result;
-pub extern fn getImageSubresourceLayout2EXT(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void;
+pub extern fn vkCopyMemoryToImageEXT(device: Device, p_copy_memory_to_image_info: [*c]const CopyMemoryToImageInfoEXT) Result;
+pub inline fn copyMemoryToImageEXT(device: Device, p_copy_memory_to_image_info: [*c]const CopyMemoryToImageInfoEXT) Result {
+    return vkCopyMemoryToImageEXT(device, p_copy_memory_to_image_info);
+}
+pub extern fn vkCopyImageToMemoryEXT(device: Device, p_copy_image_to_memory_info: [*c]const CopyImageToMemoryInfoEXT) Result;
+pub inline fn copyImageToMemoryEXT(device: Device, p_copy_image_to_memory_info: [*c]const CopyImageToMemoryInfoEXT) Result {
+    return vkCopyImageToMemoryEXT(device, p_copy_image_to_memory_info);
+}
+pub extern fn vkCopyImageToImageEXT(device: Device, p_copy_image_to_image_info: [*c]const CopyImageToImageInfoEXT) Result;
+pub inline fn copyImageToImageEXT(device: Device, p_copy_image_to_image_info: [*c]const CopyImageToImageInfoEXT) Result {
+    return vkCopyImageToImageEXT(device, p_copy_image_to_image_info);
+}
+pub extern fn vkTransitionImageLayoutEXT(device: Device, transition_count: u32, p_transitions: [*c]const HostImageLayoutTransitionInfoEXT) Result;
+pub inline fn transitionImageLayoutEXT(device: Device, transition_count: u32, p_transitions: [*c]const HostImageLayoutTransitionInfoEXT) Result {
+    return vkTransitionImageLayoutEXT(device, transition_count, p_transitions);
+}
+pub extern fn vkGetImageSubresourceLayout2EXT(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void;
+pub inline fn getImageSubresourceLayout2EXT(device: Device, image: Image, p_subresource: [*c]const ImageSubresource2KHR, p_layout: [*c]SubresourceLayout2KHR) void {
+    return vkGetImageSubresourceLayout2EXT(device, image, p_subresource, p_layout);
+}
 pub const PhysicalDeviceMapMemoryPlacedFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_map_memory_placed_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11782,7 +12481,10 @@ pub const ReleaseSwapchainImagesInfoEXT = extern struct {
     p_image_indices: [*c]const u32 = @import("std").mem.zeroes([*c]const u32),
 };
 pub const PFN_releaseSwapchainImagesEXT = ?*const fn (Device, [*c]const ReleaseSwapchainImagesInfoEXT) callconv(.c) Result;
-pub extern fn releaseSwapchainImagesEXT(device: Device, p_release_info: [*c]const ReleaseSwapchainImagesInfoEXT) Result;
+pub extern fn vkReleaseSwapchainImagesEXT(device: Device, p_release_info: [*c]const ReleaseSwapchainImagesInfoEXT) Result;
+pub inline fn releaseSwapchainImagesEXT(device: Device, p_release_info: [*c]const ReleaseSwapchainImagesInfoEXT) Result {
+    return vkReleaseSwapchainImagesEXT(device, p_release_info);
+}
 pub const PhysicalDeviceShaderDemoteToHelperInvocationFeaturesEXT = PhysicalDeviceShaderDemoteToHelperInvocationFeatures;
 pub const IndirectCommandsLayoutNV = enum(u64) { null = 0, _ };
 pub const IndirectCommandsTokenTypeNV = enum(u32) {
@@ -11920,12 +12622,30 @@ pub const PFN_cmdExecuteGeneratedCommandsNV = ?*const fn (CommandBuffer, Bool32,
 pub const PFN_cmdBindPipelineShaderGroupNV = ?*const fn (CommandBuffer, PipelineBindPoint, Pipeline, u32) callconv(.c) void;
 pub const PFN_createIndirectCommandsLayoutNV = ?*const fn (Device, [*c]const IndirectCommandsLayoutCreateInfoNV, [*c]const AllocationCallbacks, [*c]IndirectCommandsLayoutNV) callconv(.c) Result;
 pub const PFN_destroyIndirectCommandsLayoutNV = ?*const fn (Device, IndirectCommandsLayoutNV, [*c]const AllocationCallbacks) callconv(.c) void;
-pub extern fn getGeneratedCommandsMemoryRequirementsNV(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn cmdPreprocessGeneratedCommandsNV(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void;
-pub extern fn cmdExecuteGeneratedCommandsNV(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void;
-pub extern fn cmdBindPipelineShaderGroupNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline, group_index: u32) void;
-pub extern fn createIndirectCommandsLayoutNV(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutNV) Result;
-pub extern fn destroyIndirectCommandsLayoutNV(device: Device, indirect_commands_layout: IndirectCommandsLayoutNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub extern fn vkGetGeneratedCommandsMemoryRequirementsNV(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getGeneratedCommandsMemoryRequirementsNV(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoNV, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetGeneratedCommandsMemoryRequirementsNV(device, p_info, p_memory_requirements);
+}
+pub extern fn vkCmdPreprocessGeneratedCommandsNV(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void;
+pub inline fn cmdPreprocessGeneratedCommandsNV(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void {
+    return vkCmdPreprocessGeneratedCommandsNV(command_buffer, p_generated_commands_info);
+}
+pub extern fn vkCmdExecuteGeneratedCommandsNV(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void;
+pub inline fn cmdExecuteGeneratedCommandsNV(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoNV) void {
+    return vkCmdExecuteGeneratedCommandsNV(command_buffer, is_preprocessed, p_generated_commands_info);
+}
+pub extern fn vkCmdBindPipelineShaderGroupNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline, group_index: u32) void;
+pub inline fn cmdBindPipelineShaderGroupNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline, group_index: u32) void {
+    return vkCmdBindPipelineShaderGroupNV(command_buffer, pipeline_bind_point, pipeline, group_index);
+}
+pub extern fn vkCreateIndirectCommandsLayoutNV(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutNV) Result;
+pub inline fn createIndirectCommandsLayoutNV(device, p_create_info, p_allocator, p_indirect_commands_layout) Result {
+    return vkCreateIndirectCommandsLayoutNV(device, p_create_info, p_allocator, p_indirect_commands_layout);
+}
+pub extern fn vkDestroyIndirectCommandsLayoutNV(device: Device, indirect_commands_layout: IndirectCommandsLayoutNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyIndirectCommandsLayoutNV(device: Device, indirect_commands_layout: IndirectCommandsLayoutNV, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyIndirectCommandsLayoutNV(device, indirect_commands_layout, p_allocator);
+}
 pub const PhysicalDeviceInheritedViewportScissorFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_inherited_viewport_scissor_features_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -11982,7 +12702,10 @@ pub const DepthBiasRepresentationInfoEXT = extern struct {
     depth_bias_exact: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_cmdSetDepthBias2EXT = ?*const fn (CommandBuffer, [*c]const DepthBiasInfoEXT) callconv(.c) void;
-pub extern fn cmdSetDepthBias2EXT(command_buffer: CommandBuffer, p_depth_bias_info: [*c]const DepthBiasInfoEXT) void;
+pub extern fn vkCmdSetDepthBias2EXT(command_buffer: CommandBuffer, p_depth_bias_info: [*c]const DepthBiasInfoEXT) void;
+pub inline fn cmdSetDepthBias2EXT(command_buffer: CommandBuffer, p_depth_bias_info: [*c]const DepthBiasInfoEXT) void {
+    return vkCmdSetDepthBias2EXT(command_buffer, p_depth_bias_info);
+}
 pub const DeviceMemoryReportEventTypeEXT = enum(u32) {
     allocate_ext = 0,
     free_ext = 1,
@@ -12017,8 +12740,14 @@ pub const DeviceDeviceMemoryReportCreateInfoEXT = extern struct {
 };
 pub const PFN_acquireDrmDisplayEXT = ?*const fn (PhysicalDevice, i32, DisplayKHR) callconv(.c) Result;
 pub const PFN_getDrmDisplayEXT = ?*const fn (PhysicalDevice, i32, u32, [*c]DisplayKHR) callconv(.c) Result;
-pub extern fn acquireDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, display: DisplayKHR) Result;
-pub extern fn getDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, connector_id: u32, display: [*c]DisplayKHR) Result;
+pub extern fn vkAcquireDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, display: DisplayKHR) Result;
+pub inline fn acquireDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, display: DisplayKHR) Result {
+    return vkAcquireDrmDisplayEXT(physical_device, drm_fd, display);
+}
+pub extern fn vkGetDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, connector_id: u32, display: [*c]DisplayKHR) Result;
+pub inline fn getDrmDisplayEXT(physical_device: PhysicalDevice, drm_fd: i32, connector_id: u32, display: [*c]DisplayKHR) Result {
+    return vkGetDrmDisplayEXT(physical_device, drm_fd, connector_id, display);
+}
 pub const PhysicalDeviceRobustness2FeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_robustness2features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -12073,10 +12802,22 @@ pub const PFN_createPrivateDataSlotEXT = ?*const fn (Device, [*c]const PrivateDa
 pub const PFN_destroyPrivateDataSlotEXT = ?*const fn (Device, PrivateDataSlot, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_setPrivateDataEXT = ?*const fn (Device, ObjectType, u64, PrivateDataSlot, u64) callconv(.c) Result;
 pub const PFN_getPrivateDataEXT = ?*const fn (Device, ObjectType, u64, PrivateDataSlot, [*c]u64) callconv(.c) void;
-pub extern fn createPrivateDataSlotEXT(device: Device, p_create_info: [*c]const PrivateDataSlotCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_private_data_slot: [*c]PrivateDataSlot) Result;
-pub extern fn destroyPrivateDataSlotEXT(device: Device, private_data_slot: PrivateDataSlot, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn setPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, data: u64) Result;
-pub extern fn getPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, p_data: [*c]u64) void;
+pub extern fn vkCreatePrivateDataSlotEXT(device: Device, p_create_info: [*c]const PrivateDataSlotCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_private_data_slot: [*c]PrivateDataSlot) Result;
+pub inline fn createPrivateDataSlotEXT(device: Device, p_create_info: [*c]const PrivateDataSlotCreateInfo, p_allocator: [*c]const AllocationCallbacks, p_private_data_slot: [*c]PrivateDataSlot) Result {
+    return vkCreatePrivateDataSlotEXT(device, p_create_info, p_allocator, p_private_data_slot);
+}
+pub extern fn vkDestroyPrivateDataSlotEXT(device: Device, private_data_slot: PrivateDataSlot, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyPrivateDataSlotEXT(device: Device, private_data_slot: PrivateDataSlot, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyPrivateDataSlotEXT(device, private_data_slot, p_allocator);
+}
+pub extern fn vkSetPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, data: u64) Result;
+pub inline fn setPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, data: u64) Result {
+    return vkSetPrivateDataEXT(device, object_type, object_handle, private_data_slot, data);
+}
+pub extern fn vkGetPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, p_data: [*c]u64) void;
+pub inline fn getPrivateDataEXT(device: Device, object_type: ObjectType, object_handle: u64, private_data_slot: PrivateDataSlot, p_data: [*c]u64) void {
+    return vkGetPrivateDataEXT(device, object_type, object_handle, private_data_slot, p_data);
+}
 pub const PhysicalDevicePipelineCreationCacheControlFeaturesEXT = PhysicalDevicePipelineCreationCacheControlFeatures;
 pub const DeviceDiagnosticsConfigFlagsNV = enum(u32) {
     null = 0,
@@ -12142,12 +12883,30 @@ pub const PFN_createCudaFunctionNV = ?*const fn (Device, [*c]const CudaFunctionC
 pub const PFN_destroyCudaModuleNV = ?*const fn (Device, CudaModuleNV, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_destroyCudaFunctionNV = ?*const fn (Device, CudaFunctionNV, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_cmdCudaLaunchKernelNV = ?*const fn (CommandBuffer, [*c]const CudaLaunchInfoNV) callconv(.c) void;
-pub extern fn createCudaModuleNV(device: Device, p_create_info: [*c]const CudaModuleCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CudaModuleNV) Result;
-pub extern fn getCudaModuleCacheNV(device: Device, module: CudaModuleNV, p_cache_size: [*c]usize, p_cache_data: ?*anyopaque) Result;
-pub extern fn createCudaFunctionNV(device: Device, p_create_info: [*c]const CudaFunctionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CudaFunctionNV) Result;
-pub extern fn destroyCudaModuleNV(device: Device, module: CudaModuleNV, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn destroyCudaFunctionNV(device: Device, function: CudaFunctionNV, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn cmdCudaLaunchKernelNV(command_buffer: CommandBuffer, p_launch_info: [*c]const CudaLaunchInfoNV) void;
+pub extern fn vkCreateCudaModuleNV(device: Device, p_create_info: [*c]const CudaModuleCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CudaModuleNV) Result;
+pub inline fn createCudaModuleNV(device: Device, p_create_info: [*c]const CudaModuleCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_module: [*c]CudaModuleNV) Result {
+    return vkCreateCudaModuleNV(device, p_create_info, p_allocator, p_module);
+}
+pub extern fn vkGetCudaModuleCacheNV(device: Device, module: CudaModuleNV, p_cache_size: [*c]usize, p_cache_data: ?*anyopaque) Result;
+pub inline fn getCudaModuleCacheNV(device: Device, module: CudaModuleNV, p_cache_size: [*c]usize, p_cache_data: ?*anyopaque) Result {
+    return vkGetCudaModuleCacheNV(device, module, p_cache_size, p_cache_data);
+}
+pub extern fn vkCreateCudaFunctionNV(device: Device, p_create_info: [*c]const CudaFunctionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CudaFunctionNV) Result;
+pub inline fn createCudaFunctionNV(device: Device, p_create_info: [*c]const CudaFunctionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_function: [*c]CudaFunctionNV) Result {
+    return vkCreateCudaFunctionNV(device, p_create_info, p_allocator, p_function);
+}
+pub extern fn vkDestroyCudaModuleNV(device: Device, module: CudaModuleNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyCudaModuleNV(device: Device, module: CudaModuleNV, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyCudaModuleNV(device, module, p_allocator);
+}
+pub extern fn vkDestroyCudaFunctionNV(device: Device, function: CudaFunctionNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyCudaFunctionNV(device: Device, function: CudaFunctionNV, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyCudaFunctionNV(device, function, p_allocator);
+}
+pub extern fn vkCmdCudaLaunchKernelNV(command_buffer: CommandBuffer, p_launch_info: [*c]const CudaLaunchInfoNV) void;
+pub inline fn cmdCudaLaunchKernelNV(command_buffer: CommandBuffer, p_launch_info: [*c]const CudaLaunchInfoNV) void {
+    return vkCmdCudaLaunchKernelNV(command_buffer, p_launch_info);
+}
 pub const QueryLowLatencySupportNV = extern struct {
     s_type: StructureType = StructureType.query_low_latency_support_nv,
     p_next: ?*const anyopaque = @import("std").mem.zeroes(?*const anyopaque),
@@ -12282,17 +13041,46 @@ pub const PFN_getImageOpaqueCaptureDescriptorDataEXT = ?*const fn (Device, [*c]c
 pub const PFN_getImageViewOpaqueCaptureDescriptorDataEXT = ?*const fn (Device, [*c]const ImageViewCaptureDescriptorDataInfoEXT, ?*anyopaque) callconv(.c) Result;
 pub const PFN_getSamplerOpaqueCaptureDescriptorDataEXT = ?*const fn (Device, [*c]const SamplerCaptureDescriptorDataInfoEXT, ?*anyopaque) callconv(.c) Result;
 pub const PFN_getAccelerationStructureOpaqueCaptureDescriptorDataEXT = ?*const fn (Device, [*c]const AccelerationStructureCaptureDescriptorDataInfoEXT, ?*anyopaque) callconv(.c) Result;
-pub extern fn getDescriptorSetLayoutSizeEXT(device: Device, layout: DescriptorSetLayout, p_layout_size_in_bytes: [*c]DeviceSize) void;
-pub extern fn getDescriptorSetLayoutBindingOffsetEXT(device: Device, layout: DescriptorSetLayout, binding: u32, p_offset: [*c]DeviceSize) void;
-pub extern fn getDescriptorEXT(device: Device, p_descriptor_info: [*c]const DescriptorGetInfoEXT, data_size: usize, p_descriptor: ?*anyopaque) void;
-pub extern fn cmdBindDescriptorBuffersEXT(command_buffer: CommandBuffer, buffer_count: u32, p_binding_infos: [*c]const DescriptorBufferBindingInfoEXT) void;
-pub extern fn cmdSetDescriptorBufferOffsetsEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, set_count: u32, p_buffer_indices: [*c]const u32, p_offsets: [*c]const DeviceSize) void;
-pub extern fn cmdBindDescriptorBufferEmbeddedSamplersEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32) void;
-pub extern fn getBufferOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const BufferCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
-pub extern fn getImageOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const ImageCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
-pub extern fn getImageViewOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const ImageViewCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
-pub extern fn getSamplerOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const SamplerCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
-pub extern fn getAccelerationStructureOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const AccelerationStructureCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
+pub extern fn vkGetDescriptorSetLayoutSizeEXT(device: Device, layout: DescriptorSetLayout, p_layout_size_in_bytes: [*c]DeviceSize) void;
+pub inline fn getDescriptorSetLayoutSizeEXT(device: Device, layout: DescriptorSetLayout, p_layout_size_in_bytes: [*c]DeviceSize) void {
+    return vkGetDescriptorSetLayoutSizeEXT(device, layout, p_layout_size_in_bytes);
+}
+pub extern fn vkGetDescriptorSetLayoutBindingOffsetEXT(device: Device, layout: DescriptorSetLayout, binding: u32, p_offset: [*c]DeviceSize) void;
+pub inline fn getDescriptorSetLayoutBindingOffsetEXT(device: Device, layout: DescriptorSetLayout, binding: u32, p_offset: [*c]DeviceSize) void {
+    return vkGetDescriptorSetLayoutBindingOffsetEXT(device, layout, binding, p_offset);
+}
+pub extern fn vkGetDescriptorEXT(device: Device, p_descriptor_info: [*c]const DescriptorGetInfoEXT, data_size: usize, p_descriptor: ?*anyopaque) void;
+pub inline fn getDescriptorEXT(device: Device, p_descriptor_info: [*c]const DescriptorGetInfoEXT, data_size: usize, p_descriptor: ?*anyopaque) void {
+    return vkGetDescriptorEXT(device, p_descriptor_info, data_size, p_descriptor);
+}
+pub extern fn vkCmdBindDescriptorBuffersEXT(command_buffer: CommandBuffer, buffer_count: u32, p_binding_infos: [*c]const DescriptorBufferBindingInfoEXT) void;
+pub inline fn cmdBindDescriptorBuffersEXT(command_buffer: CommandBuffer, buffer_count: u32, p_binding_infos: [*c]const DescriptorBufferBindingInfoEXT) void {
+    return vkCmdBindDescriptorBuffersEXT(command_buffer, buffer_count, p_binding_infos);
+}
+pub extern fn vkCmdSetDescriptorBufferOffsetsEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, set_count: u32, p_buffer_indices: [*c]const u32, p_offsets: [*c]const DeviceSize) void;
+pub inline fn cmdSetDescriptorBufferOffsetsEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, first_set: u32, set_count: u32, p_buffer_indices: [*c]const u32, p_offsets: [*c]const DeviceSize) void {
+    return vkCmdSetDescriptorBufferOffsetsEXT(command_buffer, pipeline_bind_point, layout, first_set, set_count, p_buffer_indices, p_offsets);
+}
+pub extern fn vkCmdBindDescriptorBufferEmbeddedSamplersEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32) void;
+pub inline fn cmdBindDescriptorBufferEmbeddedSamplersEXT(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, layout: PipelineLayout, set: u32) void {
+    return vkCmdBindDescriptorBufferEmbeddedSamplersEXT(command_buffer, pipeline_bind_point, layout, set);
+}
+pub extern fn vkGetBufferOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const BufferCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
+pub inline fn getBufferOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const BufferCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result {
+    return vkGetBufferOpaqueCaptureDescriptorDataEXT(device, p_info, p_data);
+}
+pub extern fn vkGetImageOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const ImageCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
+pub inline fn getImageViewOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const ImageViewCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result {
+    return vkGetImageOpaqueCaptureDescriptorDataEXT(device, p_info, p_data);
+}
+pub extern fn vkGetSamplerOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const SamplerCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
+pub inline fn getSamplerOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const SamplerCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result {
+    return vkGetSamplerOpaqueCaptureDescriptorDataEXT(device, p_info, p_data);
+}
+pub extern fn vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const AccelerationStructureCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result;
+pub inline fn getAccelerationStructureOpaqueCaptureDescriptorDataEXT(device: Device, p_info: [*c]const AccelerationStructureCaptureDescriptorDataInfoEXT, p_data: ?*anyopaque) Result {
+    return vkGetAccelerationStructureOpaqueCaptureDescriptorDataEXT(device, p_info, p_data);
+}
 pub const GraphicsPipelineLibraryFlagsEXT = enum(u32) {
     null = 0,
     vertex_input_interface_bit_ext = 1,
@@ -12359,7 +13147,10 @@ pub const PipelineFragmentShadingRateEnumStateCreateInfoNV = extern struct {
     combiner_ops: [2]FragmentShadingRateCombinerOpKHR = @import("std").mem.zeroes([2]FragmentShadingRateCombinerOpKHR),
 };
 pub const PFN_cmdSetFragmentShadingRateEnumNV = ?*const fn (CommandBuffer, FragmentShadingRateNV, [*c]const FragmentShadingRateCombinerOpKHR) callconv(.c) void;
-pub extern fn cmdSetFragmentShadingRateEnumNV(command_buffer: CommandBuffer, shading_rate: FragmentShadingRateNV, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void;
+pub extern fn vkCmdSetFragmentShadingRateEnumNV(command_buffer: CommandBuffer, shading_rate: FragmentShadingRateNV, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void;
+pub inline fn cmdSetFragmentShadingRateEnumNV(command_buffer: CommandBuffer, shading_rate: FragmentShadingRateNV, combiner_ops: [*c]const FragmentShadingRateCombinerOpKHR) void {
+    return vkCmdSetFragmentShadingRateEnumNV(command_buffer, shading_rate, combiner_ops);
+}
 pub const AccelerationStructureMotionInstanceTypeNV = enum(u32) {
     static_nv = 0,
     matrix_motion_nv = 1,
@@ -12562,7 +13353,10 @@ pub const DeviceFaultVendorBinaryHeaderVersionOneEXT = extern struct {
     api_version: u32 = @import("std").mem.zeroes(u32),
 };
 pub const PFN_getDeviceFaultInfoEXT = ?*const fn (Device, [*c]DeviceFaultCountsEXT, [*c]DeviceFaultInfoEXT) callconv(.c) Result;
-pub extern fn getDeviceFaultInfoEXT(device: Device, p_fault_counts: [*c]DeviceFaultCountsEXT, p_fault_info: [*c]DeviceFaultInfoEXT) Result;
+pub extern fn vkGetDeviceFaultInfoEXT(device: Device, p_fault_counts: [*c]DeviceFaultCountsEXT, p_fault_info: [*c]DeviceFaultInfoEXT) Result;
+pub inline fn getDeviceFaultInfoEXT(device: Device, p_fault_counts: [*c]DeviceFaultCountsEXT, p_fault_info: [*c]DeviceFaultInfoEXT) Result {
+    return vkGetDeviceFaultInfoEXT(device, p_fault_counts, p_fault_info);
+}
 pub const PhysicalDeviceRasterizationOrderAttachmentAccessFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_rasterization_order_attachment_access_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -12616,7 +13410,10 @@ pub const VertexInputAttributeDescription2EXT = extern struct {
     offset: u32 = @import("std").mem.zeroes(u32),
 };
 pub const PFN_cmdSetVertexInputEXT = ?*const fn (CommandBuffer, u32, [*c]const VertexInputBindingDescription2EXT, u32, [*c]const VertexInputAttributeDescription2EXT) callconv(.c) void;
-pub extern fn cmdSetVertexInputEXT(command_buffer: CommandBuffer, vertex_binding_description_count: u32, p_vertex_binding_descriptions: [*c]const VertexInputBindingDescription2EXT, vertex_attribute_description_count: u32, p_vertex_attribute_descriptions: [*c]const VertexInputAttributeDescription2EXT) void;
+pub extern fn vkCmdSetVertexInputEXT(command_buffer: CommandBuffer, vertex_binding_description_count: u32, p_vertex_binding_descriptions: [*c]const VertexInputBindingDescription2EXT, vertex_attribute_description_count: u32, p_vertex_attribute_descriptions: [*c]const VertexInputAttributeDescription2EXT) void;
+pub inline fn cmdSetVertexInputEXT(command_buffer: CommandBuffer, vertex_binding_description_count: u32, p_vertex_binding_descriptions: [*c]const VertexInputBindingDescription2EXT, vertex_attribute_description_count: u32, p_vertex_attribute_descriptions: [*c]const VertexInputAttributeDescription2EXT) void {
+    return vkCmdSetVertexInputEXT(command_buffer, vertex_binding_description_count, p_vertex_binding_descriptions, vertex_attribute_description_count, p_vertex_attribute_descriptions);
+}
 pub const PhysicalDeviceDrmPropertiesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_drm_properties_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -12682,15 +13479,24 @@ pub const PhysicalDeviceSubpassShadingPropertiesHUAWEI = extern struct {
 };
 pub const PFN_getDeviceSubpassShadingMaxWorkgroupSizeHUAWEI = ?*const fn (Device, RenderPass, [*c]Extent2D) callconv(.c) Result;
 pub const PFN_cmdSubpassShadingHUAWEI = ?*const fn (CommandBuffer) callconv(.c) void;
-pub extern fn getDeviceSubpassShadingMaxWorkgroupSizeHUAWEI(device: Device, renderpass: RenderPass, p_max_workgroup_size: [*c]Extent2D) Result;
-pub extern fn cmdSubpassShadingHUAWEI(command_buffer: CommandBuffer) void;
+pub extern fn vkGetDeviceSubpassShadingMaxWorkgroupSizeHUAWEI(device: Device, renderpass: RenderPass, p_max_workgroup_size: [*c]Extent2D) Result;
+pub inline fn getDeviceSubpassShadingMaxWorkgroupSizeHUAWEI(device: Device, renderpass: RenderPass, p_max_workgroup_size: [*c]Extent2D) Result {
+    return vkGetDeviceSubpassShadingMaxWorkgroupSizeHUAWEI(device, renderpass, p_max_workgroup_size);
+}
+pub extern fn vkCmdSubpassShadingHUAWEI(command_buffer: CommandBuffer) void;
+pub inline fn cmdSubpassShadingHUAWEI(command_buffer: CommandBuffer) void {
+    return vkCmdSubpassShadingHUAWEI(command_buffer);
+}
 pub const PhysicalDeviceInvocationMaskFeaturesHUAWEI = extern struct {
     s_type: StructureType = StructureType.physical_device_invocation_mask_features_huawei,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
     invocation_mask: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_cmdBindInvocationMaskHUAWEI = ?*const fn (CommandBuffer, ImageView, ImageLayout) callconv(.c) void;
-pub extern fn cmdBindInvocationMaskHUAWEI(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void;
+pub extern fn vkCmdBindInvocationMaskHUAWEI(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void;
+pub inline fn cmdBindInvocationMaskHUAWEI(command_buffer: CommandBuffer, image_view: ImageView, image_layout: ImageLayout) void {
+    return vkCmdBindInvocationMaskHUAWEI(command_buffer, image_view, image_layout);
+}
 pub const RemoteAddressNV = ?*anyopaque;
 pub const MemoryGetRemoteAddressInfoNV = extern struct {
     s_type: StructureType = StructureType.memory_get_remote_address_info_nv,
@@ -12704,7 +13510,10 @@ pub const PhysicalDeviceExternalMemoryRDMAFeaturesNV = extern struct {
     external_memory_rdma: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_getMemoryRemoteAddressNV = ?*const fn (Device, [*c]const MemoryGetRemoteAddressInfoNV, [*c]RemoteAddressNV) callconv(.c) Result;
-pub extern fn getMemoryRemoteAddressNV(device: Device, p_memory_get_remote_address_info: [*c]const MemoryGetRemoteAddressInfoNV, p_address: [*c]RemoteAddressNV) Result;
+pub extern fn vkGetMemoryRemoteAddressNV(device: Device, p_memory_get_remote_address_info: [*c]const MemoryGetRemoteAddressInfoNV, p_address: [*c]RemoteAddressNV) Result;
+pub inline fn getMemoryRemoteAddressNV(device: Device, p_memory_get_remote_address_info: [*c]const MemoryGetRemoteAddressInfoNV, p_address: [*c]RemoteAddressNV) Result {
+    return vkGetMemoryRemoteAddressNV(device, p_memory_get_remote_address_info, p_address);
+}
 pub const PipelineInfoEXT = PipelineInfoKHR;
 pub const PipelinePropertiesIdentifierEXT = extern struct {
     s_type: StructureType = StructureType.pipeline_properties_identifier_ext,
@@ -12717,7 +13526,10 @@ pub const PhysicalDevicePipelinePropertiesFeaturesEXT = extern struct {
     pipeline_properties_identifier: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_getPipelinePropertiesEXT = ?*const fn (Device, [*c]const PipelineInfoEXT, [*c]BaseOutStructure) callconv(.c) Result;
-pub extern fn getPipelinePropertiesEXT(device: Device, p_pipeline_info: [*c]const PipelineInfoEXT, p_pipeline_properties: [*c]BaseOutStructure) Result;
+pub extern fn vkGetPipelinePropertiesEXT(device: Device, p_pipeline_info: [*c]const PipelineInfoEXT, p_pipeline_properties: [*c]BaseOutStructure) Result;
+pub inline fn getPipelinePropertiesEXT(device: Device, p_pipeline_info: [*c]const PipelineInfoEXT, p_pipeline_properties: [*c]BaseOutStructure) Result {
+    return vkGetPipelinePropertiesEXT(device, p_pipeline_info, p_pipeline_properties);
+}
 pub const FrameBoundaryFlagsEXT = enum(u32) {
     null = 0,
     frame_end_bit_ext = 1,
@@ -12768,11 +13580,26 @@ pub const PFN_cmdSetRasterizerDiscardEnableEXT = ?*const fn (CommandBuffer, Bool
 pub const PFN_cmdSetDepthBiasEnableEXT = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetLogicOpEXT = ?*const fn (CommandBuffer, LogicOp) callconv(.c) void;
 pub const PFN_cmdSetPrimitiveRestartEnableEXT = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
-pub extern fn cmdSetPatchControlPointsEXT(command_buffer: CommandBuffer, patch_control_points: u32) void;
-pub extern fn cmdSetRasterizerDiscardEnableEXT(command_buffer: CommandBuffer, rasterizer_discard_enable: Bool32) void;
-pub extern fn cmdSetDepthBiasEnableEXT(command_buffer: CommandBuffer, depth_bias_enable: Bool32) void;
-pub extern fn cmdSetLogicOpEXT(command_buffer: CommandBuffer, logic_op: LogicOp) void;
-pub extern fn cmdSetPrimitiveRestartEnableEXT(command_buffer: CommandBuffer, primitive_restart_enable: Bool32) void;
+pub extern fn vkCmdSetPatchControlPointsEXT(command_buffer: CommandBuffer, patch_control_points: u32) void;
+pub inline fn cmdSetPatchControlPointsEXT(command_buffer: CommandBuffer, patch_control_points: u32) void {
+    return vkCmdSetPatchControlPointsEXT(command_buffer, patch_control_points);
+}
+pub extern fn vkCmdSetRasterizerDiscardEnableEXT(command_buffer: CommandBuffer, rasterizer_discard_enable: Bool32) void;
+pub inline fn cmdSetRasterizerDiscardEnableEXT(command_buffer: CommandBuffer, rasterizer_discard_enable: Bool32) void {
+    return vkCmdSetRasterizerDiscardEnableEXT(command_buffer, rasterizer_discard_enable);
+}
+pub extern fn vkCmdSetDepthBiasEnableEXT(command_buffer: CommandBuffer, depth_bias_enable: Bool32) void;
+pub inline fn cmdSetDepthBiasEnableEXT(command_buffer: CommandBuffer, depth_bias_enable: Bool32) void {
+    return vkCmdSetDepthBiasEnableEXT(command_buffer, depth_bias_enable);
+}
+pub extern fn vkCmdSetLogicOpEXT(command_buffer: CommandBuffer, logic_op: LogicOp) void;
+pub inline fn cmdSetLogicOpEXT(command_buffer: CommandBuffer, logic_op: LogicOp) void {
+    return vkCmdSetLogicOpEXT(command_buffer, logic_op);
+}
+pub extern fn vkCmdSetPrimitiveRestartEnableEXT(command_buffer: CommandBuffer, primitive_restart_enable: Bool32) void;
+pub inline fn cmdSetPrimitiveRestartEnableEXT(command_buffer: CommandBuffer, primitive_restart_enable: Bool32) void {
+    return vkCmdSetPrimitiveRestartEnableEXT(command_buffer, primitive_restart_enable);
+}
 pub const PhysicalDeviceColorWriteEnableFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_color_write_enable_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -12785,7 +13612,10 @@ pub const PipelineColorWriteCreateInfoEXT = extern struct {
     p_color_write_enables: [*c]const Bool32 = @import("std").mem.zeroes([*c]const Bool32),
 };
 pub const PFN_cmdSetColorWriteEnableEXT = ?*const fn (CommandBuffer, u32, [*c]const Bool32) callconv(.c) void;
-pub extern fn cmdSetColorWriteEnableEXT(command_buffer: CommandBuffer, attachment_count: u32, p_color_write_enables: [*c]const Bool32) void;
+pub extern fn vkCmdSetColorWriteEnableEXT(command_buffer: CommandBuffer, attachment_count: u32, p_color_write_enables: [*c]const Bool32) void;
+pub inline fn cmdSetColorWriteEnableEXT(command_buffer: CommandBuffer, attachment_count: u32, p_color_write_enables: [*c]const Bool32) void {
+    return vkCmdSetColorWriteEnableEXT(command_buffer, attachment_count, p_color_write_enables);
+}
 pub const PhysicalDevicePrimitivesGeneratedQueryFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_primitives_generated_query_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -12826,8 +13656,14 @@ pub const MultiDrawIndexedInfoEXT = extern struct {
 };
 pub const PFN_cmdDrawMultiEXT = ?*const fn (CommandBuffer, u32, [*c]const MultiDrawInfoEXT, u32, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMultiIndexedEXT = ?*const fn (CommandBuffer, u32, [*c]const MultiDrawIndexedInfoEXT, u32, u32, u32, [*c]const i32) callconv(.c) void;
-pub extern fn cmdDrawMultiEXT(command_buffer: CommandBuffer, draw_count: u32, p_vertex_info: [*c]const MultiDrawInfoEXT, instance_count: u32, first_instance: u32, stride: u32) void;
-pub extern fn cmdDrawMultiIndexedEXT(command_buffer: CommandBuffer, draw_count: u32, p_index_info: [*c]const MultiDrawIndexedInfoEXT, instance_count: u32, first_instance: u32, stride: u32, p_vertex_offset: [*c]const i32) void;
+pub extern fn vkCmdDrawMultiEXT(command_buffer: CommandBuffer, draw_count: u32, p_vertex_info: [*c]const MultiDrawInfoEXT, instance_count: u32, first_instance: u32, stride: u32) void;
+pub inline fn cmdDrawMultiEXT(command_buffer: CommandBuffer, draw_count: u32, p_vertex_info: [*c]const MultiDrawInfoEXT, instance_count: u32, first_instance: u32, stride: u32) void {
+    return vkCmdDrawMultiEXT(command_buffer, draw_count, p_vertex_info, instance_count, first_instance, stride);
+}
+pub extern fn vkCmdDrawMultiIndexedEXT(command_buffer: CommandBuffer, draw_count: u32, p_index_info: [*c]const MultiDrawIndexedInfoEXT, instance_count: u32, first_instance: u32, stride: u32, p_vertex_offset: [*c]const i32) void;
+pub inline fn cmdDrawMultiIndexedEXT(command_buffer: CommandBuffer, draw_count: u32, p_index_info: [*c]const MultiDrawIndexedInfoEXT, instance_count: u32, first_instance: u32, stride: u32, p_vertex_offset: [*c]const i32) void {
+    return vkCmdDrawMultiIndexedEXT(command_buffer, draw_count, p_index_info, instance_count, first_instance, stride, p_vertex_offset);
+}
 pub const PhysicalDeviceImage2DViewOf3DFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_image2dview_of3dfeatures_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13002,20 +13838,62 @@ pub const PFN_cmdCopyMemoryToMicromapEXT = ?*const fn (CommandBuffer, [*c]const 
 pub const PFN_cmdWriteMicromapsPropertiesEXT = ?*const fn (CommandBuffer, u32, [*c]const MicromapEXT, QueryType, QueryPool, u32) callconv(.c) void;
 pub const PFN_getDeviceMicromapCompatibilityEXT = ?*const fn (Device, [*c]const MicromapVersionInfoEXT, [*c]AccelerationStructureCompatibilityKHR) callconv(.c) void;
 pub const PFN_getMicromapBuildSizesEXT = ?*const fn (Device, AccelerationStructureBuildTypeKHR, [*c]const MicromapBuildInfoEXT, [*c]MicromapBuildSizesInfoEXT) callconv(.c) void;
-pub extern fn createMicromapEXT(device: Device, p_create_info: [*c]const MicromapCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_micromap: [*c]MicromapEXT) Result;
-pub extern fn destroyMicromapEXT(device: Device, micromap: MicromapEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn cmdBuildMicromapsEXT(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) void;
-pub extern fn buildMicromapsEXT(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) Result;
-pub extern fn copyMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapInfoEXT) Result;
-pub extern fn copyMicromapToMemoryEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapToMemoryInfoEXT) Result;
-pub extern fn copyMemoryToMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToMicromapInfoEXT) Result;
-pub extern fn writeMicromapsPropertiesEXT(device: Device, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result;
-pub extern fn cmdCopyMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapInfoEXT) void;
-pub extern fn cmdCopyMicromapToMemoryEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapToMemoryInfoEXT) void;
-pub extern fn cmdCopyMemoryToMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToMicromapInfoEXT) void;
-pub extern fn cmdWriteMicromapsPropertiesEXT(command_buffer: CommandBuffer, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
-pub extern fn getDeviceMicromapCompatibilityEXT(device: Device, p_version_info: [*c]const MicromapVersionInfoEXT, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void;
-pub extern fn getMicromapBuildSizesEXT(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const MicromapBuildInfoEXT, p_size_info: [*c]MicromapBuildSizesInfoEXT) void;
+pub extern fn vkCreateMicromapEXT(device: Device, p_create_info: [*c]const MicromapCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_micromap: [*c]MicromapEXT) Result;
+pub inline fn createMicromapEXT(device: Device, p_create_info: [*c]const MicromapCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_micromap: [*c]MicromapEXT) Result {
+    return vkCreateMicromapEXT(device, p_create_info, p_allocator, p_micromap);
+}
+pub extern fn vkDestroyMicromapEXT(device: Device, micromap: MicromapEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyMicromapEXT(device: Device, micromap: MicromapEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyMicromapEXT(device, micromap, p_allocator);
+}
+pub extern fn vkCmdBuildMicromapsEXT(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) void;
+pub inline fn cmdBuildMicromapsEXT(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) void {
+    return vkCmdBuildMicromapsEXT(command_buffer, info_count, p_infos);
+}
+pub extern fn vkBuildMicromapsEXT(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) Result;
+pub inline fn buildMicromapsEXT(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const MicromapBuildInfoEXT) Result {
+    return vkBuildMicromapsEXT(device, deferred_operation, info_count, p_infos);
+}
+pub extern fn vkCopyMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapInfoEXT) Result;
+pub inline fn copyMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapInfoEXT) Result {
+    return vkCopyMicromapEXT(device, deferred_operation, p_info);
+}
+pub extern fn vkCopyMicromapToMemoryEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapToMemoryInfoEXT) Result;
+pub inline fn copyMicromapToMemoryEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMicromapToMemoryInfoEXT) Result {
+    return vkCopyMicromapToMemoryEXT(device, deferred_operation, p_info);
+}
+pub extern fn vkCopyMemoryToMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToMicromapInfoEXT) Result;
+pub inline fn copyMemoryToMicromapEXT(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToMicromapInfoEXT) Result {
+    return vkCopyMemoryToMicromapEXT(device, deferred_operation, p_info);
+}
+pub extern fn vkWriteMicromapsPropertiesEXT(device: Device, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result;
+pub inline fn writeMicromapsPropertiesEXT(device: Device, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result {
+    return vkWriteMicromapsPropertiesEXT(device, micromap_count, p_micromaps, query_type, data_size, p_data, stride);
+}
+pub extern fn vkCmdCopyMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapInfoEXT) void;
+pub inline fn cmdCopyMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapInfoEXT) void {
+    return vkCmdCopyMicromapEXT(command_buffer, p_info);
+}
+pub extern fn vkCmdCopyMicromapToMemoryEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapToMemoryInfoEXT) void;
+pub inline fn cmdCopyMicromapToMemoryEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMicromapToMemoryInfoEXT) void {
+    return vkCmdCopyMicromapToMemoryEXT(command_buffer, p_info);
+}
+pub extern fn vkCmdCopyMemoryToMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToMicromapInfoEXT) void;
+pub inline fn cmdCopyMemoryToMicromapEXT(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToMicromapInfoEXT) void {
+    return vkCmdCopyMemoryToMicromapEXT(command_buffer, p_info);
+}
+pub extern fn vkCmdWriteMicromapsPropertiesEXT(command_buffer: CommandBuffer, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
+pub inline fn cmdWriteMicromapsPropertiesEXT(command_buffer: CommandBuffer, micromap_count: u32, p_micromaps: [*c]const MicromapEXT, query_type: QueryType, query_pool: QueryPool, first_query: u32) void {
+    return vkCmdWriteMicromapsPropertiesEXT(command_buffer, micromap_count, p_micromaps, query_type, query_pool, first_query);
+}
+pub extern fn vkGetDeviceMicromapCompatibilityEXT(device: Device, p_version_info: [*c]const MicromapVersionInfoEXT, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void;
+pub inline fn getDeviceMicromapCompatibilityEXT(device: Device, p_version_info: [*c]const MicromapVersionInfoEXT, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void {
+    return vkGetDeviceMicromapCompatibilityEXT(device, p_version_info, p_compatibility);
+}
+pub extern fn vkGetMicromapBuildSizesEXT(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const MicromapBuildInfoEXT, p_size_info: [*c]MicromapBuildSizesInfoEXT) void;
+pub inline fn getMicromapBuildSizesEXT(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const MicromapBuildInfoEXT, p_size_info: [*c]MicromapBuildSizesInfoEXT) void {
+    return vkGetMicromapBuildSizesEXT(device, build_type, p_build_info, p_size_info);
+}
 pub const PhysicalDeviceClusterCullingShaderFeaturesHUAWEI = extern struct {
     s_type: StructureType = StructureType.physical_device_cluster_culling_shader_features_huawei,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13037,8 +13915,14 @@ pub const PhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI = extern struct {
 };
 pub const PFN_cmdDrawClusterHUAWEI = ?*const fn (CommandBuffer, u32, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawClusterIndirectHUAWEI = ?*const fn (CommandBuffer, Buffer, DeviceSize) callconv(.c) void;
-pub extern fn cmdDrawClusterHUAWEI(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
-pub extern fn cmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void;
+pub extern fn vkCmdDrawClusterHUAWEI(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
+pub inline fn cmdDrawClusterHUAWEI(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void {
+    return vkCmdDrawClusterHUAWEI(command_buffer, group_count_x, group_count_y, group_count_z);
+}
+pub extern fn vkCmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void;
+pub inline fn cmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void {
+    return vkCmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset);
+}
 pub const PhysicalDeviceBorderColorSwizzleFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_border_color_swizzle_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13057,7 +13941,10 @@ pub const PhysicalDevicePageableDeviceLocalMemoryFeaturesEXT = extern struct {
     pageable_device_local_memory: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_setDeviceMemoryPriorityEXT = ?*const fn (Device, DeviceMemory, f32) callconv(.c) void;
-pub extern fn setDeviceMemoryPriorityEXT(device: Device, memory: DeviceMemory, priority: f32) void;
+pub extern fn vkSetDeviceMemoryPriorityEXT(device: Device, memory: DeviceMemory, priority: f32) void;
+pub inline fn setDeviceMemoryPriorityEXT(device: Device, memory: DeviceMemory, priority: f32) void {
+    return vkSetDeviceMemoryPriorityEXT(device, memory, priority);
+}
 pub const PhysicalDeviceShaderCorePropertiesARM = extern struct {
     s_type: StructureType = StructureType.physical_device_shader_core_properties_arm,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13111,8 +13998,14 @@ pub const DescriptorSetLayoutHostMappingInfoVALVE = extern struct {
 };
 pub const PFN_getDescriptorSetLayoutHostMappingInfoVALVE = ?*const fn (Device, [*c]const DescriptorSetBindingReferenceVALVE, [*c]DescriptorSetLayoutHostMappingInfoVALVE) callconv(.c) void;
 pub const PFN_getDescriptorSetHostMappingVALVE = ?*const fn (Device, DescriptorSet, [*c]?*anyopaque) callconv(.c) void;
-pub extern fn getDescriptorSetLayoutHostMappingInfoVALVE(device: Device, p_binding_reference: [*c]const DescriptorSetBindingReferenceVALVE, p_host_mapping: [*c]DescriptorSetLayoutHostMappingInfoVALVE) void;
-pub extern fn getDescriptorSetHostMappingVALVE(device: Device, descriptor_set: DescriptorSet, pp_data: [*c]?*anyopaque) void;
+pub extern fn vkGetDescriptorSetLayoutHostMappingInfoVALVE(device: Device, p_binding_reference: [*c]const DescriptorSetBindingReferenceVALVE, p_host_mapping: [*c]DescriptorSetLayoutHostMappingInfoVALVE) void;
+pub inline fn getDescriptorSetLayoutHostMappingInfoVALVE(device: Device, p_binding_reference: [*c]const DescriptorSetBindingReferenceVALVE, p_host_mapping: [*c]DescriptorSetLayoutHostMappingInfoVALVE) void {
+    return vkGetDescriptorSetLayoutHostMappingInfoVALVE(device, p_binding_reference, p_host_mapping);
+}
+pub extern fn vkGetDescriptorSetHostMappingVALVE(device: Device, descriptor_set: DescriptorSet, pp_data: [*c]?*anyopaque) void;
+pub inline fn getDescriptorSetHostMappingVALVE(device: Device, descriptor_set: DescriptorSet, pp_data: [*c]?*anyopaque) void {
+    return vkGetDescriptorSetHostMappingVALVE(device: Device, descriptor_set, pp_data);
+}
 pub const PhysicalDeviceDepthClampZeroOneFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_depth_clamp_zero_one_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13192,8 +14085,14 @@ pub const PhysicalDeviceCopyMemoryIndirectPropertiesNV = extern struct {
 };
 pub const PFN_cmdCopyMemoryIndirectNV = ?*const fn (CommandBuffer, DeviceAddress, u32, u32) callconv(.c) void;
 pub const PFN_cmdCopyMemoryToImageIndirectNV = ?*const fn (CommandBuffer, DeviceAddress, u32, u32, Image, ImageLayout, [*c]const ImageSubresourceLayers) callconv(.c) void;
-pub extern fn cmdCopyMemoryIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32) void;
-pub extern fn cmdCopyMemoryToImageIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32, dst_image: Image, dst_image_layout: ImageLayout, p_image_subresources: [*c]const ImageSubresourceLayers) void;
+pub extern fn vkCmdCopyMemoryIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32) void;
+pub inline fn cmdCopyMemoryIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32) void {
+    return vkCmdCopyMemoryIndirectNV(command_buffer, copy_buffer_address, copy_count, stride);
+}
+pub extern fn vkCmdCopyMemoryToImageIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32, dst_image: Image, dst_image_layout: ImageLayout, p_image_subresources: [*c]const ImageSubresourceLayers) void;
+pub inline fn cmdCopyMemoryToImageIndirectNV(command_buffer: CommandBuffer, copy_buffer_address: DeviceAddress, copy_count: u32, stride: u32, dst_image: Image, dst_image_layout: ImageLayout, p_image_subresources: [*c]const ImageSubresourceLayers) void {
+    return vkCmdCopyMemoryToImageIndirectNV(command_buffer, copy_buffer_address, copy_count, stride, dst_image, dst_image_layout, p_image_subresources);
+}
 pub const MemoryDecompressionMethodFlagsNV = Flags64;
 pub const DecompressMemoryRegionNV = extern struct {
     src_address: DeviceAddress = @import("std").mem.zeroes(DeviceAddress),
@@ -13215,8 +14114,14 @@ pub const PhysicalDeviceMemoryDecompressionPropertiesNV = extern struct {
 };
 pub const PFN_cmdDecompressMemoryNV = ?*const fn (CommandBuffer, u32, [*c]const DecompressMemoryRegionNV) callconv(.c) void;
 pub const PFN_cmdDecompressMemoryIndirectCountNV = ?*const fn (CommandBuffer, DeviceAddress, DeviceAddress, u32) callconv(.c) void;
-pub extern fn cmdDecompressMemoryNV(command_buffer: CommandBuffer, decompress_region_count: u32, p_decompress_memory_regions: [*c]const DecompressMemoryRegionNV) void;
-pub extern fn cmdDecompressMemoryIndirectCountNV(command_buffer: CommandBuffer, indirect_commands_address: DeviceAddress, indirect_commands_count_address: DeviceAddress, stride: u32) void;
+pub extern fn vkCmdDecompressMemoryNV(command_buffer: CommandBuffer, decompress_region_count: u32, p_decompress_memory_regions: [*c]const DecompressMemoryRegionNV) void;
+pub inline fn cmdDecompressMemoryNV(command_buffer: CommandBuffer, decompress_region_count: u32, p_decompress_memory_regions: [*c]const DecompressMemoryRegionNV) void {
+    return vkCmdDecompressMemoryNV(command_buffer, decompress_region_count, p_decompress_memory_regions);
+}
+pub extern fn vkCmdDecompressMemoryIndirectCountNV(command_buffer: CommandBuffer, indirect_commands_address: DeviceAddress, indirect_commands_count_address: DeviceAddress, stride: u32) void;
+pub inline fn cmdDecompressMemoryIndirectCountNV(command_buffer: CommandBuffer, indirect_commands_address: DeviceAddress, indirect_commands_count_address: DeviceAddress, stride: u32) void {
+    return vkCmdDecompressMemoryIndirectCountNV(command_buffer, indirect_commands_address, indirect_commands_count_address, stride);
+}
 pub const PhysicalDeviceDeviceGeneratedCommandsComputeFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_device_generated_commands_compute_features_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13243,9 +14148,18 @@ pub const BindPipelineIndirectCommandNV = extern struct {
 pub const PFN_getPipelineIndirectMemoryRequirementsNV = ?*const fn (Device, [*c]const ComputePipelineCreateInfo, [*c]MemoryRequirements2) callconv(.c) void;
 pub const PFN_cmdUpdatePipelineIndirectBufferNV = ?*const fn (CommandBuffer, PipelineBindPoint, Pipeline) callconv(.c) void;
 pub const PFN_getPipelineIndirectDeviceAddressNV = ?*const fn (Device, [*c]const PipelineIndirectDeviceAddressInfoNV) callconv(.c) DeviceAddress;
-pub extern fn getPipelineIndirectMemoryRequirementsNV(device: Device, p_create_info: [*c]const ComputePipelineCreateInfo, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn cmdUpdatePipelineIndirectBufferNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void;
-pub extern fn getPipelineIndirectDeviceAddressNV(device: Device, p_info: [*c]const PipelineIndirectDeviceAddressInfoNV) DeviceAddress;
+pub extern fn vkGetPipelineIndirectMemoryRequirementsNV(device: Device, p_create_info: [*c]const ComputePipelineCreateInfo, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getPipelineIndirectMemoryRequirementsNV(device: Device, p_create_info: [*c]const ComputePipelineCreateInfo, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetPipelineIndirectMemoryRequirementsNV(device, p_create_info, p_memory_requirements);
+}
+pub extern fn vkCmdUpdatePipelineIndirectBufferNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void;
+pub inline fn cmdUpdatePipelineIndirectBufferNV(command_buffer: CommandBuffer, pipeline_bind_point: PipelineBindPoint, pipeline: Pipeline) void {
+    return vkCmdUpdatePipelineIndirectBufferNV(command_buffer, pipeline_bind_point, pipeline);
+}
+pub extern fn vkGetPipelineIndirectDeviceAddressNV(device: Device, p_info: [*c]const PipelineIndirectDeviceAddressInfoNV) DeviceAddress;
+pub inline fn getPipelineIndirectDeviceAddressNV(device: Device, p_info: [*c]const PipelineIndirectDeviceAddressInfoNV) DeviceAddress {
+    return vkGetPipelineIndirectDeviceAddressNV(device, p_info);
+}
 pub const PhysicalDeviceLinearColorAttachmentFeaturesNV = extern struct {
     s_type: StructureType = StructureType.physical_device_linear_color_attachment_features_nv,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13381,37 +14295,130 @@ pub const PFN_cmdSetCoverageModulationTableNV = ?*const fn (CommandBuffer, u32, 
 pub const PFN_cmdSetShadingRateImageEnableNV = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetRepresentativeFragmentTestEnableNV = ?*const fn (CommandBuffer, Bool32) callconv(.c) void;
 pub const PFN_cmdSetCoverageReductionModeNV = ?*const fn (CommandBuffer, CoverageReductionModeNV) callconv(.c) void;
-pub extern fn cmdSetDepthClampEnableEXT(command_buffer: CommandBuffer, depth_clamp_enable: Bool32) void;
-pub extern fn cmdSetPolygonModeEXT(command_buffer: CommandBuffer, polygon_mode: PolygonMode) void;
-pub extern fn cmdSetRasterizationSamplesEXT(command_buffer: CommandBuffer, rasterization_samples: SampleCountFlags) void;
-pub extern fn cmdSetSampleMaskEXT(command_buffer: CommandBuffer, samples: SampleCountFlags, p_sample_mask: [*c]const SampleMask) void;
-pub extern fn cmdSetAlphaToCoverageEnableEXT(command_buffer: CommandBuffer, alpha_to_coverage_enable: Bool32) void;
-pub extern fn cmdSetAlphaToOneEnableEXT(command_buffer: CommandBuffer, alpha_to_one_enable: Bool32) void;
-pub extern fn cmdSetLogicOpEnableEXT(command_buffer: CommandBuffer, logic_op_enable: Bool32) void;
-pub extern fn cmdSetColorBlendEnableEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_enables: [*c]const Bool32) void;
-pub extern fn cmdSetColorBlendEquationEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_equations: [*c]const ColorBlendEquationEXT) void;
-pub extern fn cmdSetColorWriteMaskEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_write_masks: [*c]const ColorComponentFlags) void;
-pub extern fn cmdSetTessellationDomainOriginEXT(command_buffer: CommandBuffer, domain_origin: TessellationDomainOrigin) void;
-pub extern fn cmdSetRasterizationStreamEXT(command_buffer: CommandBuffer, rasterization_stream: u32) void;
-pub extern fn cmdSetConservativeRasterizationModeEXT(command_buffer: CommandBuffer, conservative_rasterization_mode: ConservativeRasterizationModeEXT) void;
-pub extern fn cmdSetExtraPrimitiveOverestimationSizeEXT(command_buffer: CommandBuffer, extra_primitive_overestimation_size: f32) void;
-pub extern fn cmdSetDepthClipEnableEXT(command_buffer: CommandBuffer, depth_clip_enable: Bool32) void;
-pub extern fn cmdSetSampleLocationsEnableEXT(command_buffer: CommandBuffer, sample_locations_enable: Bool32) void;
-pub extern fn cmdSetColorBlendAdvancedEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_advanced: [*c]const ColorBlendAdvancedEXT) void;
-pub extern fn cmdSetProvokingVertexModeEXT(command_buffer: CommandBuffer, provoking_vertex_mode: ProvokingVertexModeEXT) void;
-pub extern fn cmdSetLineRasterizationModeEXT(command_buffer: CommandBuffer, line_rasterization_mode: LineRasterizationModeEXT) void;
-pub extern fn cmdSetLineStippleEnableEXT(command_buffer: CommandBuffer, stippled_line_enable: Bool32) void;
-pub extern fn cmdSetDepthClipNegativeOneToOneEXT(command_buffer: CommandBuffer, negative_one_to_one: Bool32) void;
-pub extern fn cmdSetViewportWScalingEnableNV(command_buffer: CommandBuffer, viewport_wscaling_enable: Bool32) void;
-pub extern fn cmdSetViewportSwizzleNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_swizzles: [*c]const ViewportSwizzleNV) void;
-pub extern fn cmdSetCoverageToColorEnableNV(command_buffer: CommandBuffer, coverage_to_color_enable: Bool32) void;
-pub extern fn cmdSetCoverageToColorLocationNV(command_buffer: CommandBuffer, coverage_to_color_location: u32) void;
-pub extern fn cmdSetCoverageModulationModeNV(command_buffer: CommandBuffer, coverage_modulation_mode: CoverageModulationModeNV) void;
-pub extern fn cmdSetCoverageModulationTableEnableNV(command_buffer: CommandBuffer, coverage_modulation_table_enable: Bool32) void;
-pub extern fn cmdSetCoverageModulationTableNV(command_buffer: CommandBuffer, coverage_modulation_table_count: u32, p_coverage_modulation_table: [*c]const f32) void;
-pub extern fn cmdSetShadingRateImageEnableNV(command_buffer: CommandBuffer, shading_rate_image_enable: Bool32) void;
-pub extern fn cmdSetRepresentativeFragmentTestEnableNV(command_buffer: CommandBuffer, representative_fragment_test_enable: Bool32) void;
-pub extern fn cmdSetCoverageReductionModeNV(command_buffer: CommandBuffer, coverage_reduction_mode: CoverageReductionModeNV) void;
+pub extern fn vkCmdSetDepthClampEnableEXT(command_buffer: CommandBuffer, depth_clamp_enable: Bool32) void;
+pub inline fn cmdSetDepthClampEnableEXT(command_buffer: CommandBuffer, depth_clamp_enable: Bool32) void {
+    return vkCmdSetDepthClampEnableEXT(command_buffer, depth_clamp_enable);
+}
+pub extern fn vkCmdSetPolygonModeEXT(command_buffer: CommandBuffer, polygon_mode: PolygonMode) void;
+pub inline fn cmdSetPolygonModeEXT(command_buffer: CommandBuffer, polygon_mode: PolygonMode) void {
+    return vkCmdSetPolygonModeEXT(command_buffer, polygon_mode);
+}
+pub extern fn vkCmdSetRasterizationSamplesEXT(command_buffer: CommandBuffer, rasterization_samples: SampleCountFlags) void;
+pub inline fn cmdSetRasterizationSamplesEXT(command_buffer: CommandBuffer, rasterization_samples: SampleCountFlags) void {
+    return vkCmdSetRasterizationSamplesEXT(command_buffer, rasterization_samples);
+}
+pub extern fn vkCmdSetSampleMaskEXT(command_buffer: CommandBuffer, samples: SampleCountFlags, p_sample_mask: [*c]const SampleMask) void;
+pub inline fn cmdSetSampleMaskEXT(command_buffer: CommandBuffer, samples: SampleCountFlags, p_sample_mask: [*c]const SampleMask) void {
+    return vkCmdSetSampleMaskEXT(command_buffer, samples, p_sample_mask);
+}
+pub extern fn vkCmdSetAlphaToCoverageEnableEXT(command_buffer: CommandBuffer, alpha_to_coverage_enable: Bool32) void;
+pub inline fn cmdSetAlphaToCoverageEnableEXT(command_buffer: CommandBuffer, alpha_to_coverage_enable: Bool32) void {
+    return vkCmdSetAlphaToCoverageEnableEXT(command_buffer, alpha_to_coverage_enable);
+}
+pub extern fn vkCmdSetAlphaToOneEnableEXT(command_buffer: CommandBuffer, alpha_to_one_enable: Bool32) void;
+pub inline fn cmdSetAlphaToOneEnableEXT(command_buffer: CommandBuffer, alpha_to_one_enable: Bool32) void {
+    return vkCmdSetAlphaToOneEnableEXT(command_buffer, alpha_to_one_enable);
+}
+pub extern fn vkCmdSetLogicOpEnableEXT(command_buffer: CommandBuffer, logic_op_enable: Bool32) void;
+pub inline fn cmdSetLogicOpEnableEXT(command_buffer: CommandBuffer, logic_op_enable: Bool32) void {
+    return vkCmdSetLogicOpEnableEXT(command_buffer, logic_op_enable);
+}
+pub extern fn vkCmdSetColorBlendEnableEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_enables: [*c]const Bool32) void;
+pub inline fn cmdSetColorBlendEnableEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_enables: [*c]const Bool32) void {
+    return vkCmdSetColorBlendEnableEXT(command_buffer, first_attachment, attachment_count, p_color_blend_enables);
+}
+pub extern fn vkCmdSetColorBlendEquationEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_equations: [*c]const ColorBlendEquationEXT) void;
+pub inline fn cmdSetColorBlendEquationEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_equations: [*c]const ColorBlendEquationEXT) void {
+    return vkCmdSetColorBlendEquationEXT(command_buffer, first_attachment, attachment_count, p_color_blend_equations);
+}
+pub extern fn vkCmdSetColorWriteMaskEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_write_masks: [*c]const ColorComponentFlags) void;
+pub inline fn cmdSetColorWriteMaskEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_write_masks: [*c]const ColorComponentFlags) void {
+    return vkCmdSetColorWriteMaskEXT(command_buffer, first_attachment, attachment_count, p_color_write_masks);
+}
+pub extern fn vkCmdSetTessellationDomainOriginEXT(command_buffer: CommandBuffer, domain_origin: TessellationDomainOrigin) void;
+pub inline fn cmdSetTessellationDomainOriginEXT(command_buffer: CommandBuffer, domain_origin: TessellationDomainOrigin) void {
+    return vkCmdSetTessellationDomainOriginEXT(command_buffer, domain_origin);
+}
+pub extern fn vkCmdSetRasterizationStreamEXT(command_buffer: CommandBuffer, rasterization_stream: u32) void;
+pub inline fn cmdSetRasterizationStreamEXT(command_buffer: CommandBuffer, rasterization_stream: u32) void {
+    return vkCmdSetRasterizationStreamEXT(command_buffer, rasterization_stream);
+}
+pub extern fn vkCmdSetConservativeRasterizationModeEXT(command_buffer: CommandBuffer, conservative_rasterization_mode: ConservativeRasterizationModeEXT) void;
+pub inline fn cmdSetConservativeRasterizationModeEXT(command_buffer: CommandBuffer, conservative_rasterization_mode: ConservativeRasterizationModeEXT) void {
+    return vkCmdSetConservativeRasterizationModeEXT(command_buffer, conservative_rasterization_mode);
+}
+pub extern fn vkCmdSetExtraPrimitiveOverestimationSizeEXT(command_buffer: CommandBuffer, extra_primitive_overestimation_size: f32) void;
+pub inline fn cmdSetExtraPrimitiveOverestimationSizeEXT(command_buffer: CommandBuffer, extra_primitive_overestimation_size: f32) void {
+    return vkCmdSetExtraPrimitiveOverestimationSizeEXT(command_buffer, extra_primitive_overestimation_size);
+}
+pub extern fn vkCmdSetDepthClipEnableEXT(command_buffer: CommandBuffer, depth_clip_enable: Bool32) void;
+pub inline fn cmdSetDepthClipEnableEXT(command_buffer: CommandBuffer, depth_clip_enable: Bool32) void {
+    return vkCmdSetDepthClipEnableEXT(command_buffer, depth_clip_enable);
+}
+pub extern fn vkCmdSetSampleLocationsEnableEXT(command_buffer: CommandBuffer, sample_locations_enable: Bool32) void;
+pub inline fn cmdSetSampleLocationsEnableEXT(command_buffer: CommandBuffer, sample_locations_enable: Bool32) void {
+    return vkCmdSetSampleLocationsEnableEXT(command_buffer, sample_locations_enable);
+}
+pub extern fn vkCmdSetColorBlendAdvancedEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_advanced: [*c]const ColorBlendAdvancedEXT) void;
+pub inline fn cmdSetColorBlendAdvancedEXT(command_buffer: CommandBuffer, first_attachment: u32, attachment_count: u32, p_color_blend_advanced: [*c]const ColorBlendAdvancedEXT) void {
+    return vkCmdSetColorBlendAdvancedEXT(command_buffer, first_attachment, attachment_count, p_color_blend_advanced);
+}
+pub extern fn vkCmdSetProvokingVertexModeEXT(command_buffer: CommandBuffer, provoking_vertex_mode: ProvokingVertexModeEXT) void;
+pub inline fn cmdSetProvokingVertexModeEXT(command_buffer: CommandBuffer, provoking_vertex_mode: ProvokingVertexModeEXT) void {
+    return vkCmdSetProvokingVertexModeEXT(command_buffer, provoking_vertex_mode);
+}
+pub extern fn vkCmdSetLineRasterizationModeEXT(command_buffer: CommandBuffer, line_rasterization_mode: LineRasterizationModeEXT) void;
+pub inline fn cmdSetLineRasterizationModeEXT(command_buffer: CommandBuffer, line_rasterization_mode: LineRasterizationModeEXT) void {
+    return vkCmdSetLineRasterizationModeEXT(command_buffer, line_rasterization_mode);
+}
+pub extern fn vkCmdSetLineStippleEnableEXT(command_buffer: CommandBuffer, stippled_line_enable: Bool32) void;
+pub inline fn cmdSetLineStippleEnableEXT(command_buffer: CommandBuffer, stippled_line_enable: Bool32) void {
+    return vkCmdSetLineStippleEnableEXT(command_buffer, stippled_line_enable);
+}
+pub extern fn vkCmdSetDepthClipNegativeOneToOneEXT(command_buffer: CommandBuffer, negative_one_to_one: Bool32) void;
+pub inline fn cmdSetDepthClipNegativeOneToOneEXT(command_buffer: CommandBuffer, negative_one_to_one: Bool32) void {
+    return vkCmdSetDepthClipNegativeOneToOneEXT(command_buffer, negative_one_to_one);
+}
+pub extern fn vkCmdSetViewportWScalingEnableNV(command_buffer: CommandBuffer, viewport_wscaling_enable: Bool32) void;
+pub inline fn cmdSetViewportWScalingEnableNV(command_buffer: CommandBuffer, viewport_wscaling_enable: Bool32) void {
+    return vkCmdSetViewportWScalingEnableNV(command_buffer, viewport_wscaling_enable);
+}
+pub extern fn vkCmdSetViewportSwizzleNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_swizzles: [*c]const ViewportSwizzleNV) void;
+pub inline fn cmdSetViewportSwizzleNV(command_buffer: CommandBuffer, first_viewport: u32, viewport_count: u32, p_viewport_swizzles: [*c]const ViewportSwizzleNV) void {
+    return vkCmdSetViewportSwizzleNV(command_buffer, first_viewport, viewport_count, p_viewport_swizzles);
+}
+pub extern fn vkCmdSetCoverageToColorEnableNV(command_buffer: CommandBuffer, coverage_to_color_enable: Bool32) void;
+pub inline fn cmdSetCoverageToColorEnableNV(command_buffer: CommandBuffer, coverage_to_color_enable: Bool32) void {
+    return vkCmdSetCoverageToColorEnableNV(command_buffer, coverage_to_color_enable);
+}
+pub extern fn vkCmdSetCoverageToColorLocationNV(command_buffer: CommandBuffer, coverage_to_color_location: u32) void;
+pub inline fn cmdSetCoverageToColorLocationNV(command_buffer: CommandBuffer, coverage_to_color_location: u32) void {
+    return vkCmdSetCoverageToColorLocationNV(command_buffer, coverage_to_color_location);
+}
+pub extern fn vkCmdSetCoverageModulationModeNV(command_buffer: CommandBuffer, coverage_modulation_mode: CoverageModulationModeNV) void;
+pub inline fn cmdSetCoverageModulationModeNV(command_buffer: CommandBuffer, coverage_modulation_mode: CoverageModulationModeNV) void {
+    return cmdSetCoverageModulationModeNV(command_buffer, coverage_modulation_mode);
+}
+pub extern fn vkCmdSetCoverageModulationTableEnableNV(command_buffer: CommandBuffer, coverage_modulation_table_enable: Bool32) void;
+pub inline fn cmdSetCoverageModulationTableEnableNV(command_buffer: CommandBuffer, coverage_modulation_table_enable: Bool32) void {
+    return vkCmdSetCoverageModulationTableEnableNV(command_buffer, coverage_modulation_table_enable);
+}
+pub extern fn vkCmdSetCoverageModulationTableNV(command_buffer: CommandBuffer, coverage_modulation_table_count: u32, p_coverage_modulation_table: [*c]const f32) void;
+pub inline fn cmdSetCoverageModulationTableNV(command_buffer: CommandBuffer, coverage_modulation_table_count: u32, p_coverage_modulation_table: [*c]const f32) void {
+    return vkCmdSetCoverageModulationTableNV(command_buffer, coverage_modulation_table_count, p_coverage_modulation_table);
+}
+pub extern fn vkCmdSetShadingRateImageEnableNV(command_buffer: CommandBuffer, shading_rate_image_enable: Bool32) void;
+pub inline fn cmdSetShadingRateImageEnableNV(command_buffer: CommandBuffer, shading_rate_image_enable: Bool32) void {
+    return vkCmdSetShadingRateImageEnableNV(command_buffer, shading_rate_image_enable);
+}
+pub extern fn vkCmdSetRepresentativeFragmentTestEnableNV(command_buffer: CommandBuffer, representative_fragment_test_enable: Bool32) void;
+pub inline fn cmdSetRepresentativeFragmentTestEnableNV(command_buffer: CommandBuffer, representative_fragment_test_enable: Bool32) void {
+    return vkCmdSetRepresentativeFragmentTestEnableNV(command_buffer, representative_fragment_test_enable);
+}
+pub extern fn vkCmdSetCoverageReductionModeNV(command_buffer: CommandBuffer, coverage_reduction_mode: CoverageReductionModeNV) void;
+pub inline fn cmdSetCoverageReductionModeNV(command_buffer: CommandBuffer, coverage_reduction_mode: CoverageReductionModeNV) void {
+    return vkCmdSetCoverageReductionModeNV(command_buffer, coverage_reduction_mode);
+}
 pub const SubpassMergeStatusEXT = enum(u32) {
     merged_ext = 0,
     disallowed_ext = 1,
@@ -13499,8 +14506,14 @@ pub const ShaderModuleIdentifierEXT = extern struct {
 };
 pub const PFN_getShaderModuleIdentifierEXT = ?*const fn (Device, ShaderModule, [*c]ShaderModuleIdentifierEXT) callconv(.c) void;
 pub const PFN_getShaderModuleCreateInfoIdentifierEXT = ?*const fn (Device, [*c]const ShaderModuleCreateInfo, [*c]ShaderModuleIdentifierEXT) callconv(.c) void;
-pub extern fn getShaderModuleIdentifierEXT(device: Device, shader_module: ShaderModule, p_identifier: [*c]ShaderModuleIdentifierEXT) void;
-pub extern fn getShaderModuleCreateInfoIdentifierEXT(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_identifier: [*c]ShaderModuleIdentifierEXT) void;
+pub extern fn vkGetShaderModuleIdentifierEXT(device: Device, shader_module: ShaderModule, p_identifier: [*c]ShaderModuleIdentifierEXT) void;
+pub inline fn getShaderModuleIdentifierEXT(device: Device, shader_module: ShaderModule, p_identifier: [*c]ShaderModuleIdentifierEXT) void {
+    return vkGetShaderModuleIdentifierEXT(device, shader_module, p_identifier);
+}
+pub extern fn vkGetShaderModuleCreateInfoIdentifierEXT(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_identifier: [*c]ShaderModuleIdentifierEXT) void;
+pub inline fn getShaderModuleCreateInfoIdentifierEXT(device: Device, p_create_info: [*c]const ShaderModuleCreateInfo, p_identifier: [*c]ShaderModuleIdentifierEXT) void {
+    return vkGetShaderModuleCreateInfoIdentifierEXT(device, p_create_info, p_identifier);
+}
 pub const OpticalFlowSessionNV = enum(u64) { null = 0, _ };
 pub const OpticalFlowPerformanceLevelNV = enum(u32) {
     unknown_nv = 0,
@@ -13608,11 +14621,26 @@ pub const PFN_createOpticalFlowSessionNV = ?*const fn (Device, [*c]const Optical
 pub const PFN_destroyOpticalFlowSessionNV = ?*const fn (Device, OpticalFlowSessionNV, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_bindOpticalFlowSessionImageNV = ?*const fn (Device, OpticalFlowSessionNV, OpticalFlowSessionBindingPointNV, ImageView, ImageLayout) callconv(.c) Result;
 pub const PFN_cmdOpticalFlowExecuteNV = ?*const fn (CommandBuffer, OpticalFlowSessionNV, [*c]const OpticalFlowExecuteInfoNV) callconv(.c) void;
-pub extern fn getPhysicalDeviceOpticalFlowImageFormatsNV(physical_device: PhysicalDevice, p_optical_flow_image_format_info: [*c]const OpticalFlowImageFormatInfoNV, p_format_count: [*c]u32, p_image_format_properties: [*c]OpticalFlowImageFormatPropertiesNV) Result;
-pub extern fn createOpticalFlowSessionNV(device: Device, p_create_info: [*c]const OpticalFlowSessionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_session: [*c]OpticalFlowSessionNV) Result;
-pub extern fn destroyOpticalFlowSessionNV(device: Device, session: OpticalFlowSessionNV, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn bindOpticalFlowSessionImageNV(device: Device, session: OpticalFlowSessionNV, binding_point: OpticalFlowSessionBindingPointNV, view: ImageView, layout: ImageLayout) Result;
-pub extern fn cmdOpticalFlowExecuteNV(command_buffer: CommandBuffer, session: OpticalFlowSessionNV, p_execute_info: [*c]const OpticalFlowExecuteInfoNV) void;
+pub extern fn vkGetPhysicalDeviceOpticalFlowImageFormatsNV(physical_device: PhysicalDevice, p_optical_flow_image_format_info: [*c]const OpticalFlowImageFormatInfoNV, p_format_count: [*c]u32, p_image_format_properties: [*c]OpticalFlowImageFormatPropertiesNV) Result;
+pub inline fn getPhysicalDeviceOpticalFlowImageFormatsNV(physical_device: PhysicalDevice, p_optical_flow_image_format_info: [*c]const OpticalFlowImageFormatInfoNV, p_format_count: [*c]u32, p_image_format_properties: [*c]OpticalFlowImageFormatPropertiesNV) Result {
+    return vkGetPhysicalDeviceOpticalFlowImageFormatsNV(physical_device, p_optical_flow_image_format_info, p_format_count, p_image_format_properties);
+}
+pub extern fn vkCreateOpticalFlowSessionNV(device: Device, p_create_info: [*c]const OpticalFlowSessionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_session: [*c]OpticalFlowSessionNV) Result;
+pub inline fn createOpticalFlowSessionNV(device: Device, p_create_info: [*c]const OpticalFlowSessionCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_session: [*c]OpticalFlowSessionNV) Result {
+    return vkCreateOpticalFlowSessionNV(device, p_create_info, p_allocator, p_session);
+}
+pub extern fn vkDestroyOpticalFlowSessionNV(device: Device, session: OpticalFlowSessionNV, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyOpticalFlowSessionNV(device: Device, session: OpticalFlowSessionNV, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyOpticalFlowSessionNV(device, session, p_allocator);
+}
+pub extern fn vkBindOpticalFlowSessionImageNV(device: Device, session: OpticalFlowSessionNV, binding_point: OpticalFlowSessionBindingPointNV, view: ImageView, layout: ImageLayout) Result;
+pub inline fn bindOpticalFlowSessionImageNV(device: Device, session: OpticalFlowSessionNV, binding_point: OpticalFlowSessionBindingPointNV, view: ImageView, layout: ImageLayout) Result {
+    return vkBindOpticalFlowSessionImageNV(device, session, binding_point, view, layout);
+}
+pub extern fn vkCmdOpticalFlowExecuteNV(command_buffer: CommandBuffer, session: OpticalFlowSessionNV, p_execute_info: [*c]const OpticalFlowExecuteInfoNV) void;
+pub inline fn cmdOpticalFlowExecuteNV(command_buffer: CommandBuffer, session: OpticalFlowSessionNV, p_execute_info: [*c]const OpticalFlowExecuteInfoNV) void {
+    return vkCmdOpticalFlowExecuteNV(command_buffer, session, p_execute_info);
+}
 pub const PhysicalDeviceLegacyDitheringFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_legacy_dithering_features_ext,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13651,7 +14679,10 @@ pub const AntiLagDataAMD = extern struct {
     p_presentation_info: [*c]const AntiLagPresentationInfoAMD = @import("std").mem.zeroes([*c]const AntiLagPresentationInfoAMD),
 };
 pub const PFN_antiLagUpdateAMD = ?*const fn (Device, [*c]const AntiLagDataAMD) callconv(.c) void;
-pub extern fn antiLagUpdateAMD(device: Device, p_data: [*c]const AntiLagDataAMD) void;
+pub extern fn vkAntiLagUpdateAMD(device: Device, p_data: [*c]const AntiLagDataAMD) void;
+pub inline fn antiLagUpdateAMD(device: Device, p_data: [*c]const AntiLagDataAMD) void {
+    return vkAntiLagUpdateAMD(device, p_data);
+}
 pub const ShaderEXT = enum(u64) { null = 0, _ };
 pub const ShaderCodeTypeEXT = enum(u32) {
     binary_ext = 0,
@@ -13709,11 +14740,26 @@ pub const PFN_destroyShaderEXT = ?*const fn (Device, ShaderEXT, [*c]const Alloca
 pub const PFN_getShaderBinaryDataEXT = ?*const fn (Device, ShaderEXT, [*c]usize, ?*anyopaque) callconv(.c) Result;
 pub const PFN_cmdBindShadersEXT = ?*const fn (CommandBuffer, u32, [*c]const ShaderStageFlags, [*c]const ShaderEXT) callconv(.c) void;
 pub const PFN_cmdSetDepthClampRangeEXT = ?*const fn (CommandBuffer, DepthClampModeEXT, [*c]const DepthClampRangeEXT) callconv(.c) void;
-pub extern fn createShadersEXT(device: Device, create_info_count: u32, p_create_infos: [*c]const ShaderCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_shaders: [*c]ShaderEXT) Result;
-pub extern fn destroyShaderEXT(device: Device, shader: ShaderEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getShaderBinaryDataEXT(device: Device, shader: ShaderEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
-pub extern fn cmdBindShadersEXT(command_buffer: CommandBuffer, stage_count: u32, p_stages: [*c]const ShaderStageFlags, p_shaders: [*c]const ShaderEXT) void;
-pub extern fn cmdSetDepthClampRangeEXT(command_buffer: CommandBuffer, depth_clamp_mode: DepthClampModeEXT, p_depth_clamp_range: [*c]const DepthClampRangeEXT) void;
+pub extern fn vkCreateShadersEXT(device: Device, create_info_count: u32, p_create_infos: [*c]const ShaderCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_shaders: [*c]ShaderEXT) Result;
+pub inline fn createShadersEXT(device: Device, create_info_count: u32, p_create_infos: [*c]const ShaderCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_shaders: [*c]ShaderEXT) Result {
+    return vkCreateShadersEXT(device, create_info_count, p_create_infos, p_allocator, p_shaders);
+}
+pub extern fn vkDestroyShaderEXT(device: Device, shader: ShaderEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyShaderEXT(device: Device, shader: ShaderEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyShaderEXT(device, shader, p_allocator);
+}
+pub extern fn vkGetShaderBinaryDataEXT(device: Device, shader: ShaderEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result;
+pub inline fn getShaderBinaryDataEXT(device: Device, shader: ShaderEXT, p_data_size: [*c]usize, p_data: ?*anyopaque) Result {
+    return vkGetShaderBinaryDataEXT(device, shader, p_data_size, p_data);
+}
+pub extern fn vkCmdBindShadersEXT(command_buffer: CommandBuffer, stage_count: u32, p_stages: [*c]const ShaderStageFlags, p_shaders: [*c]const ShaderEXT) void;
+pub inline fn cmdBindShadersEXT(command_buffer: CommandBuffer, stage_count: u32, p_stages: [*c]const ShaderStageFlags, p_shaders: [*c]const ShaderEXT) void {
+    return vkCmdBindShadersEXT(command_buffer, stage_count, p_stages, p_shaders);
+}
+pub extern fn vkCmdSetDepthClampRangeEXT(command_buffer: CommandBuffer, depth_clamp_mode: DepthClampModeEXT, p_depth_clamp_range: [*c]const DepthClampRangeEXT) void;
+pub inline fn cmdSetDepthClampRangeEXT(command_buffer: CommandBuffer, depth_clamp_mode: DepthClampModeEXT, p_depth_clamp_range: [*c]const DepthClampRangeEXT) void {
+    return vkCmdSetDepthClampRangeEXT(command_buffer, depth_clamp_mode, p_depth_clamp_range);
+}
 pub const PhysicalDeviceTilePropertiesFeaturesQCOM = extern struct {
     s_type: StructureType = StructureType.physical_device_tile_properties_features_qcom,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13728,8 +14774,14 @@ pub const TilePropertiesQCOM = extern struct {
 };
 pub const PFN_getFramebufferTilePropertiesQCOM = ?*const fn (Device, Framebuffer, [*c]u32, [*c]TilePropertiesQCOM) callconv(.c) Result;
 pub const PFN_getDynamicRenderingTilePropertiesQCOM = ?*const fn (Device, [*c]const RenderingInfo, [*c]TilePropertiesQCOM) callconv(.c) Result;
-pub extern fn getFramebufferTilePropertiesQCOM(device: Device, framebuffer: Framebuffer, p_properties_count: [*c]u32, p_properties: [*c]TilePropertiesQCOM) Result;
-pub extern fn getDynamicRenderingTilePropertiesQCOM(device: Device, p_rendering_info: [*c]const RenderingInfo, p_properties: [*c]TilePropertiesQCOM) Result;
+pub extern fn vkGetFramebufferTilePropertiesQCOM(device: Device, framebuffer: Framebuffer, p_properties_count: [*c]u32, p_properties: [*c]TilePropertiesQCOM) Result;
+pub inline fn getFramebufferTilePropertiesQCOM(device: Device, framebuffer: Framebuffer, p_properties_count: [*c]u32, p_properties: [*c]TilePropertiesQCOM) Result {
+    return vkGetFramebufferTilePropertiesQCOM(device, framebuffer, p_properties_count, p_properties);
+}
+pub extern fn vkGetDynamicRenderingTilePropertiesQCOM(device: Device, p_rendering_info: [*c]const RenderingInfo, p_properties: [*c]TilePropertiesQCOM) Result;
+pub inline fn getDynamicRenderingTilePropertiesQCOM(device: Device, p_rendering_info: [*c]const RenderingInfo, p_properties: [*c]TilePropertiesQCOM) Result {
+    return vkGetDynamicRenderingTilePropertiesQCOM(device, p_rendering_info, p_properties);
+}
 pub const PhysicalDeviceAmigoProfilingFeaturesSEC = extern struct {
     s_type: StructureType = StructureType.physical_device_amigo_profiling_features_sec,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13914,11 +14966,26 @@ pub const PFN_latencySleepNV = ?*const fn (Device, SwapchainKHR, [*c]const Laten
 pub const PFN_setLatencyMarkerNV = ?*const fn (Device, SwapchainKHR, [*c]const SetLatencyMarkerInfoNV) callconv(.c) void;
 pub const PFN_getLatencyTimingsNV = ?*const fn (Device, SwapchainKHR, [*c]GetLatencyMarkerInfoNV) callconv(.c) void;
 pub const PFN_queueNotifyOutOfBandNV = ?*const fn (Queue, [*c]const OutOfBandQueueTypeInfoNV) callconv(.c) void;
-pub extern fn setLatencySleepModeNV(device: Device, swapchain: SwapchainKHR, p_sleep_mode_info: [*c]const LatencySleepModeInfoNV) Result;
-pub extern fn latencySleepNV(device: Device, swapchain: SwapchainKHR, p_sleep_info: [*c]const LatencySleepInfoNV) Result;
-pub extern fn setLatencyMarkerNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]const SetLatencyMarkerInfoNV) void;
-pub extern fn getLatencyTimingsNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]GetLatencyMarkerInfoNV) void;
-pub extern fn queueNotifyOutOfBandNV(queue: Queue, p_queue_type_info: [*c]const OutOfBandQueueTypeInfoNV) void;
+pub extern fn vkSetLatencySleepModeNV(device: Device, swapchain: SwapchainKHR, p_sleep_mode_info: [*c]const LatencySleepModeInfoNV) Result;
+pub inline fn setLatencySleepModeNV(device: Device, swapchain: SwapchainKHR, p_sleep_mode_info: [*c]const LatencySleepModeInfoNV) Result {
+    return vkSetLatencySleepModeNV(device, swapchain, p_sleep_mode_info);
+}
+pub extern fn vkLatencySleepNV(device: Device, swapchain: SwapchainKHR, p_sleep_info: [*c]const LatencySleepInfoNV) Result;
+pub inline fn latencySleepNV(device: Device, swapchain: SwapchainKHR, p_sleep_info: [*c]const LatencySleepInfoNV) Result {
+    return vkLatencySleepNV(device, swapchain, p_sleep_info);
+}
+pub extern fn vkSetLatencyMarkerNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]const SetLatencyMarkerInfoNV) void;
+pub inline fn setLatencyMarkerNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]const SetLatencyMarkerInfoNV) void {
+    return vkSetLatencyMarkerNV(device, swapchain, p_latency_marker_info);
+}
+pub extern fn vkGetLatencyTimingsNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]GetLatencyMarkerInfoNV) void;
+pub inline fn getLatencyTimingsNV(device: Device, swapchain: SwapchainKHR, p_latency_marker_info: [*c]GetLatencyMarkerInfoNV) void {
+    return vkGetLatencyTimingsNV(device, swapchain, p_latency_marker_info);
+}
+pub extern fn vkQueueNotifyOutOfBandNV(queue: Queue, p_queue_type_info: [*c]const OutOfBandQueueTypeInfoNV) void;
+pub inline fn queueNotifyOutOfBandNV(queue: Queue, p_queue_type_info: [*c]const OutOfBandQueueTypeInfoNV) void {
+    return vkQueueNotifyOutOfBandNV(queue, p_queue_type_info);
+}
 pub const PhysicalDeviceMultiviewPerViewRenderAreasFeaturesQCOM = extern struct {
     s_type: StructureType = StructureType.physical_device_multiview_per_view_render_areas_features_qcom,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -13999,7 +15066,10 @@ pub const PhysicalDeviceAttachmentFeedbackLoopDynamicStateFeaturesEXT = extern s
     attachment_feedback_loop_dynamic_state: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_cmdSetAttachmentFeedbackLoopEnableEXT = ?*const fn (CommandBuffer, ImageAspectFlags) callconv(.c) void;
-pub extern fn cmdSetAttachmentFeedbackLoopEnableEXT(command_buffer: CommandBuffer, aspect_mask: ImageAspectFlags) void;
+pub extern fn vkCmdSetAttachmentFeedbackLoopEnableEXT(command_buffer: CommandBuffer, aspect_mask: ImageAspectFlags) void;
+pub inline fn cmdSetAttachmentFeedbackLoopEnableEXT(command_buffer: CommandBuffer, aspect_mask: ImageAspectFlags) void {
+    return vkCmdSetAttachmentFeedbackLoopEnableEXT(command_buffer, aspect_mask);
+}
 pub const LayeredDriverUnderlyingApiMSFT = enum(u32) {
     none_msft = 0,
     d3d12_msft = 1,
@@ -14231,15 +15301,42 @@ pub const PFN_createIndirectExecutionSetEXT = ?*const fn (Device, [*c]const Indi
 pub const PFN_destroyIndirectExecutionSetEXT = ?*const fn (Device, IndirectExecutionSetEXT, [*c]const AllocationCallbacks) callconv(.c) void;
 pub const PFN_updateIndirectExecutionSetPipelineEXT = ?*const fn (Device, IndirectExecutionSetEXT, u32, [*c]const WriteIndirectExecutionSetPipelineEXT) callconv(.c) void;
 pub const PFN_updateIndirectExecutionSetShaderEXT = ?*const fn (Device, IndirectExecutionSetEXT, u32, [*c]const WriteIndirectExecutionSetShaderEXT) callconv(.c) void;
-pub extern fn getGeneratedCommandsMemoryRequirementsEXT(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoEXT, p_memory_requirements: [*c]MemoryRequirements2) void;
-pub extern fn cmdPreprocessGeneratedCommandsEXT(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT, state_command_buffer: CommandBuffer) void;
-pub extern fn cmdExecuteGeneratedCommandsEXT(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT) void;
-pub extern fn createIndirectCommandsLayoutEXT(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutEXT) Result;
-pub extern fn destroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn createIndirectExecutionSetEXT(device: Device, p_create_info: [*c]const IndirectExecutionSetCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_execution_set: [*c]IndirectExecutionSetEXT) Result;
-pub extern fn destroyIndirectExecutionSetEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn updateIndirectExecutionSetPipelineEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetPipelineEXT) void;
-pub extern fn updateIndirectExecutionSetShaderEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetShaderEXT) void;
+pub extern fn vkGetGeneratedCommandsMemoryRequirementsEXT(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoEXT, p_memory_requirements: [*c]MemoryRequirements2) void;
+pub inline fn getGeneratedCommandsMemoryRequirementsEXT(device: Device, p_info: [*c]const GeneratedCommandsMemoryRequirementsInfoEXT, p_memory_requirements: [*c]MemoryRequirements2) void {
+    return vkGetGeneratedCommandsMemoryRequirementsEXT(device, p_info, p_memory_requirements);
+}
+pub extern fn vkCmdPreprocessGeneratedCommandsEXT(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT, state_command_buffer: CommandBuffer) void;
+pub inline fn cmdPreprocessGeneratedCommandsEXT(command_buffer: CommandBuffer, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT, state_command_buffer: CommandBuffer) void {
+    return vkCmdPreprocessGeneratedCommandsEXT(command_buffer, p_generated_commands_info, state_command_buffer);
+}
+pub extern fn vkCmdExecuteGeneratedCommandsEXT(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT) void;
+pub inline fn cmdExecuteGeneratedCommandsEXT(command_buffer: CommandBuffer, is_preprocessed: Bool32, p_generated_commands_info: [*c]const GeneratedCommandsInfoEXT) void {
+    return vkCmdExecuteGeneratedCommandsEXT(command_buffer, is_preprocessed, p_generated_commands_info);
+}
+pub extern fn vkCreateIndirectCommandsLayoutEXT(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutEXT) Result;
+pub inline fn createIndirectCommandsLayoutEXT(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutEXT) Result {
+    return vkCreateIndirectCommandsLayoutEXT(device, p_create_info, p_allocator, p_indirect_commands_layout);
+}
+pub extern fn vkDestroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void  {
+    return vkDestroyIndirectCommandsLayoutEXT(device, indirect_commands_layout, p_allocator);
+}
+pub extern fn vkCreateIndirectExecutionSetEXT(device: Device, p_create_info: [*c]const IndirectExecutionSetCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_execution_set: [*c]IndirectExecutionSetEXT) Result;
+pub inline fn createIndirectExecutionSetEXT(device: Device, p_create_info: [*c]const IndirectExecutionSetCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_execution_set: [*c]IndirectExecutionSetEXT) Result {
+    return vkCreateIndirectExecutionSetEXT(device, p_create_info, p_allocator, p_indirect_execution_set);
+}
+pub extern fn vkDestroyIndirectExecutionSetEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyIndirectExecutionSetEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyIndirectExecutionSetEXT(device, indirect_execution_set, p_allocator);
+}
+pub extern fn vkUpdateIndirectExecutionSetPipelineEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetPipelineEXT) void;
+pub inline fn updateIndirectExecutionSetPipelineEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetPipelineEXT) void {
+    return vkUpdateIndirectExecutionSetPipelineEXT(device, indirect_execution_set, execution_set_write_count, p_execution_set_writes);
+}
+pub extern fn vkUpdateIndirectExecutionSetShaderEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetShaderEXT) void;
+pub inline fn updateIndirectExecutionSetShaderEXT(device: Device, indirect_execution_set: IndirectExecutionSetEXT, execution_set_write_count: u32, p_execution_set_writes: [*c]const WriteIndirectExecutionSetShaderEXT) void {
+    return vkUpdateIndirectExecutionSetShaderEXT(device, indirect_execution_set, execution_set_write_count, p_execution_set_writes);
+}
 pub const PhysicalDeviceImageAlignmentControlFeaturesMESA = extern struct {
     s_type: StructureType = StructureType.physical_device_image_alignment_control_features_mesa,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -14421,22 +15518,70 @@ pub const PFN_getAccelerationStructureDeviceAddressKHR = ?*const fn (Device, [*c
 pub const PFN_cmdWriteAccelerationStructuresPropertiesKHR = ?*const fn (CommandBuffer, u32, [*c]const AccelerationStructureKHR, QueryType, QueryPool, u32) callconv(.c) void;
 pub const PFN_getDeviceAccelerationStructureCompatibilityKHR = ?*const fn (Device, [*c]const AccelerationStructureVersionInfoKHR, [*c]AccelerationStructureCompatibilityKHR) callconv(.c) void;
 pub const PFN_getAccelerationStructureBuildSizesKHR = ?*const fn (Device, AccelerationStructureBuildTypeKHR, [*c]const AccelerationStructureBuildGeometryInfoKHR, [*c]const u32, [*c]AccelerationStructureBuildSizesInfoKHR) callconv(.c) void;
-pub extern fn createAccelerationStructureKHR(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureKHR) Result;
-pub extern fn destroyAccelerationStructureKHR(device: Device, acceleration_structure: AccelerationStructureKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn cmdBuildAccelerationStructuresKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) void;
-pub extern fn cmdBuildAccelerationStructuresIndirectKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_indirect_device_addresses: [*c]const DeviceAddress, p_indirect_strides: [*c]const u32, pp_max_primitive_counts: [*c]const [*c]const u32) void;
-pub extern fn buildAccelerationStructuresKHR(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) Result;
-pub extern fn copyAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureInfoKHR) Result;
-pub extern fn copyAccelerationStructureToMemoryKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) Result;
-pub extern fn copyMemoryToAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) Result;
-pub extern fn writeAccelerationStructuresPropertiesKHR(device: Device, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result;
-pub extern fn cmdCopyAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureInfoKHR) void;
-pub extern fn cmdCopyAccelerationStructureToMemoryKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) void;
-pub extern fn cmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void;
-pub extern fn getAccelerationStructureDeviceAddressKHR(device: Device, p_info: [*c]const AccelerationStructureDeviceAddressInfoKHR) DeviceAddress;
-pub extern fn cmdWriteAccelerationStructuresPropertiesKHR(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
-pub extern fn getDeviceAccelerationStructureCompatibilityKHR(device: Device, p_version_info: [*c]const AccelerationStructureVersionInfoKHR, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void;
-pub extern fn getAccelerationStructureBuildSizesKHR(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_max_primitive_counts: [*c]const u32, p_size_info: [*c]AccelerationStructureBuildSizesInfoKHR) void;
+pub extern fn vkCreateAccelerationStructureKHR(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureKHR) Result;
+pub inline fn createAccelerationStructureKHR(device: Device, p_create_info: [*c]const AccelerationStructureCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_acceleration_structure: [*c]AccelerationStructureKHR) Result {
+    return vkCreateAccelerationStructureKHR(device, p_create_info, p_allocator, p_acceleration_structure);
+}
+pub extern fn vkDestroyAccelerationStructureKHR(device: Device, acceleration_structure: AccelerationStructureKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyAccelerationStructureKHR(device: Device, acceleration_structure: AccelerationStructureKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyAccelerationStructureKHR(device, acceleration_structure, p_allocator);
+}
+pub extern fn vkCmdBuildAccelerationStructuresKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) void;
+pub inline fn cmdBuildAccelerationStructuresKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) void {
+    return vkCmdBuildAccelerationStructuresKHR(command_buffer, info_count, p_infos, pp_build_range_infos);
+}
+pub extern fn vkCmdBuildAccelerationStructuresIndirectKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_indirect_device_addresses: [*c]const DeviceAddress, p_indirect_strides: [*c]const u32, pp_max_primitive_counts: [*c]const [*c]const u32) void;
+pub inline fn cmdBuildAccelerationStructuresIndirectKHR(command_buffer: CommandBuffer, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_indirect_device_addresses: [*c]const DeviceAddress, p_indirect_strides: [*c]const u32, pp_max_primitive_counts: [*c]const [*c]const u32) void {
+    return vkCmdBuildAccelerationStructuresIndirectKHR(command_buffer, info_count, p_infos, p_indirect_device_addresses, p_indirect_strides, pp_max_primitive_counts);
+}
+pub extern fn vkBuildAccelerationStructuresKHR(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) Result;
+pub inline fn buildAccelerationStructuresKHR(device: Device, deferred_operation: DeferredOperationKHR, info_count: u32, p_infos: [*c]const AccelerationStructureBuildGeometryInfoKHR, pp_build_range_infos: [*c]const [*c]const AccelerationStructureBuildRangeInfoKHR) Result {
+    return vkBuildAccelerationStructuresKHR(device, deferred_operation, info_count, p_infos, pp_build_range_infos);
+}
+pub extern fn vkCopyAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureInfoKHR) Result;
+pub inline fn copyAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureInfoKHR) Result {
+    return vkCopyAccelerationStructureKHR(device, deferred_operation, p_info);
+}
+pub extern fn vkCopyAccelerationStructureToMemoryKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) Result;
+pub inline fn copyAccelerationStructureToMemoryKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) Result {
+    return vkCopyAccelerationStructureToMemoryKHR(device, deferred_operation, p_info) Result;
+}
+pub extern fn vkCopyMemoryToAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) Result;
+pub inline fn copyMemoryToAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) Result {
+    return vkCopyMemoryToAccelerationStructureKHR(device, deferred_operation, p_info);
+}
+pub extern fn vkWriteAccelerationStructuresPropertiesKHR(device: Device, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result;
+pub inline fn writeAccelerationStructuresPropertiesKHR(device: Device, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, data_size: usize, p_data: ?*anyopaque, stride: usize) Result {
+    return vkWriteAccelerationStructuresPropertiesKHR(device, acceleration_structure_count, p_acceleration_structures, query_type, data_size, p_data, stride);
+}
+pub extern fn vkCmdCopyAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureInfoKHR) void;
+pub inline fn cmdCopyAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureInfoKHR) void {
+    return vkCmdCopyAccelerationStructureKHR(command_buffer, p_info);
+}
+pub extern fn vkCmdCopyAccelerationStructureToMemoryKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) void;
+pub inline fn cmdCopyAccelerationStructureToMemoryKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) void {
+    return vkCmdCopyAccelerationStructureToMemoryKHR(command_buffer, p_info);
+}
+pub extern fn vkCmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void;
+pub inline fn cmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void  {
+    return vkCmdCopyMemoryToAccelerationStructureKHR(command_buffer, p_info);
+}
+pub extern fn vkGetAccelerationStructureDeviceAddressKHR(device: Device, p_info: [*c]const AccelerationStructureDeviceAddressInfoKHR) DeviceAddress;
+pub inline fn getAccelerationStructureDeviceAddressKHR(device: Device, p_info: [*c]const AccelerationStructureDeviceAddressInfoKHR) DeviceAddress {
+    return vkGetAccelerationStructureDeviceAddressKHR(device, p_info);
+}
+pub extern fn vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, query_pool: QueryPool, first_query: u32) void;
+pub inline fn cmdWriteAccelerationStructuresPropertiesKHR(command_buffer: CommandBuffer, acceleration_structure_count: u32, p_acceleration_structures: [*c]const AccelerationStructureKHR, query_type: QueryType, query_pool: QueryPool, first_query: u32) void {
+    return vkCmdWriteAccelerationStructuresPropertiesKHR(command_buffer, acceleration_structure_count, p_acceleration_structures, query_type, query_pool, first_query);
+}
+pub extern fn vkGetDeviceAccelerationStructureCompatibilityKHR(device: Device, p_version_info: [*c]const AccelerationStructureVersionInfoKHR, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void;
+pub inline fn getDeviceAccelerationStructureCompatibilityKHR(device: Device, p_version_info: [*c]const AccelerationStructureVersionInfoKHR, p_compatibility: [*c]AccelerationStructureCompatibilityKHR) void {
+    return vkGetDeviceAccelerationStructureCompatibilityKHR(device, p_version_info, p_compatibility);
+}
+pub extern fn vkGetAccelerationStructureBuildSizesKHR(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_max_primitive_counts: [*c]const u32, p_size_info: [*c]AccelerationStructureBuildSizesInfoKHR) void;
+pub inline fn getAccelerationStructureBuildSizesKHR(device: Device, build_type: AccelerationStructureBuildTypeKHR, p_build_info: [*c]const AccelerationStructureBuildGeometryInfoKHR, p_max_primitive_counts: [*c]const u32, p_size_info: [*c]AccelerationStructureBuildSizesInfoKHR) void {
+    return vkGetAccelerationStructureBuildSizesKHR(device, build_type, p_build_info, p_max_primitive_counts, p_size_info);
+}
 pub const ShaderGroupShaderKHR = enum(u32) {
     general_khr = 0,
     closest_hit_khr = 1,
@@ -14512,12 +15657,30 @@ pub const PFN_getRayTracingCaptureReplayShaderGroupHandlesKHR = ?*const fn (Devi
 pub const PFN_cmdTraceRaysIndirectKHR = ?*const fn (CommandBuffer, [*c]const StridedDeviceAddressRegionKHR, [*c]const StridedDeviceAddressRegionKHR, [*c]const StridedDeviceAddressRegionKHR, [*c]const StridedDeviceAddressRegionKHR, DeviceAddress) callconv(.c) void;
 pub const PFN_getRayTracingShaderGroupStackSizeKHR = ?*const fn (Device, Pipeline, u32, ShaderGroupShaderKHR) callconv(.c) DeviceSize;
 pub const PFN_cmdSetRayTracingPipelineStackSizeKHR = ?*const fn (CommandBuffer, u32) callconv(.c) void;
-pub extern fn cmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void;
-pub extern fn createRayTracingPipelinesKHR(device: Device, deferred_operation: DeferredOperationKHR, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
-pub extern fn getRayTracingCaptureReplayShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
-pub extern fn cmdTraceRaysIndirectKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, indirect_device_address: DeviceAddress) void;
-pub extern fn getRayTracingShaderGroupStackSizeKHR(device: Device, pipeline: Pipeline, group: u32, group_shader: ShaderGroupShaderKHR) DeviceSize;
-pub extern fn cmdSetRayTracingPipelineStackSizeKHR(command_buffer: CommandBuffer, pipeline_stack_size: u32) void;
+pub extern fn vkCmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void;
+pub inlne fn cmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void {
+    return vkCmdTraceRaysKHR(command_buffer, p_raygen_shader_binding_table, p_miss_shader_binding_table, p_hit_shader_binding_table, p_callable_shader_binding_table, width, height, depth);
+}
+pub extern fn vkCreateRayTracingPipelinesKHR(device: Device, deferred_operation: DeferredOperationKHR, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
+pub inline fn createRayTracingPipelinesKHR(device: Device, deferred_operation: DeferredOperationKHR, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result {
+    return vkCreateRayTracingPipelinesKHR(device, deferred_operation, pipeline_cache, create_info_count, p_create_infos, p_allocator, p_pipelines);
+}
+pub extern fn vkGetRayTracingCaptureReplayShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result;
+pub inline fn getRayTracingCaptureReplayShaderGroupHandlesKHR(device: Device, pipeline: Pipeline, first_group: u32, group_count: u32, data_size: usize, p_data: ?*anyopaque) Result {
+    return vkGetRayTracingCaptureReplayShaderGroupHandlesKHR(device, pipeline, first_group, group_count, data_size, p_data);
+}
+pub extern fn vkCmdTraceRaysIndirectKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, indirect_device_address: DeviceAddress) void;
+pub inline fn cmdTraceRaysIndirectKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, indirect_device_address: DeviceAddress) void {
+    return vkCmdTraceRaysIndirectKHR(command_buffer, p_raygen_shader_binding_table, p_miss_shader_binding_table, p_hit_shader_binding_table, p_callable_shader_binding_table, indirect_device_address);
+}
+pub extern fn vkGetRayTracingShaderGroupStackSizeKHR(device: Device, pipeline: Pipeline, group: u32, group_shader: ShaderGroupShaderKHR) DeviceSize;
+pub inline fn getRayTracingShaderGroupStackSizeKHR(device: Device, pipeline: Pipeline, group: u32, group_shader: ShaderGroupShaderKHR) DeviceSize {
+    return vkGetRayTracingShaderGroupStackSizeKHR(device, pipeline, group, group_shader);
+}
+pub extern fn vkCmdSetRayTracingPipelineStackSizeKHR(command_buffer: CommandBuffer, pipeline_stack_size: u32) void;
+pub inline fn cmdSetRayTracingPipelineStackSizeKHR(command_buffer: CommandBuffer, pipeline_stack_size: u32) void {
+    return vkCmdSetRayTracingPipelineStackSizeKHR(command_buffer, pipeline_stack_size);
+}
 pub const PhysicalDeviceRayQueryFeaturesKHR = extern struct {
     s_type: StructureType = StructureType.physical_device_ray_query_features_khr,
     p_next: ?*anyopaque = @import("std").mem.zeroes(?*anyopaque),
@@ -14572,9 +15735,18 @@ pub const DrawMeshTasksIndirectCommandEXT = extern struct {
 pub const PFN_cmdDrawMeshTasksEXT = ?*const fn (CommandBuffer, u32, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMeshTasksIndirectEXT = ?*const fn (CommandBuffer, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMeshTasksIndirectCountEXT = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
-pub extern fn cmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
-pub extern fn cmdDrawMeshTasksIndirectEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
-pub extern fn cmdDrawMeshTasksIndirectCountEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub extern fn vkCmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
+pub inline fn cmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void  {
+    return vkCmdDrawMeshTasksEXT(command_buffer, group_count_x, group_count_y, group_count_z);
+}
+pub extern fn vkCmdDrawMeshTasksIndirectEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawMeshTasksIndirectEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void {
+    return vkCmdDrawMeshTasksIndirectEXT(command_buffer, buffer, offset, draw_count, stride);
+}
+pub extern fn vkCmdDrawMeshTasksIndirectCountEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void;
+pub inline fn cmdDrawMeshTasksIndirectCountEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, count_buffer: Buffer, count_buffer_offset: DeviceSize, max_draw_count: u32, stride: u32) void {
+    return vkCmdDrawMeshTasksIndirectCountEXT(command_buffer, buffer, offset, count_buffer, count_buffer_offset, max_draw_count, stride);
+}
 pub inline fn makeApiVersion(variant: anytype, major: anytype, minor: anytype, patch: anytype) @TypeOf((((@import("std").zig.c_translation.cast(u32, variant) << @as(c_uint, 29)) | (@import("std").zig.c_translation.cast(u32, major) << @as(c_uint, 22))) | (@import("std").zig.c_translation.cast(u32, minor) << @as(c_uint, 12))) | @import("std").zig.c_translation.cast(u32, patch)) {
     _ = &variant;
     _ = &major;
