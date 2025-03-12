@@ -6423,11 +6423,11 @@ pub const PFN_getPhysicalDeviceSurfaceFormatsKHR = ?*const fn (PhysicalDevice, S
 pub const PFN_getPhysicalDeviceSurfacePresentModesKHR = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]u32, [*c]PresentModeKHR) callconv(.c) Result;
 pub extern fn vkDestroySurfaceKHR(instance: Instance, surface: SurfaceKHR, p_allocator: [*c]const AllocationCallbacks) void;
 pub inline fn destroySurfaceKHR(instance: Instance, surface: SurfaceKHR, p_allocator: [*c]const AllocationCallbacks) void {
-    return destroySurfaceKHR(instance, surface, p_allocator);
+    return vkDestroySurfaceKHR(instance, surface, p_allocator);
 }
 pub extern fn vkGetPhysicalDeviceSurfaceSupportKHR(physical_device: PhysicalDevice, queue_family_index: u32, surface: SurfaceKHR, p_supported: [*c]Bool32) Result;
 pub inline fn getPhysicalDeviceSurfaceSupportKHR(physical_device: PhysicalDevice, queue_family_index: u32, surface: SurfaceKHR, p_supported: [*c]Bool32) Result {
-    return getPhysicalDeviceSurfaceSupportKHR(physical_device, queue_family_index, surface, p_supported);
+    return vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, queue_family_index, surface, p_supported);
 }
 pub extern fn vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilitiesKHR) Result;
 pub inline fn getPhysicalDeviceSurfaceCapabilitiesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilitiesKHR) Result {
@@ -6439,7 +6439,7 @@ pub inline fn getPhysicalDeviceSurfaceFormatsKHR(physical_device: PhysicalDevice
 }
 pub extern fn vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_present_mode_count: [*c]u32, p_present_modes: [*c]PresentModeKHR) Result;
 pub inline fn getPhysicalDeviceSurfacePresentModesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_present_mode_count: [*c]u32, p_present_modes: [*c]PresentModeKHR) Result {
-    return getPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, p_present_mode_count, p_present_modes);
+    return vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, p_present_mode_count, p_present_modes);
 }
 pub const SwapchainKHR = enum(u64) { null = 0, _ };
 pub const SwapchainCreateFlagsKHR = enum(u32) {
