@@ -12639,7 +12639,7 @@ pub inline fn cmdBindPipelineShaderGroupNV(command_buffer: CommandBuffer, pipeli
     return vkCmdBindPipelineShaderGroupNV(command_buffer, pipeline_bind_point, pipeline, group_index);
 }
 pub extern fn vkCreateIndirectCommandsLayoutNV(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutNV) Result;
-pub inline fn createIndirectCommandsLayoutNV(device, p_create_info, p_allocator, p_indirect_commands_layout) Result {
+pub inline fn createIndirectCommandsLayoutNV(device: Device, p_create_info: [*c]const IndirectCommandsLayoutCreateInfoNV, p_allocator: [*c]const AllocationCallbacks, p_indirect_commands_layout: [*c]IndirectCommandsLayoutNV) Result {
     return vkCreateIndirectCommandsLayoutNV(device, p_create_info, p_allocator, p_indirect_commands_layout);
 }
 pub extern fn vkDestroyIndirectCommandsLayoutNV(device: Device, indirect_commands_layout: IndirectCommandsLayoutNV, p_allocator: [*c]const AllocationCallbacks) void;
@@ -13921,7 +13921,7 @@ pub inline fn cmdDrawClusterHUAWEI(command_buffer: CommandBuffer, group_count_x:
 }
 pub extern fn vkCmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void;
 pub inline fn cmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize) void {
-    return vkCmdDrawClusterIndirectHUAWEI(command_buffer: CommandBuffer, buffer: Buffer, offset);
+    return vkCmdDrawClusterIndirectHUAWEI(command_buffer, buffer, offset);
 }
 pub const PhysicalDeviceBorderColorSwizzleFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_border_color_swizzle_features_ext,
@@ -14004,7 +14004,7 @@ pub inline fn getDescriptorSetLayoutHostMappingInfoVALVE(device: Device, p_bindi
 }
 pub extern fn vkGetDescriptorSetHostMappingVALVE(device: Device, descriptor_set: DescriptorSet, pp_data: [*c]?*anyopaque) void;
 pub inline fn getDescriptorSetHostMappingVALVE(device: Device, descriptor_set: DescriptorSet, pp_data: [*c]?*anyopaque) void {
-    return vkGetDescriptorSetHostMappingVALVE(device: Device, descriptor_set, pp_data);
+    return vkGetDescriptorSetHostMappingVALVE(device, descriptor_set, pp_data);
 }
 pub const PhysicalDeviceDepthClampZeroOneFeaturesEXT = extern struct {
     s_type: StructureType = StructureType.physical_device_depth_clamp_zero_one_features_ext,
@@ -15318,7 +15318,7 @@ pub inline fn createIndirectCommandsLayoutEXT(device: Device, p_create_info: [*c
     return vkCreateIndirectCommandsLayoutEXT(device, p_create_info, p_allocator, p_indirect_commands_layout);
 }
 pub extern fn vkDestroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void;
-pub inline fn destroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void  {
+pub inline fn destroyIndirectCommandsLayoutEXT(device: Device, indirect_commands_layout: IndirectCommandsLayoutEXT, p_allocator: [*c]const AllocationCallbacks) void {
     return vkDestroyIndirectCommandsLayoutEXT(device, indirect_commands_layout, p_allocator);
 }
 pub extern fn vkCreateIndirectExecutionSetEXT(device: Device, p_create_info: [*c]const IndirectExecutionSetCreateInfoEXT, p_allocator: [*c]const AllocationCallbacks, p_indirect_execution_set: [*c]IndirectExecutionSetEXT) Result;
@@ -15544,7 +15544,7 @@ pub inline fn copyAccelerationStructureKHR(device: Device, deferred_operation: D
 }
 pub extern fn vkCopyAccelerationStructureToMemoryKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) Result;
 pub inline fn copyAccelerationStructureToMemoryKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyAccelerationStructureToMemoryInfoKHR) Result {
-    return vkCopyAccelerationStructureToMemoryKHR(device, deferred_operation, p_info) Result;
+    return vkCopyAccelerationStructureToMemoryKHR(device, deferred_operation, p_info);
 }
 pub extern fn vkCopyMemoryToAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) Result;
 pub inline fn copyMemoryToAccelerationStructureKHR(device: Device, deferred_operation: DeferredOperationKHR, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) Result {
@@ -15563,7 +15563,7 @@ pub inline fn cmdCopyAccelerationStructureToMemoryKHR(command_buffer: CommandBuf
     return vkCmdCopyAccelerationStructureToMemoryKHR(command_buffer, p_info);
 }
 pub extern fn vkCmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void;
-pub inline fn cmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void  {
+pub inline fn cmdCopyMemoryToAccelerationStructureKHR(command_buffer: CommandBuffer, p_info: [*c]const CopyMemoryToAccelerationStructureInfoKHR) void {
     return vkCmdCopyMemoryToAccelerationStructureKHR(command_buffer, p_info);
 }
 pub extern fn vkGetAccelerationStructureDeviceAddressKHR(device: Device, p_info: [*c]const AccelerationStructureDeviceAddressInfoKHR) DeviceAddress;
@@ -15658,7 +15658,7 @@ pub const PFN_cmdTraceRaysIndirectKHR = ?*const fn (CommandBuffer, [*c]const Str
 pub const PFN_getRayTracingShaderGroupStackSizeKHR = ?*const fn (Device, Pipeline, u32, ShaderGroupShaderKHR) callconv(.c) DeviceSize;
 pub const PFN_cmdSetRayTracingPipelineStackSizeKHR = ?*const fn (CommandBuffer, u32) callconv(.c) void;
 pub extern fn vkCmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void;
-pub inlne fn cmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void {
+pub inline fn cmdTraceRaysKHR(command_buffer: CommandBuffer, p_raygen_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_miss_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_hit_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, p_callable_shader_binding_table: [*c]const StridedDeviceAddressRegionKHR, width: u32, height: u32, depth: u32) void {
     return vkCmdTraceRaysKHR(command_buffer, p_raygen_shader_binding_table, p_miss_shader_binding_table, p_hit_shader_binding_table, p_callable_shader_binding_table, width, height, depth);
 }
 pub extern fn vkCreateRayTracingPipelinesKHR(device: Device, deferred_operation: DeferredOperationKHR, pipeline_cache: PipelineCache, create_info_count: u32, p_create_infos: [*c]const RayTracingPipelineCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_pipelines: [*c]Pipeline) Result;
@@ -15736,7 +15736,7 @@ pub const PFN_cmdDrawMeshTasksEXT = ?*const fn (CommandBuffer, u32, u32, u32) ca
 pub const PFN_cmdDrawMeshTasksIndirectEXT = ?*const fn (CommandBuffer, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub const PFN_cmdDrawMeshTasksIndirectCountEXT = ?*const fn (CommandBuffer, Buffer, DeviceSize, Buffer, DeviceSize, u32, u32) callconv(.c) void;
 pub extern fn vkCmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void;
-pub inline fn cmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void  {
+pub inline fn cmdDrawMeshTasksEXT(command_buffer: CommandBuffer, group_count_x: u32, group_count_y: u32, group_count_z: u32) void {
     return vkCmdDrawMeshTasksEXT(command_buffer, group_count_x, group_count_y, group_count_z);
 }
 pub extern fn vkCmdDrawMeshTasksIndirectEXT(command_buffer: CommandBuffer, buffer: Buffer, offset: DeviceSize, draw_count: u32, stride: u32) void;
