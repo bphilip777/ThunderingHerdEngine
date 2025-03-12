@@ -1,4 +1,5 @@
 const std = @import("std");
+const EnumPackedStruct = @import("../helpers/helpers.zig").EnumPackedStruct;
 pub const subpass_external = ~@as(c_uint, 0);
 pub const Bool32 = enum(u32) {
     true = 1,
