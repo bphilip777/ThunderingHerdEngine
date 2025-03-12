@@ -1219,71 +1219,48 @@ fn createTextureImage(
     texture_image: *vk.Image,
     texture_image_memory: *vk.DeviceMemory,
 ) !void {
-    _ = physical_device;
-    _ = device;
-    _ = texture_image;
-    _ = texture_image_memory;
-
     const width: i32, const height: i32, const channels: i32 = .{ undefined, undefined, undefined };
-    _ = width;
-    _ = height;
     _ = channels;
 
     const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\src\\textures\\texture.jpg";
 
     const info = zstbi.Image.info(filepath);
-    std.debug.print("Image Info: {any}\n", .{info});
+    // std.debug.print("Image Info: {any}\n", .{info});
 
-    const data = try zstbi.Image.loadFromFile(filepath, info.num_components);
-    std.debug.print("Data: {any}\n", .{data});
+    const pixels = try zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
+    const image_size: vk.DeviceSize = width * height * 4;
 
-    return error.Incomplete;
+    // buffers
+    const staging_buffer = try createBuffer(device, image_size, &.{.transfer_src_bit});
+    defer vk.destroyBuffer(device, staging_buffer, null);
 
-    // const image_size: vk.DeviceSize = width * height * 4;
-    // if (!pixels) {
-    //     return error.FailedToLoadTextureImage;
-    // }
-    //
-    // // buffers
-    // var staging_buffer: vk.Buffer = undefined;
-    // var staging_buffer_memory: vk.BufferMemory = undefined;
-    // try createBuffer(
-    //     physical_device,
-    //     device,
-    //     image_size,
-    //     vk._BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //     vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //     &staging_buffer,
-    //     &staging_buffer_memory,
-    // );
-    //
-    // defer vk.destroyBuffer(device, staging_buffer, null);
-    // defer vk.freeMemory(device, staging_buffer_memory, null);
-    //
-    // {
-    //     var data = ?*anyopaque;
-    //     vk.mapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-    //     vk.unmapMemory(device, staging_buffer_memory);
-    //
-    //     const T = @TypeOf(pixels);
-    //     const image_data: [*]T = @ptrCast(@alignCast(data));
-    //     @memcpy(image_data, pixels);
-    // }
-    //
-    // createImage(
-    //     width,
-    //     height,
-    //     vk._FORMAT_R8G8B8A8_SRGB,
-    //     vk._IMAGE_TILING_OPTIMAL,
-    //     vk._IMAGE_USAGE_TRANSFER_DST_BIT | vk._IMAGE_USAGE_SAMPLED_BIT,
-    //     vk._MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-    //     texture_image,
-    //     texture_image_memory,
-    // );
-    //
-    // transitionImageLayout(texture_image, .r8g8b8a8_srgb, .undefined, .transfer_dst_optimal);
-    // copyBufferToImage(staging_buffer, texture_image, @as(u32, width), @as(u32, height));
-    // transitionImageLayout(texture_image, .r8g8b8a8_srgb, .transfer_dst_optimal, .shader_read_only_optimal);
+    const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
+    defer vk.freeMemory(device, staging_buffer_memory, null);
+
+    {
+        var data = ?*anyopaque;
+        vk.mapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
+        vk.unmapMemory(device, staging_buffer_memory);
+
+        const T = @TypeOf(pixels);
+        const image_data: [*]T = @ptrCast(@alignCast(data));
+        @memcpy(image_data, pixels);
+    }
+
+    createImage(
+        width,
+        height,
+        .r8g8b8a8_srgb,
+        .optimal,
+        &.{ .transfer_dst_bit, .usage_sampled_bit },
+        &.{.device_local_bit},
+        texture_image,
+        texture_image_memory,
+    );
+
+    transitionImageLayout(texture_image, .r8g8b8a8_srgb, .undefined, .transfer_dst_optimal);
+    copyBufferToImage(staging_buffer, texture_image, @as(u32, width), @as(u32, height));
+    transitionImageLayout(texture_image, .r8g8b8a8_srgb, .transfer_dst_optimal, .shader_read_only_optimal);
 }
 
 fn createImage(
@@ -1462,25 +1439,19 @@ fn endSingleTimeCommands(
 fn createVertexBuffer(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    vertex_buffer: *vk.Buffer,
-    vertex_buffer_memory: *vk.DeviceMemory,
+    vertex_buffer: vk.Buffer,
+    vertex_buffer_memory: vk.DeviceMemory,
     pool: vk.CommandPool,
     graphics_queue: vk.Queue,
     vertices: []const Vertex,
 ) !void {
     const buffer_size: vk.DeviceSize = @sizeOf(Vertex) * vertices.len;
 
-    var staging_buffer: vk.Buffer = undefined;
-    var staging_buffer_memory: vk.DeviceMemory = undefined;
-    try createBuffer(
-        physical_device,
-        device,
-        buffer_size,
-        vk.BufferUsageFlags.initEnum(.transfer_src_bit),
-        vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
-        &staging_buffer,
-        &staging_buffer_memory,
-    );
+    const staging_buffer = try createBuffer(device, buffer_size, &.{.transfer_src_bit});
+    defer vk.destroyBuffer(device, staging_buffer, null);
+
+    const staging_buffer_memory = try createBufferMemory(physical_device, device, &.{ .host_visible_bit, .host_coherent_bit });
+    defer vk.freeMemory(device, staging_buffer_memory, null);
 
     {
         var data: ?*anyopaque = undefined;
@@ -1491,40 +1462,29 @@ fn createVertexBuffer(
         @memcpy(gpu_vertices[0..vertices.len], vertices);
     }
 
-    try createBuffer(
-        physical_device,
-        device,
-        buffer_size,
-        vk.BufferUsageFlags.initEnums(&.{ .transfer_dst_bit, .vertex_buffer_bit }),
-        vk.MemoryPropertyFlags.initEnum(.device_local_bit),
-        vertex_buffer,
-        vertex_buffer_memory,
-    );
+    vertex_buffer = try createBuffer(device, buffer_size, &.{ .transfer_dst_bit, .vertex_buffer_bit });
+    vertex_buffer_memory = try createBufferMemory(physical_device, device, vertex_buffer, &.{.device_local_bit});
 
-    try copyBuffer(device, staging_buffer, vertex_buffer.*, buffer_size, pool, graphics_queue);
-
-    vk.destroyBuffer(device, staging_buffer, null);
-    vk.freeMemory(device, staging_buffer_memory, null);
+    try copyBuffer(device, staging_buffer, vertex_buffer, buffer_size, pool, graphics_queue);
 }
 
-fn createBuffer(
-    physical_device: vk.PhysicalDevice,
-    device: vk.Device,
-    size: vk.DeviceSize,
-    usage: vk.BufferUsageFlags,
-    props: vk.MemoryPropertyFlags,
-    buffer: *vk.Buffer,
-    buffer_memory: *vk.DeviceMemory,
-) !void {
-    // create buffer
+fn createBuffer(device: vk.Device, size: vk.DeviceSize, usage: vk.BufferUsageFlags) !vk.Buffer {
+    var buffer: vk.Buffer = undefined;
     const bci = vk.BufferCreateInfo{
         .size = size,
         .usage = usage,
-        .sharing_mode = .exclusive, // vk._SHARING_MODE_EXCLUSIVE,
+        .sharing_mode = .exclusive, // static for now, in the future, change this to a feature w/ a default
     };
-    try isSuccess(vk.createBuffer(device, &bci, null, buffer));
+    try isSuccess(vk.createBuffer(device, &bci, null, &buffer));
+    return buffer;
+}
 
-    // create memory
+fn createBufferMemory(
+    physical_device: vk.PhysicalDevice,
+    device: vk.Device,
+    buffer: vk.Buffer,
+    props: vk.MemoryPropertyFlags,
+) !vk.DeviceMemory {
     var mem_reqs: vk.MemoryRequirements = undefined;
     vk.getBufferMemoryRequirements(device, buffer.*, &mem_reqs);
 
@@ -1536,9 +1496,11 @@ fn createBuffer(
             props,
         ),
     };
-    try isSuccess(vk.allocateMemory(device, &mai, null, @ptrCast(buffer_memory)));
 
-    try isSuccess(vk.bindBufferMemory(device, buffer.*, buffer_memory.*, 0));
+    var buffer_memory: vk.DeviceMemory = undefined;
+    try isSuccess(vk.allocateMemory(device, &mai, null, @ptrCast(&buffer_memory)));
+    try isSuccess(vk.bindBufferMemory(device, buffer.*, buffer_memory, 0));
+    return buffer_memory;
 }
 
 fn copyBuffer(
@@ -1612,17 +1574,8 @@ fn createIndexBuffer(
 ) !void {
     const buffer_size: vk.DeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
 
-    var staging_buffer: vk.Buffer = undefined;
-    var staging_buffer_memory: vk.DeviceMemory = undefined;
-    try createBuffer(
-        physical_device,
-        device,
-        buffer_size,
-        vk.BufferUsageFlags.initEnum(.transfer_src_bit),
-        vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
-        &staging_buffer,
-        &staging_buffer_memory,
-    );
+    const staging_buffer = try createBuffer(device, buffer_size, &.{.transfer_src_bit});
+    const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
 
     {
         var data: ?*anyopaque = undefined;
@@ -1633,15 +1586,8 @@ fn createIndexBuffer(
         @memcpy(gpu_indices[0..indices.len], indices);
     }
 
-    try createBuffer(
-        physical_device,
-        device,
-        buffer_size,
-        vk.BufferUsageFlags.initEnums(&.{ .transfer_dst_bit, .index_buffer_bit }),
-        vk.MemoryPropertyFlags.initEnum(.device_local_bit),
-        index_buffer,
-        index_buffer_memory,
-    );
+    index_buffer = try createBuffer(device, buffer_size, &.{ .transfer_dst_bit, .index_buffer_bit });
+    index_buffer_memory = try createBufferMemory(physical_device, device, index_buffer, &.{.device_local_bit});
 
     try copyBuffer(device, staging_buffer, index_buffer.*, buffer_size, pool, graphics_queue);
 
@@ -1659,15 +1605,17 @@ fn createUniformBuffers(
     const buffer_size: vk.DeviceSize = @sizeOf(UBO);
 
     for (uniform_buffers, uniform_buffers_memory, uniform_buffers_mapped) |*ub, *ub_mem, *ub_map| {
-        try createBuffer(
-            physical_device,
-            device,
-            buffer_size,
-            vk.BufferUsageFlags.initEnum(.uniform_buffer_bit),
-            vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
-            ub,
-            ub_mem,
-        );
+        ub.* = try createBuffer(device, buffer_size, &.{.uniform_buffer_bit});
+        ub_mem.* = try createBufferMemory(physical_device, device, ub, &.{ .host_visible_bit, .host_coherent_bit });
+        // try createBuffer(
+        //     physical_device,
+        //     device,
+        //     buffer_size,
+        //     vk.BufferUsageFlags.initEnum(.uniform_buffer_bit),
+        //     vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
+        //     ub,
+        //     ub_mem,
+        // );
 
         try isSuccess(vk.mapMemory(device, ub_mem.*, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), @ptrCast(ub_map)));
     }
