@@ -308,8 +308,8 @@ pub fn init(
 
 pub fn deinit(self: *Self) void {
     defer { // Cleanup vulkan instance/window/surface/quit sdl
-        vk.DestroyDevice(self.device, null);
-        sdl.SDL_Vulkan_DestroySurface(@ptrCast(self.instance), @ptrCast(self.surface), null); // sdl
+        vk.destroyDevice(self.device, null);
+        sdl.SDL_Vulkan_DestroySurface(@ptrCast(&self.instance), @ptrCast(&self.surface), null); // sdl
         vk.destroyInstance(self.instance, null);
         sdl.SDL_DestroyWindow(self.window);
         zstbi.deinit();
@@ -317,15 +317,15 @@ pub fn deinit(self: *Self) void {
     }
 
     defer { // Cleanup command pool/buffers
-        vk.DestroyCommandPool(self.device, self.command_pool, null);
+        vk.destroyCommandPool(self.device, self.command_pool, null);
         self.allo.free(self.command_buffers);
     }
 
     defer { // Cleanup sync objects
         for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-            vk.DestroySemaphore(self.device, self.image_available_semaphores[i], null);
-            vk.DestroySemaphore(self.device, self.render_finished_semaphores[i], null);
-            vk.DestroyFence(self.device, self.in_flight_fences[i], null);
+            vk.destroySemaphore(self.device, self.image_available_semaphores[i], null);
+            vk.destroySemaphore(self.device, self.render_finished_semaphores[i], null);
+            vk.destroyFence(self.device, self.in_flight_fences[i], null);
         }
         self.allo.free(self.in_flight_fences);
         self.allo.free(self.image_available_semaphores);
@@ -333,36 +333,36 @@ pub fn deinit(self: *Self) void {
     }
 
     defer { // Cleanup vertex buffers
-        vk.FreeMemory(self.device, self.vertex_buffer_memory, null);
-        vk.DestroyBuffer(self.device, self.vertex_buffer, null);
+        vk.freeMemory(self.device, self.vertex_buffer_memory, null);
+        vk.destroyBuffer(self.device, self.vertex_buffer, null);
     }
 
     defer { // Cleanup index buffers
-        vk.DestroyBuffer(self.device, self.index_buffer, null);
-        vk.FreeMemory(self.device, self.index_buffer_memory, null);
+        vk.destroyBuffer(self.device, self.index_buffer, null);
+        vk.freeMemory(self.device, self.index_buffer_memory, null);
     }
 
     defer { // Cleanup layout/renderpass/pipeline/pipeline specific descriptor set layout
-        vk.DestroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
-        vk.DestroyPipelineLayout(self.device, self.pipeline_layout, null);
-        vk.DestroyRenderPass(self.device, self.render_pass, null);
-        vk.DestroyPipeline(self.device, self.pipeline, null);
+        vk.destroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
+        vk.destroyPipelineLayout(self.device, self.pipeline_layout, null);
+        vk.destroyRenderPass(self.device, self.render_pass, null);
+        vk.destroyPipeline(self.device, self.pipeline, null);
     }
 
     defer { // Texture Data
-        vk.DestroyImage(self.device, self.texture_image, null);
-        vk.FreeMemory(self.device, self.texture_image_memory, null);
+        vk.destroyImage(self.device, self.texture_image, null);
+        vk.freeMemory(self.device, self.texture_image_memory, null);
     }
 
     defer { // Cleanup descriptor sets/layouts/pool - used with UBO
-        vk.DestroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
+        vk.destroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
         self.allo.free(self.descriptor_sets);
     }
 
     defer { // Cleanup uniform buffers
         for (self.uniform_buffers, self.uniform_buffers_memory) |ub, ub_mem| {
-            vk.DestroyBuffer(self.device, ub, null);
-            vk.FreeMemory(self.device, ub_mem, null);
+            vk.destroyBuffer(self.device, ub, null);
+            vk.freeMemory(self.device, ub_mem, null);
         }
         self.allo.free(self.uniform_buffers);
         self.allo.free(self.uniform_buffers_mapped);
@@ -511,7 +511,7 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
 
     const ici = vk.InstanceCreateInfo{
         .p_next = null,
-        .flags = vk.InstanceCreateFlags{ .mask = vk.InstanceCreateFlags.null },
+        .flags = vk.InstanceCreateFlags.initEmpty(),
         .p_application_info = &ai,
         .enabled_layer_count = 0,
         .pp_enabled_layer_names = null,
@@ -805,7 +805,7 @@ fn createSwapchain(
         .image_color_space = format.color_space,
         .image_extent = extent,
         .image_array_layers = 1,
-        .image_usage = vk.ImageUsageFlags{ .mask = vk.ImageUsageFlags.color_attachment_bit },
+        .image_usage = vk.ImageUsageFlags.initEnum(.color_attachment_bit),
 
         .image_sharing_mode = if (is_same_family) .exclusive else .concurrent,
         .queue_family_index_count = if (is_same_family) 1 else 2,
@@ -908,7 +908,7 @@ fn createImageViews(
                 .a = .identity,
             },
             .subresource_range = .{
-                .aspect_mask = vk.ImageAspectFlags{ .mask = vk.ImageAspectFlags.color_bit },
+                .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
                 .base_mip_level = 0,
                 .level_count = 1,
                 .base_array_layer = 0,
@@ -955,7 +955,7 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
     const color_attachment = [1]vk.AttachmentDescription{
         .{
             .format = format,
-            .samples = vk.SampleCountFlags{ .mask = vk.SampleCountFlags.@"1_bit" },
+            .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
             .load_op = .clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
             .store_op = .store, // vk._ATTACHMENT_STORE_OP_STORE,
             .stencil_load_op = .dont_care, // vk._ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -984,10 +984,10 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
         .{
             .src_subpass = vk.subpass_external,
             .dst_subpass = 0,
-            .src_stage_mask = vk.PipelineStageFlags{ .mask = vk.PipelineStageFlags.color_attachment_output_bit },
-            .src_access_mask = vk.AccessFlags{ .mask = vk.AccessFlags.none },
-            .dst_stage_mask = vk.PipelineStageFlags{ .mask = vk.PipelineStageFlags.color_attachment_output_bit },
-            .dst_access_mask = vk.AccessFlags{ .mask = vk.AccessFlags.color_attachment_write_bit },
+            .src_stage_mask = vk.PipelineStageFlags.initEnum(.color_attachment_output_bit),
+            .src_access_mask = vk.AccessFlags.initEnum(.none),
+            .dst_stage_mask = vk.PipelineStageFlags.initEnum(.color_attachment_output_bit),
+            .dst_access_mask = vk.AccessFlags.initEnum(.color_attachment_write_bit),
         },
     };
 
@@ -1013,7 +1013,7 @@ fn createDescriptorSetLayout(device: vk.Device) !vk.DescriptorSetLayout {
             .descriptor_count = 1,
             .descriptor_type = .uniform_buffer, // vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .p_immutable_samplers = null,
-            .stage_flags = .vertex_bit,
+            .stage_flags = vk.ShaderStageFlags.initEnum(.vertex_bit),
         },
     };
     // syntax i want is .{.vertex_bit, .fragment_bit, ...}
@@ -1048,12 +1048,12 @@ fn createGraphicsPipelines(
 
     const shader_stages = [2]vk.PipelineShaderStageCreateInfo{
         .{ // vert
-            .stage = .vertex_bit,
+            .stage = vk.ShaderStageFlags.initEnum(.vertex_bit),
             .module = vert,
             .p_name = "main",
         },
         .{ // frag
-            .stage = .fragment_bit,
+            .stage = vk.ShaderStageFlags.initEnum(.fragment_bit),
             .module = frag,
             .p_name = "main",
         },
@@ -1100,7 +1100,7 @@ fn createGraphicsPipelines(
         .rasterizer_discard_enable = .false,
         .polygon_mode = .fill,
         .line_width = 1.0,
-        .cull_mode = .back_bit,
+        .cull_mode = vk.CullModeFlags.initEnum(.back_bit),
         .front_face = .counter_clockwise,
         .depth_bias_enable = .false,
         // .depthBiasConstantFactor = 0.0,
@@ -1110,7 +1110,7 @@ fn createGraphicsPipelines(
 
     const multisampling = vk.PipelineMultisampleStateCreateInfo{
         .sample_shading_enable = .false,
-        .rasterization_samples = .@"1_bit",
+        .rasterization_samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
         .min_sample_shading = 1.0,
         .p_sample_mask = null,
         .alpha_to_coverage_enable = .false,
@@ -1119,7 +1119,7 @@ fn createGraphicsPipelines(
 
     const color_blend_attachments = [1]vk.PipelineColorBlendAttachmentState{
         .{
-            .color_write_mask = vk.ColorComponentFlags{ .mask = vk.ColorComponentFlags.r_bit | vk.ColorComponentFlags.g_bit | vk.ColorComponentFlags.b_bit | vk.ColorComponentFlags.a_bit },
+            .color_write_mask = vk.ColorComponentFlags.initEnums(&.{ .r_bit, .g_bit, .b_bit, .a_bit }),
             .blend_enable = .false,
             .src_color_blend_factor = .one,
             .dst_color_blend_factor = .zero,
@@ -1204,7 +1204,7 @@ fn createCommandPool(
     const qfi = QFI.findQueueFamilies(surface, physical_device);
 
     const cpci = vk.CommandPoolCreateInfo{
-        .flags = .reset_command_buffer_bit,
+        .flags = vk.CommandPoolCreateFlags.initEnum(.reset_command_buffer_bit),
         .queue_family_index = qfi.graphics_family.?,
     };
 
@@ -1476,16 +1476,16 @@ fn createVertexBuffer(
         physical_device,
         device,
         buffer_size,
-        .usage_transfer_src_bit,
-        .host_visible_bit | .host_coherent_bit,
+        vk.BufferUsageFlags.initEnum(.transfer_src_bit),
+        vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
         &staging_buffer,
         &staging_buffer_memory,
     );
 
     {
         var data: ?*anyopaque = undefined;
-        try isSuccess(vk.MapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
-        defer vk.UnmapMemory(device, staging_buffer_memory);
+        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), &data));
+        defer vk.unmapMemory(device, staging_buffer_memory);
 
         var gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
         @memcpy(gpu_vertices[0..vertices.len], vertices);
@@ -1495,8 +1495,8 @@ fn createVertexBuffer(
         physical_device,
         device,
         buffer_size,
-        vk.BufferUsageFlags{ .mask = .transfer_dst_bit | .vertex_buffer_bit },
-        .device_local_bit,
+        vk.BufferUsageFlags.initEnums(&.{ .transfer_dst_bit, .vertex_buffer_bit }),
+        vk.MemoryPropertyFlags.initEnum(.device_local_bit),
         vertex_buffer,
         vertex_buffer_memory,
     );
@@ -1522,18 +1522,17 @@ fn createBuffer(
         .usage = usage,
         .sharing_mode = .exclusive, // vk._SHARING_MODE_EXCLUSIVE,
     };
-    try isSuccess(vk.CreateBuffer(device, &bci, null, buffer));
+    try isSuccess(vk.createBuffer(device, &bci, null, buffer));
 
     // create memory
     var mem_reqs: vk.MemoryRequirements = undefined;
     vk.getBufferMemoryRequirements(device, buffer.*, &mem_reqs);
 
     const mai = vk.MemoryAllocateInfo{
-        .sType = vk._STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        .allocationSize = mem_reqs.size,
-        .memoryTypeIndex = try findMemoryType(
+        .allocation_size = mem_reqs.size,
+        .memory_type_index = try findMemoryType(
             physical_device,
-            mem_reqs.memoryTypeBits,
+            mem_reqs.memory_type_bits,
             props,
         ),
     };
@@ -1559,14 +1558,14 @@ fn copyBuffer(
     try isSuccess(vk.allocateCommandBuffers(device, &cbai, &command_buffer));
 
     const cbbi = vk.CommandBufferBeginInfo{
-        .flags = vk._COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .flags = vk.CommandBufferUsageFlags.initEnum(.one_time_submit_bit),
     };
     try isSuccess(vk.beginCommandBuffer(command_buffer, &cbbi));
 
     {
         var copy_region = vk.BufferCopy{
-            .srcOffset = 0,
-            .dstOffset = 0,
+            .src_offset = 0,
+            .dst_offset = 0,
             .size = size,
         };
         vk.cmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
@@ -1579,7 +1578,7 @@ fn copyBuffer(
         .p_command_buffers = &command_buffer,
     };
 
-    try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, null));
+    try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, .null));
     try isSuccess(vk.queueWaitIdle(graphics_queue));
 
     vk.freeCommandBuffers(device, pool, 1, &command_buffer);
@@ -1593,8 +1592,8 @@ fn findMemoryType(
     var mem_props: vk.PhysicalDeviceMemoryProperties = undefined;
     vk.getPhysicalDeviceMemoryProperties(physical_device, &mem_props);
 
-    for (0..mem_props.memoryTypeCount) |i| {
-        if ((type_filter & (@as(u32, 1) << @truncate(i))) > 0 and mem_props.memoryTypes[i].propertyFlags & props == props) {
+    for (0..mem_props.memory_type_count) |i| {
+        if ((type_filter & (@as(u32, 1) << @truncate(i))) > 0 and mem_props.memory_types[i].property_flags.has(props)) {
             return @truncate(i);
         }
     }
@@ -1619,15 +1618,15 @@ fn createIndexBuffer(
         physical_device,
         device,
         buffer_size,
-        vk._BUFFER_USAGE_TRANSFER_SRC_BIT,
-        vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        vk.BufferUsageFlags.initEnum(.transfer_src_bit),
+        vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
         &staging_buffer,
         &staging_buffer_memory,
     );
 
     {
         var data: ?*anyopaque = undefined;
-        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, buffer_size, 0, &data));
+        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), &data));
         defer vk.unmapMemory(device, staging_buffer_memory);
 
         var gpu_indices: [*]u16 = @ptrCast(@alignCast(data));
@@ -1638,8 +1637,8 @@ fn createIndexBuffer(
         physical_device,
         device,
         buffer_size,
-        vk._BUFFER_USAGE_TRANSFER_DST_BIT | vk._BUFFER_USAGE_INDEX_BUFFER_BIT,
-        vk._MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vk.BufferUsageFlags.initEnums(&.{ .transfer_dst_bit, .index_buffer_bit }),
+        vk.MemoryPropertyFlags.initEnum(.device_local_bit),
         index_buffer,
         index_buffer_memory,
     );
@@ -1664,13 +1663,13 @@ fn createUniformBuffers(
             physical_device,
             device,
             buffer_size,
-            vk._BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            vk._MEMORY_PROPERTY_HOST_VISIBLE_BIT | vk._MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            vk.BufferUsageFlags.initEnum(.uniform_buffer_bit),
+            vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
             ub,
             ub_mem,
         );
 
-        try isSuccess(vk.mapMemory(device, ub_mem.*, 0, buffer_size, 0, @ptrCast(ub_map)));
+        try isSuccess(vk.mapMemory(device, ub_mem.*, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), @ptrCast(ub_map)));
     }
 }
 
@@ -1724,19 +1723,18 @@ fn createDescriptorSets(
 
         const descriptor_write = [_]vk.WriteDescriptorSet{
             .{
-                .sType = vk._STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstSet = sets[i],
-                .dstBinding = 0,
-                .dstArrayElement = 0,
-                .descriptorType = vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = 1,
-                .pBufferInfo = &dbi,
-                .pImageInfo = null,
-                .pTexelBufferView = null,
+                .dst_set = sets[i],
+                .dst_binding = 0,
+                .dst_array_element = 0,
+                .descriptor_type = vk.DescriptorType.uniform_buffer,
+                .descriptor_count = 1,
+                .p_buffer_info = &dbi,
+                .p_image_info = null,
+                .p_texel_buffer_view = null,
             },
         };
 
-        vk.UpdateDescriptorSets(device, @truncate(descriptor_write.len), @ptrCast(&descriptor_write), 0, null);
+        vk.updateDescriptorSets(device, @truncate(descriptor_write.len), @ptrCast(&descriptor_write), 0, null);
     }
 
     return sets;
@@ -1748,14 +1746,13 @@ fn createCommandBuffers(
     pool: vk.CommandPool,
 ) ![]vk.CommandBuffer {
     const cbai = vk.CommandBufferAllocateInfo{
-        .sType = vk._STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .commandPool = pool,
-        .level = vk._COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandBufferCount = @as(u32, @intCast(MAX_FRAMES_IN_FLIGHT)),
+        .command_pool = pool,
+        .level = .primary,
+        .command_buffer_count = @as(u32, @intCast(MAX_FRAMES_IN_FLIGHT)),
     };
 
     const command_buffers = try allo.alloc(vk.CommandBuffer, MAX_FRAMES_IN_FLIGHT);
-    try isSuccess(vk.AllocateCommandBuffers(device, &cbai, command_buffers.ptr));
+    try isSuccess(vk.allocateCommandBuffers(device, &cbai, command_buffers.ptr));
     return command_buffers;
 }
 
@@ -1769,35 +1766,36 @@ fn recordCommandBuffer(
     image_index: u32,
 ) !void {
     const cbbi = vk.CommandBufferBeginInfo{
-        .sType = vk._STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .pInheritanceInfo = null,
     };
-    try isSuccess(vk.BeginCommandBuffer(command_buffer, &cbbi));
+    try isSuccess(vk.beginCommandBuffer(command_buffer, &cbbi));
 
     const clear_colors = [_][4]f32{.{ 0, 0, 0, 1 }};
     const rpbi = vk.RenderPassBeginInfo{
-        .sType = vk._STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .renderPass = self.render_pass,
+        .render_pass = self.render_pass,
         .framebuffer = self.frame_buffers[image_index],
-        .renderArea = vk.Rect2D{
-            .offset = .{ .x = 0, .y = 0 },
+        .render_area = vk.Rect2D{
+            .offset = .{
+                .x = 0,
+                .y = 0,
+            },
             .extent = self.extent,
         },
-        .clearValueCount = @truncate(clear_colors.len),
-        .pClearValues = &.{
+        .clear_value_count = @truncate(clear_colors.len),
+        .p_clear_values = &.{
             .color = .{
                 .float32 = clear_colors[0],
             },
         },
     };
 
-    vk.CmdBeginRenderPass(
+    vk.cmdBeginRenderPass(
         command_buffer,
         &rpbi,
-        vk._SUBPASS_CONTENTS_INLINE,
+        vk.@"inline",
     );
 
-    vk.CmdBindPipeline(
+    vk.cmdBindPipeline(
         command_buffer,
         vk._PIPELINE_BIND_POINT_GRAPHICS,
         self.pipeline,
@@ -1808,30 +1806,33 @@ fn recordCommandBuffer(
         .y = 0,
         .width = @floatFromInt(self.extent.width),
         .height = @floatFromInt(self.extent.height),
-        .minDepth = 0,
-        .maxDepth = 1,
+        .min_depth = 0,
+        .max_depth = 1,
     };
-    vk.CmdSetViewport(command_buffer, 0, 1, @ptrCast(&viewport));
+    vk.cmdSetViewport(command_buffer, 0, 1, @ptrCast(&viewport));
 
     const scissor = vk.Rect2D{
-        .offset = .{ .x = 0, .y = 0 },
+        .offset = .{
+            .x = 0,
+            .y = 0,
+        },
         .extent = self.extent,
     };
-    vk.CmdSetScissor(command_buffer, 0, 1, &scissor);
+    vk.cmdSetScissor(command_buffer, 0, 1, &scissor);
 
     // vk.CmdDraw(command_buffer, 3, 1, 0, 0); // simple draw call fn
 
     const vertex_buffers = [_]vk.Buffer{vertex_buffer};
     const offsets = [_]vk.DeviceSize{0};
 
-    vk.CmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets); // bind vertex buffers
-    vk.CmdBindIndexBuffer(command_buffer, index_buffer, 0, vk._INDEX_TYPE_UINT16); // bind indices
-    vk.CmdBindDescriptorSets(command_buffer, vk._PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, descriptor_set, 0, null); // bind descriptors
-    vk.CmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0); // draw indices
+    vk.cmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets); // bind vertex buffers
+    vk.cmdBindIndexBuffer(command_buffer, index_buffer, 0, vk._INDEX_TYPE_UINT16); // bind indices
+    vk.cmdBindDescriptorSets(command_buffer, vk._PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, descriptor_set, 0, null); // bind descriptors
+    vk.cmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0); // draw indices
 
-    vk.CmdEndRenderPass(command_buffer);
+    vk.cmdEndRenderPass(command_buffer);
 
-    try isSuccess(vk.EndCommandBuffer(command_buffer));
+    try isSuccess(vk.endCommandBuffer(command_buffer));
 }
 
 fn createFences(
@@ -1842,10 +1843,9 @@ fn createFences(
 
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
         const fci = vk.FenceCreateInfo{
-            .sType = vk._STRUCTURE_TYPE_FENCE_CREATE_INFO,
-            .flags = vk._FENCE_CREATE_SIGNALED_BIT, // default to on
+            .flags = .signaled_bit, // default to on
         };
-        try isSuccess(vk.CreateFence(device, &fci, null, &fences[i]));
+        try isSuccess(vk.createFence(device, &fci, null, &fences[i]));
     }
 
     return fences;
@@ -1858,17 +1858,15 @@ fn createSemaphores(
     var semaphores = try allo.alloc(vk.Semaphore, MAX_FRAMES_IN_FLIGHT);
 
     for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-        const sci = vk.SemaphoreCreateInfo{
-            .sType = vk._STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        };
-        try isSuccess(vk.CreateSemaphore(device, &sci, null, &semaphores[i]));
+        const sci = vk.SemaphoreCreateInfo{};
+        try isSuccess(vk.createSemaphore(device, &sci, null, &semaphores[i]));
     }
 
     return semaphores;
 }
 
 fn drawFrame(self: *Self) !void {
-    try isSuccess(vk.WaitForFences(self.device, 1, &self.in_flight_fences[self.current_frame], 1, std.math.maxInt(u64)));
+    try isSuccess(vk.waitForFences(self.device, 1, &self.in_flight_fences[self.current_frame], 1, std.math.maxInt(u64)));
 
     // if out of date = recreate swapchain
     var image_index: u32 = undefined;
@@ -1893,9 +1891,9 @@ fn drawFrame(self: *Self) !void {
     self.updateUniformBuffer();
 
     // only reset if doing work - prevents dead lock
-    try isSuccess(vk.ResetFences(self.device, 1, &self.in_flight_fences[self.current_frame]));
+    try isSuccess(vk.resetFences(self.device, 1, &self.in_flight_fences[self.current_frame]));
 
-    try isSuccess(vk.ResetCommandBuffer(self.command_buffers[self.current_frame], 0));
+    try isSuccess(vk.resetCommandBuffer(self.command_buffers[self.current_frame], 0));
     try self.recordCommandBuffer(
         self.command_buffers[self.current_frame],
         self.pipeline_layout,
@@ -1906,13 +1904,12 @@ fn drawFrame(self: *Self) !void {
     );
 
     const wait_semaphores = [1]vk.Semaphore{self.image_available_semaphores[self.current_frame]};
-    const wait_stages = [1]vk.PipelineStageFlags{vk._PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    const wait_stages = [1]vk.PipelineStageFlags.initEnum(.color_attachment_output_bit);
 
     std.debug.assert(wait_semaphores.len == wait_stages.len);
     const signal_semaphores = [1]vk.Semaphore{self.render_finished_semaphores[self.current_frame]};
 
     const submit_info = vk.SubmitInfo{
-        .sType = vk._STRUCTURE_TYPE_SUBMIT_INFO,
         .waitSemaphoreCount = @truncate(wait_semaphores.len),
         .pWaitSemaphores = &wait_semaphores,
         .pWaitDstStageMask = &wait_stages,
@@ -1921,12 +1918,11 @@ fn drawFrame(self: *Self) !void {
     };
 
     try isSuccess(
-        vk.QueueSubmit(self.graphics_queue, 1, &submit_info, self.in_flight_fences[self.current_frame]),
+        vk.queueSubmit(self.graphics_queue, 1, &submit_info, self.in_flight_fences[self.current_frame]),
     );
 
     const swapchains = [1]vk.SwapchainKHR{self.swapchain};
     const present_info = vk.PresentInfoKHR{
-        .sType = vk._STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = @ptrCast(&signal_semaphores),
         .swapchainCount = @truncate(swapchains.len),
@@ -1935,7 +1931,7 @@ fn drawFrame(self: *Self) !void {
     };
 
     // if suboptimal or out of date = update swapchain
-    const r2: vk.Result = @enumFromInt(@as(i32, @intCast(vk.QueuePresentKHR(self.present_queue, &present_info))));
+    const r2: vk.Result = @enumFromInt(@as(i32, @intCast(vk.queuePresentKHR(self.present_queue, &present_info))));
     switch (r2) {
         .success => {},
         .out_of_date, .suboptimal => {

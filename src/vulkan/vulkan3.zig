@@ -1994,8 +1994,8 @@ pub const AccessFlagbits = enum(u32) {
     pub const acceleration_structure_write_bit_nv = Self.acceleration_structure_write_bit_khr;
     pub const shading_rate_image_read_bit_nv = Self.fragment_shading_rate_attachment_read_bit_khr;
 };
-pub const AccessFlags = std.EnumSet(AccessFlags);
-pub const ImageAspectFlagbits = enum(u32) {
+pub const AccessFlags = EnumPackedStruct(AccessFlagbits);
+const ImageAspectFlagbits = enum(u32) {
     none = 0,
     color_bit = 1,
     depth_bit = 2,
@@ -2013,7 +2013,7 @@ pub const ImageAspectFlagbits = enum(u32) {
     pub const plane_1_bit = Self.plane_1_bit_khr;
     pub const plane_2_bit = Self.plane_2_bit_khr;
 };
-pub const ImageAspectFlags = std.EnumSet(ImageAspectFlagbits);
+pub const ImageAspectFlags = EnumPackedStruct(ImageAspectFlagbits);
 pub const FormatFeatureFlagbits = enum(u32) {
     sampled_image_bit = 1,
     storage_image_bit = 2,
@@ -2059,7 +2059,7 @@ pub const FormatFeatureFlagbits = enum(u32) {
     pub const disjoint_bit_khr = Self.disjoint_bit;
     pub const cosited_chroma_samples_bit_khr = Self.cosited_chroma_samples_bit;
 };
-pub const FormatFeatureFlags = std.EnumSet(FormatFeatureFlagbits);
+pub const FormatFeatureFlags = EnumPackedStruct(FormatFeatureFlagbits);
 pub const ImageCreateFlagbits = enum(u32) {
     null = 0,
     sparse_binding_bit = 1,
@@ -2090,7 +2090,7 @@ pub const ImageCreateFlagbits = enum(u32) {
     pub const disjoint_bit_khr = Self.disjoint_bit;
     pub const alias_bit_khr = Self.alias_bit;
 };
-pub const ImageCreateFlags = std.EnumSet(ImageCreateFlagbits);
+pub const ImageCreateFlags = EnumPackedStruct(ImageCreateFlagbits);
 pub const SampleCountFlagbits = enum(u32) {
     @"1_bit" = 1,
     @"2_bit" = 2,
@@ -2100,7 +2100,7 @@ pub const SampleCountFlagbits = enum(u32) {
     @"32_bit" = 32,
     @"64_bit" = 64,
 };
-pub const SampleCountFlags = std.EnumSet(SampleCountFlagbits);
+pub const SampleCountFlags = EnumPackedStruct(SampleCountFlagbits);
 pub const ImageUsageFlagbits = enum(u32) {
     null = 0,
     transfer_src_bit = 1,
@@ -2127,11 +2127,11 @@ pub const ImageUsageFlagbits = enum(u32) {
     pub const Self = @This();
     pub const fragment_shading_rate_attachment_bit_khr = Self.shading_rate_image_bit_nv;
 };
-pub const ImageUsageFlags = std.EnumSet(ImageUsageFlagbits);
+pub const ImageUsageFlags = EnumPackedStruct(ImageUsageFlagbits);
 pub const InstanceCreateFlagbits = enum(u32) {
     enumerate_portability_bit_khr = 1,
 };
-pub const InstanceCreateFlags = std.EnumSet(InstanceCreateFlagbits);
+pub const InstanceCreateFlags = EnumPackedStruct(InstanceCreateFlagbits);
 pub const MemoryHeapFlagbits = enum(u32) {
     null = 0,
     device_local_bit = 1,
@@ -2139,7 +2139,7 @@ pub const MemoryHeapFlagbits = enum(u32) {
     pub const Self = @This();
     pub const multi_instance_bit = Self.multi_instance_bit_khr;
 };
-pub const MemoryHeapFlags = std.EnumSet(MemoryHeapFlagbits);
+pub const MemoryHeapFlags = EnumPackedStruct(MemoryHeapFlagbits);
 pub const MemoryPropertyFlagbits = enum(u32) {
     null = 0,
     device_local_bit = 1,
@@ -2152,7 +2152,7 @@ pub const MemoryPropertyFlagbits = enum(u32) {
     device_uncached_bit_amd = 128,
     rdma_capable_bit_nv = 256,
 };
-pub const MemoryPropertyFlags = std.EnumSet(MemoryPropertyFlagbits);
+pub const MemoryPropertyFlags = EnumPackedStruct(MemoryPropertyFlagbits);
 pub const QueueFlagbits = enum(u32) {
     null = 0,
     graphics_bit = 1,
@@ -2164,13 +2164,13 @@ pub const QueueFlagbits = enum(u32) {
     video_encode_bit_khr = 64,
     optical_flow_bit_nv = 256,
 };
-pub const QueueFlags = std.EnumSet(QueueFlagbits);
+pub const QueueFlags = EnumPackedStruct(QueueFlagbits);
 pub const DeviceCreateFlags = Flags;
 pub const DeviceQueueCreateFlagbits = enum(u32) {
     null = 0,
     protected_bit = 1,
 };
-pub const DeviceQueueCreateFlags = std.EnumSet(DeviceQueueCreateFlagbits);
+pub const DeviceQueueCreateFlags = EnumPackedStruct(DeviceQueueCreateFlagbits);
 pub const PipelineStageFlagbits = enum(u32) {
     none = 0,
     top_of_pipe_bit = 1,
@@ -2207,24 +2207,24 @@ pub const PipelineStageFlagbits = enum(u32) {
     pub const shading_rate_image_bit_nv = Self.fragment_shading_rate_attachment_bit_khr;
     pub const acceleration_structure_build_bit_nv = Self.acceleration_structure_build_bit_khr;
 };
-pub const PipelineStageFlags = std.EnumSet(PipelineStageFlagbits);
+pub const PipelineStageFlags = EnumPackedStruct(PipelineStageFlagbits);
 pub const MemoryMapFlagbits = enum(u32) {
     null = 0,
     placed_bit_ext = 1,
 };
-pub const MemoryMapFlags = std.EnumSet(MemoryMapFlagbits);
+pub const MemoryMapFlags = EnumPackedStruct(MemoryMapFlagbits);
 pub const SparseMemoryBindFlagbits = enum(u32) {
     null = 0,
     metadata_bit = 1,
 };
-pub const SparseMemoryBindFlags = std.EnumSet(SparseMemoryBindFlagbits);
+pub const SparseMemoryBindFlags = EnumPackedStruct(SparseMemoryBindFlagbits);
 pub const SparseImageFormatFlagbits = enum(u32) {
     null = 0,
     single_miptail_bit = 1,
     aligned_mip_size_bit = 2,
     nonstandard_block_size_bit = 4,
 };
-pub const SparseImageFormatFlags = std.EnumSet(SparseImageFormatFlagbits);
+pub const SparseImageFormatFlags = EnumPackedStruct(SparseImageFormatFlagbits);
 pub const FenceCreateFlags = enum(u32) {
     null = 0,
     signaled_bit = 1,
@@ -2236,7 +2236,7 @@ pub const EventCreateFlagbits = enum(u32) {
     pub const Self = @This();
     pub const device_only_bit = Self.device_only_bit_khr;
 };
-pub const EventCreateFlags = std.EnumSet(EventCreateFlagbits);
+pub const EventCreateFlags = EnumPackedStruct(EventCreateFlagbits);
 pub const QueryPipelineStatisticFlagbits = enum(u32) {
     pub const @"null" = 0;
     pub const input_assembly_vertices_bit = 1;
@@ -2254,7 +2254,7 @@ pub const QueryPipelineStatisticFlagbits = enum(u32) {
     pub const mesh_shader_invocations_bit_ext = 4096;
     pub const cluster_culling_shader_invocations_bit_huawei = 8192;
 };
-pub const QueryPipelineStatisticFlags = std.EnumSet(QueryPipelineStatisticFlagbits);
+pub const QueryPipelineStatisticFlags = EnumPackedStruct(QueryPipelineStatisticFlagbits);
 pub const QueryPoolCreateFlags = Flags;
 pub const QueryResultFlagbits = enum(u32) {
     null = 0,
@@ -2264,7 +2264,7 @@ pub const QueryResultFlagbits = enum(u32) {
     partial_bit = 8,
     with_status_bit_khr = 16,
 };
-pub const QueryResultFlags = std.EnumSet(QueryResultFlagbits);
+pub const QueryResultFlags = EnumPackedStruct(QueryResultFlagbits);
 pub const BufferCreateFlagbits = enum(u32) {
     null = 0,
     sparse_binding_bit = 1,
@@ -2278,7 +2278,7 @@ pub const BufferCreateFlagbits = enum(u32) {
     pub const device_address_capture_replay_bit_ext = Self.device_address_capture_replay_bit_khr;
     pub const device_address_capture_replay_bit = Self.device_address_capture_replay_bit_khr;
 };
-pub const BufferCreateFlags = std.EnumSet(BufferCreateFlagbits);
+pub const BufferCreateFlags = EnumPackedStruct(BufferCreateFlagbits);
 pub const BufferUsageFlagbits = enum(u32) {
     null = 0,
     transfer_src_bit = 1,
@@ -2311,7 +2311,7 @@ pub const BufferUsageFlagbits = enum(u32) {
     pub const shader_device_address_bit_ext = Self.shader_device_address_bit;
     pub const shader_device_address_bit_khr = Self.shader_device_address_bit;
 };
-pub const BufferUsageFlags = std.EnumSet(BufferUsageFlagbits);
+pub const BufferUsageFlags = EnumPackedStruct(BufferUsageFlagbits);
 pub const BufferViewCreateFlags = Flags;
 pub const ImageViewCreateFlagbits = enum(u32) {
     null = 0,
@@ -2319,7 +2319,7 @@ pub const ImageViewCreateFlagbits = enum(u32) {
     fragment_density_map_deferred_bit_ext = 2,
     descriptor_buffer_capture_replay_bit_ext = 4,
 };
-pub const ImageViewCreateFlags = std.EnumSet(ImageViewCreateFlagbits);
+pub const ImageViewCreateFlags = EnumPackedStruct(ImageViewCreateFlagbits);
 pub const ShaderModuleCreateFlags = Flags;
 pub const PipelineCacheCreateFlagbits = enum(u32) {
     null = 0,
@@ -2327,7 +2327,7 @@ pub const PipelineCacheCreateFlagbits = enum(u32) {
     pub const Self = @This();
     pub const externally_synchronized_bit = Self.externally_synchronized_bit_ext;
 };
-pub const PipelineCacheCreateFlags = std.EnumSet(PipelineCacheCreateFlagbits);
+pub const PipelineCacheCreateFlags = EnumPackedStruct(PipelineCacheCreateFlagbits);
 pub const ColorComponentFlagbits = enum(u32) {
     null = 0,
     r_bit = 1,
@@ -2335,7 +2335,7 @@ pub const ColorComponentFlagbits = enum(u32) {
     b_bit = 4,
     a_bit = 8,
 };
-pub const ColorComponentFlags = std.EnumSet(ColorComponentFlagbits);
+pub const ColorComponentFlags = EnumPackedStruct(ColorComponentFlagbits);
 pub const PipelineCreateFlagbits = enum(u32) {
     null = 0,
     disable_optimization_bit = 1,
@@ -2377,7 +2377,7 @@ pub const PipelineCreateFlagbits = enum(u32) {
     pub const rasterization_state_create_fragment_shading_rate_attachment_bit_khr = Self.rendering_fragment_shading_rate_attachment_bit_khr;
     pub const rasterization_state_create_fragment_density_map_attachment_bit_ext = Self.rendering_fragment_density_map_attachment_bit_ext;
 };
-pub const PipelineCreateFlags = std.EnumSet(PipelineCreateFlags);
+pub const PipelineCreateFlags = EnumPackedStruct(PipelineCreateFlagbits);
 pub const PipelineShaderStageCreateFlagbits = enum(u32) {
     null = 0,
     allow_varying_subgroup_size_bit_ext = 1,
@@ -2386,7 +2386,7 @@ pub const PipelineShaderStageCreateFlagbits = enum(u32) {
     pub const allow_varying_subgroup_size_bit = Self.allow_varying_subgroup_size_bit_ext;
     pub const require_full_subgroups_bit = Self.require_full_subgroups_bit_ext;
 };
-pub const PipelineShaderStageCreateFlags = std.EnumSet(PipelineShaderStageCreateFlagbits);
+pub const PipelineShaderStageCreateFlags = EnumPackedStruct(PipelineShaderStageCreateFlagbits);
 pub const ShaderStageFlagbits = enum(u32) {
     null = 0,
     vertex_bit = 1,
@@ -2416,14 +2416,14 @@ pub const ShaderStageFlagbits = enum(u32) {
     pub const intersection_bit_nv = Self.intersection_bit_khr;
     pub const callable_bit_nv = Self.callable_bit_khr;
 };
-pub const ShaderStageFlags = std.EnumSet(ShaderStageFlagbits);
+pub const ShaderStageFlags = EnumPackedStruct(ShaderStageFlagbits);
 pub const CullModeFlagbits = enum(u32) {
     none = 0,
     front_bit = 1,
     back_bit = 2,
     front_and_back = 3,
 };
-pub const CullModeFlags = std.EnumSet(CullModeFlagbits);
+pub const CullModeFlags = EnumPackedStruct(CullModeFlagbits);
 pub const PipelineVertexInputStateCreateFlags = Flags;
 pub const PipelineInputAssemblyStateCreateFlags = Flags;
 pub const PipelineTessellationStateCreateFlags = Flags;
@@ -2438,20 +2438,20 @@ pub const PipelineDepthStencilStateCreateFlagbits = enum(u32) {
     pub const rasterization_order_attachment_depth_access_bit_ext = Self.rasterization_order_attachment_depth_access_bit_arm;
     pub const rasterization_order_attachment_stencil_access_bit_ext = Self.rasterization_order_attachment_stencil_access_bit_arm;
 };
-pub const PipelineDepthStencilStateCreateFlags = std.EnumSet(PipelineDepthStencilStateCreateFlagbits);
+pub const PipelineDepthStencilStateCreateFlags = EnumPackedStruct(PipelineDepthStencilStateCreateFlagbits);
 pub const PipelineColorBlendStateCreateFlagbits = enum(u32) {
     null = 0,
     rasterization_order_attachment_access_bit_arm = 1,
     pub const Self = @This();
     pub const rasterization_order_attachment_access_bit_ext = Self.rasterization_order_attachment_access_bit_arm;
 };
-pub const PipelineColorBlendStateCreateFlags = std.EnumSet(PipelineColorBlendStateCreateFlagbits);
+pub const PipelineColorBlendStateCreateFlags = EnumPackedStruct(PipelineColorBlendStateCreateFlagbits);
 pub const PipelineDynamicStateCreateFlags = Flags;
 pub const PipelineLayoutCreateFlagbits = enum(u32) {
     null = 0,
     independent_sets_bit_ext = 2,
 };
-pub const PipelineLayoutCreateFlags = std.EnumSet(PipelineLayoutCreateFlagbits);
+pub const PipelineLayoutCreateFlags = EnumPackedStruct(PipelineLayoutCreateFlagbits);
 pub const SamplerCreateFlagbits = enum(u32) {
     null = 0,
     subsampled_bit_ext = 1,
@@ -2460,7 +2460,7 @@ pub const SamplerCreateFlagbits = enum(u32) {
     descriptor_buffer_capture_replay_bit_ext = 8,
     image_processing_bit_qcom = 16,
 };
-pub const SamplerCreateFlags = std.EnumSet(SamplerCreateFlagbits);
+pub const SamplerCreateFlags = EnumPackedStruct(SamplerCreateFlagbits);
 pub const DescriptorPoolCreateFlagbits = enum(u32) {
     null = 0,
     free_descriptor_set_bit = 1,
@@ -2472,7 +2472,7 @@ pub const DescriptorPoolCreateFlagbits = enum(u32) {
     pub const update_after_bind_bit = Self.update_after_bind_bit_ext;
     pub const host_only_bit_ext = Self.host_only_bit_valve;
 };
-pub const DescriptorPoolCreateFlags = std.EnumSet(DescriptorPoolCreateFlagbits);
+pub const DescriptorPoolCreateFlags = EnumPackedStruct(DescriptorPoolCreateFlagbits);
 pub const DescriptorPoolResetFlags = Flags;
 pub const DescriptorSetLayoutCreateFlagbits = enum(u32) {
     null = 0,
@@ -2487,12 +2487,12 @@ pub const DescriptorSetLayoutCreateFlagbits = enum(u32) {
     pub const update_after_bind_pool_bit = Self.update_after_bind_pool_bit_ext;
     pub const host_only_pool_bit_ext = Self.host_only_pool_bit_valve;
 };
-pub const DescriptorSetLayoutCreateFlags = std.EnumSet(DescriptorSetLayoutCreateFlagbits);
+pub const DescriptorSetLayoutCreateFlags = EnumPackedStruct(DescriptorSetLayoutCreateFlagbits);
 pub const AttachmentDescriptionFlagbits = enum(u32) {
     null = 0,
     may_alias_bit = 1,
 };
-pub const AttachmentDescriptionFlags = std.EnumSet(AttachmentDescriptionFlagbits);
+pub const AttachmentDescriptionFlags = EnumPackedStruct(AttachmentDescriptionFlagbits);
 pub const DependencyFlagbits = enum(u32) {
     null = 0,
     by_region_bit = 1,
@@ -2503,19 +2503,19 @@ pub const DependencyFlagbits = enum(u32) {
     pub const view_local_bit = Self.view_local_bit_khr;
     pub const device_group_bit = Self.device_group_bit_khr;
 };
-pub const DependencyFlags = std.EnuMSet(DependencyFlagbits);
+pub const DependencyFlags = EnumPackedStruct(DependencyFlagbits);
 pub const FramebufferCreateFlagbits = enum(u32) {
     null = 0,
     imageless_bit_khr = 1,
     pub const Self = @This();
     pub const imageless_bit = Self.imageless_bit_khr;
 };
-pub const FramebufferCreateFlags = std.EnumSet(FramebufferCreateFlagbits);
+pub const FramebufferCreateFlags = EnumPackedStruct(FramebufferCreateFlagbits);
 pub const RenderPassCreateFlagbits = enum(u32) {
     null = 0,
     transform_bit_qcom = 2,
 };
-pub const RenderPassCreateFlags = std.EnumSet(RenderPassCreateFlagbits);
+pub const RenderPassCreateFlags = EnumPackedStruct(RenderPassCreateFlagbits);
 pub const SubpassDescriptionFlagbits = enum(u32) {
     null = 0,
     per_view_attributes_bit_nvx = 1,
@@ -2531,43 +2531,43 @@ pub const SubpassDescriptionFlagbits = enum(u32) {
     pub const rasterization_order_attachment_depth_access_bit_ext = Self.rasterization_order_attachment_depth_access_bit_arm;
     pub const rasterization_order_attachment_stencil_access_bit_ext = Self.rasterization_order_attachment_stencil_access_bit_arm;
 };
-pub const SubpassDescriptionFlags = std.EnumSet(SubpassDescriptionFlagbits);
+pub const SubpassDescriptionFlags = EnumPackedStruct(SubpassDescriptionFlagbits);
 pub const CommandPoolCreateFlagbits = enum(u32) {
     null = 0,
     transient_bit = 1,
     reset_command_buffer_bit = 2,
     protected_bit = 4,
 };
-pub const CommandPoolCreateFlags = std.EnumSet(CommandPoolCreateFlagbits);
+pub const CommandPoolCreateFlags = EnumPackedStruct(CommandPoolCreateFlagbits);
 pub const CommandPoolResetFlagbits = enum(u32) {
     null = 0,
     release_resources_bit = 1,
 };
-pub const CommandPoolResetFlags = std.EnumSet(CommandPoolResetFlagbits);
+pub const CommandPoolResetFlags = EnumPackedStruct(CommandPoolResetFlagbits);
 pub const CommandBufferUsageFlagbits = enum(u32) {
     null = 0,
     one_time_submit_bit = 1,
     render_pass_continue_bit = 2,
     simultaneous_use_bit = 4,
 };
-pub const CommandBufferUsageFlags = std.EnumSet(CommandBufferUsageFlagbits);
+pub const CommandBufferUsageFlags = EnumPackedStruct(CommandBufferUsageFlagbits);
 pub const QueryControlFlagbits = enum(u32) {
     null = 0,
     precise_bit = 1,
 };
-pub const QueryControlFlags = std.EnumSet(QueryControlFlagbits);
+pub const QueryControlFlags = EnumPackedStruct(QueryControlFlagbits);
 pub const CommandBufferResetFlagbits = enum(u32) {
     null = 0,
     release_resources_bit = 1,
 };
-pub const CommandBufferResetFlags = std.EnumSet(CommandBufferResetFlagbits);
+pub const CommandBufferResetFlags = EnumPackedStruct(CommandBufferResetFlagbits);
 pub const StencilFaceFlagbits = enum(u32) {
     null = 0,
     front_bit = 1,
     back_bit = 2,
     front_and_back = 3,
 };
-pub const StencilFaceFlags = std.EnumSet(StencilFaceFlagbits);
+pub const StencilFaceFlags = EnumPackedStruct(StencilFaceFlagbits);
 pub const Extent2D = extern struct {
     width: u32 = @import("std").mem.zeroes(u32),
     height: u32 = @import("std").mem.zeroes(u32),
@@ -6421,11 +6421,26 @@ pub const PFN_getPhysicalDeviceSurfaceSupportKHR = ?*const fn (PhysicalDevice, u
 pub const PFN_getPhysicalDeviceSurfaceCapabilitiesKHR = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]SurfaceCapabilitiesKHR) callconv(.c) Result;
 pub const PFN_getPhysicalDeviceSurfaceFormatsKHR = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]u32, [*c]SurfaceFormatKHR) callconv(.c) Result;
 pub const PFN_getPhysicalDeviceSurfacePresentModesKHR = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]u32, [*c]PresentModeKHR) callconv(.c) Result;
-pub extern fn destroySurfaceKHR(instance: Instance, surface: SurfaceKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getPhysicalDeviceSurfaceSupportKHR(physical_device: PhysicalDevice, queue_family_index: u32, surface: SurfaceKHR, p_supported: [*c]Bool32) Result;
-pub extern fn getPhysicalDeviceSurfaceCapabilitiesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilitiesKHR) Result;
-pub extern fn getPhysicalDeviceSurfaceFormatsKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormatKHR) Result;
-pub extern fn getPhysicalDeviceSurfacePresentModesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_present_mode_count: [*c]u32, p_present_modes: [*c]PresentModeKHR) Result;
+pub extern fn vkDestroySurfaceKHR(instance: Instance, surface: SurfaceKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroySurfaceKHR(instance: Instance, surface: SurfaceKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return destroySurfaceKHR(instance, surface, p_allocator);
+}
+pub extern fn vkGetPhysicalDeviceSurfaceSupportKHR(physical_device: PhysicalDevice, queue_family_index: u32, surface: SurfaceKHR, p_supported: [*c]Bool32) Result;
+pub inline fn getPhysicalDeviceSurfaceSupportKHR(physical_device: PhysicalDevice, queue_family_index: u32, surface: SurfaceKHR, p_supported: [*c]Bool32) Result {
+    return getPhysicalDeviceSurfaceSupportKHR(physical_device, queue_family_index, surface, p_supported);
+}
+pub extern fn vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilitiesKHR) Result;
+pub inline fn getPhysicalDeviceSurfaceCapabilitiesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_capabilities: [*c]SurfaceCapabilitiesKHR) Result {
+    return vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, p_surface_capabilities);
+}
+pub extern fn vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormatKHR) Result;
+pub inline fn getPhysicalDeviceSurfaceFormatsKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_surface_format_count: [*c]u32, p_surface_formats: [*c]SurfaceFormatKHR) Result {
+    return vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, p_surface_format_count, p_surface_formats);
+}
+pub extern fn vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_present_mode_count: [*c]u32, p_present_modes: [*c]PresentModeKHR) Result;
+pub inline fn getPhysicalDeviceSurfacePresentModesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_present_mode_count: [*c]u32, p_present_modes: [*c]PresentModeKHR) Result {
+    return getPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, p_present_mode_count, p_present_modes);
+}
 pub const SwapchainKHR = enum(u64) { null = 0, _ };
 pub const SwapchainCreateFlagsKHR = enum(u32) {
     null = 0,
@@ -6518,15 +6533,42 @@ pub const PFN_getDeviceGroupPresentCapabilitiesKHR = ?*const fn (Device, [*c]Dev
 pub const PFN_getDeviceGroupSurfacePresentModesKHR = ?*const fn (Device, SurfaceKHR, [*c]DeviceGroupPresentModeFlagsKHR) callconv(.c) Result;
 pub const PFN_getPhysicalDevicePresentRectanglesKHR = ?*const fn (PhysicalDevice, SurfaceKHR, [*c]u32, [*c]Rect2D) callconv(.c) Result;
 pub const PFN_acquireNextImage2KHR = ?*const fn (Device, [*c]const AcquireNextImageInfoKHR, [*c]u32) callconv(.c) Result;
-pub extern fn createSwapchainKHR(device: Device, p_create_info: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchain: [*c]SwapchainKHR) Result;
-pub extern fn destroySwapchainKHR(device: Device, swapchain: SwapchainKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getSwapchainImagesKHR(device: Device, swapchain: SwapchainKHR, p_swapchain_image_count: [*c]u32, p_swapchain_images: [*c]Image) Result;
-pub extern fn acquireNextImageKHR(device: Device, swapchain: SwapchainKHR, timeout: u64, semaphore: Semaphore, fence: Fence, p_image_index: [*c]u32) Result;
-pub extern fn queuePresentKHR(queue: Queue, p_present_info: [*c]const PresentInfoKHR) Result;
-pub extern fn getDeviceGroupPresentCapabilitiesKHR(device: Device, p_device_group_present_capabilities: [*c]DeviceGroupPresentCapabilitiesKHR) Result;
-pub extern fn getDeviceGroupSurfacePresentModesKHR(device: Device, surface: SurfaceKHR, p_modes: [*c]DeviceGroupPresentModeFlagsKHR) Result;
-pub extern fn getPhysicalDevicePresentRectanglesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_rect_count: [*c]u32, p_rects: [*c]Rect2D) Result;
-pub extern fn acquireNextImage2KHR(device: Device, p_acquire_info: [*c]const AcquireNextImageInfoKHR, p_image_index: [*c]u32) Result;
+pub extern fn vkCreateSwapchainKHR(device: Device, p_create_info: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchain: [*c]SwapchainKHR) Result;
+pub inline fn createSwapchainKHR(device: Device, p_create_info: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchain: [*c]SwapchainKHR) Result {
+    return vkCreateSwapchainKHR(device, p_create_info, p_allocator, p_swapchain);
+}
+pub extern fn vkDestroySwapchainKHR(device: Device, swapchain: SwapchainKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroySwapchainKHR(device: Device, swapchain: SwapchainKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroySwapchainKHR(device, swapchain, p_allocator);
+}
+pub extern fn vkGetSwapchainImagesKHR(device: Device, swapchain: SwapchainKHR, p_swapchain_image_count: [*c]u32, p_swapchain_images: [*c]Image) Result;
+pub inline fn getSwapchainImagesKHR(device: Device, swapchain: SwapchainKHR, p_swapchain_image_count: [*c]u32, p_swapchain_images: [*c]Image) Result {
+    return vkGetSwapchainImagesKHR(device, swapchain, p_swapchain_image_count, p_swapchain_images);
+}
+pub extern fn vkAcquireNextImageKHR(device: Device, swapchain: SwapchainKHR, timeout: u64, semaphore: Semaphore, fence: Fence, p_image_index: [*c]u32) Result;
+pub inline fn acquireNextImageKHR(device: Device, swapchain: SwapchainKHR, timeout: u64, semaphore: Semaphore, fence: Fence, p_image_index: [*c]u32) Result {
+    return vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, p_image_index);
+}
+pub extern fn vkQueuePresentKHR(queue: Queue, p_present_info: [*c]const PresentInfoKHR) Result;
+pub inline fn queuePresentKHR(queue: Queue, p_present_info: [*c]const PresentInfoKHR) Result {
+    return vkQueuePresentKHR(queue, p_present_info);
+}
+pub extern fn vkGetDeviceGroupPresentCapabilitiesKHR(device: Device, p_device_group_present_capabilities: [*c]DeviceGroupPresentCapabilitiesKHR) Result;
+pub inline fn getDeviceGroupPresentCapabilitiesKHR(device: Device, p_device_group_present_capabilities: [*c]DeviceGroupPresentCapabilitiesKHR) Result {
+    return vkGetDeviceGroupPresentCapabilitiesKHR(device, p_device_group_present_capabilities);
+}
+pub extern fn vkGetDeviceGroupSurfacePresentModesKHR(device: Device, surface: SurfaceKHR, p_modes: [*c]DeviceGroupPresentModeFlagsKHR) Result;
+pub inline fn getDeviceGroupSurfacePresentModesKHR(device: Device, surface: SurfaceKHR, p_modes: [*c]DeviceGroupPresentModeFlagsKHR) Result {
+    return vkGetDeviceGroupSurfacePresentModesKHR(device, surface, p_modes);
+}
+pub extern fn vkGetPhysicalDevicePresentRectanglesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_rect_count: [*c]u32, p_rects: [*c]Rect2D) Result;
+pub inline fn getPhysicalDevicePresentRectanglesKHR(physical_device: PhysicalDevice, surface: SurfaceKHR, p_rect_count: [*c]u32, p_rects: [*c]Rect2D) Result {
+    return vkGetPhysicalDevicePresentRectanglesKHR(physical_device, surface, p_rect_count, p_rects);
+}
+pub extern fn vkAcquireNextImage2KHR(device: Device, p_acquire_info: [*c]const AcquireNextImageInfoKHR, p_image_index: [*c]u32) Result;
+pub inline fn acquireNextImage2KHR(device: Device, p_acquire_info: [*c]const AcquireNextImageInfoKHR, p_image_index: [*c]u32) Result {
+    return vkAcquireNextImage2KHR(device, p_acquire_info, p_image_index);
+}
 pub const DisplayKHR = enum(u64) { null = 0, _ };
 pub const DisplayModeKHR = enum(u64) { null = 0, _ };
 pub const DisplayModeCreateFlagsKHR = Flags;
@@ -6595,13 +6637,34 @@ pub const PFN_getDisplayModePropertiesKHR = ?*const fn (PhysicalDevice, DisplayK
 pub const PFN_createDisplayModeKHR = ?*const fn (PhysicalDevice, DisplayKHR, [*c]const DisplayModeCreateInfoKHR, [*c]const AllocationCallbacks, [*c]DisplayModeKHR) callconv(.c) Result;
 pub const PFN_getDisplayPlaneCapabilitiesKHR = ?*const fn (PhysicalDevice, DisplayModeKHR, u32, [*c]DisplayPlaneCapabilitiesKHR) callconv(.c) Result;
 pub const PFN_createDisplayPlaneSurfaceKHR = ?*const fn (Instance, [*c]const DisplaySurfaceCreateInfoKHR, [*c]const AllocationCallbacks, [*c]SurfaceKHR) callconv(.c) Result;
-pub extern fn getPhysicalDeviceDisplayPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPropertiesKHR) Result;
-pub extern fn getPhysicalDeviceDisplayPlanePropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlanePropertiesKHR) Result;
-pub extern fn getDisplayPlaneSupportedDisplaysKHR(physical_device: PhysicalDevice, plane_index: u32, p_display_count: [*c]u32, p_displays: [*c]DisplayKHR) Result;
-pub extern fn getDisplayModePropertiesKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModePropertiesKHR) Result;
-pub extern fn createDisplayModeKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_create_info: [*c]const DisplayModeCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_mode: [*c]DisplayModeKHR) Result;
-pub extern fn getDisplayPlaneCapabilitiesKHR(physical_device: PhysicalDevice, mode: DisplayModeKHR, plane_index: u32, p_capabilities: [*c]DisplayPlaneCapabilitiesKHR) Result;
-pub extern fn createDisplayPlaneSurfaceKHR(instance: Instance, p_create_info: [*c]const DisplaySurfaceCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result;
+pub extern fn vkGetPhysicalDeviceDisplayPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPropertiesKHR) Result;
+pub inline fn getPhysicalDeviceDisplayPropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPropertiesKHR) Result {
+    return vkGetPhysicalDeviceDisplayPropertiesKHR(physical_device, p_property_count, p_properties);
+}
+pub extern fn vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlanePropertiesKHR) Result;
+pub inline fn getPhysicalDeviceDisplayPlanePropertiesKHR(physical_device: PhysicalDevice, p_property_count: [*c]u32, p_properties: [*c]DisplayPlanePropertiesKHR) Result {
+    return vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physical_device, p_property_count, p_properties);
+}
+pub extern fn vkGetDisplayPlaneSupportedDisplaysKHR(physical_device: PhysicalDevice, plane_index: u32, p_display_count: [*c]u32, p_displays: [*c]DisplayKHR) Result;
+pub inline fn getDisplayPlaneSupportedDisplaysKHR(physical_device: PhysicalDevice, plane_index: u32, p_display_count: [*c]u32, p_displays: [*c]DisplayKHR) Result {
+    return vkGetDisplayPlaneSupportedDisplaysKHR(physical_device, plane_index, p_display_count, p_displays);
+}
+pub extern fn vkGetDisplayModePropertiesKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModePropertiesKHR) Result;
+pub inline fn getDisplayModePropertiesKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_property_count: [*c]u32, p_properties: [*c]DisplayModePropertiesKHR) Result {
+    return vkGetDisplayModePropertiesKHR(physical_device, display, p_property_count, p_properties);
+}
+pub extern fn vkCreateDisplayModeKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_create_info: [*c]const DisplayModeCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_mode: [*c]DisplayModeKHR) Result;
+pub inline fn createDisplayModeKHR(physical_device: PhysicalDevice, display: DisplayKHR, p_create_info: [*c]const DisplayModeCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_mode: [*c]DisplayModeKHR) Result {
+    return vkCreateDisplayModeKHR(physical_device, display, p_create_info, p_allocator, p_mode);
+}
+pub extern fn vkGetDisplayPlaneCapabilitiesKHR(physical_device: PhysicalDevice, mode: DisplayModeKHR, plane_index: u32, p_capabilities: [*c]DisplayPlaneCapabilitiesKHR) Result;
+pub inline fn getDisplayPlaneCapabilitiesKHR(physical_device: PhysicalDevice, mode: DisplayModeKHR, plane_index: u32, p_capabilities: [*c]DisplayPlaneCapabilitiesKHR) Result {
+    return vkGetDisplayPlaneCapabilitiesKHR(physical_device, mode, plane_index, p_capabilities);
+}
+pub extern fn vkCreateDisplayPlaneSurfaceKHR(instance: Instance, p_create_info: [*c]const DisplaySurfaceCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result;
+pub inline fn createDisplayPlaneSurfaceKHR(instance: Instance, p_create_info: [*c]const DisplaySurfaceCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_surface: [*c]SurfaceKHR) Result {
+    return vkCreateDisplayPlaneSurfaceKHR(instance, p_create_info, p_allocator, p_surface);
+}
 pub const DisplayPresentInfoKHR = extern struct {
     s_type: StructureType = StructureType.display_present_info_khr,
     p_next: ?*const anyopaque = @import("std").mem.zeroes(?*const anyopaque),
@@ -6610,7 +6673,10 @@ pub const DisplayPresentInfoKHR = extern struct {
     persistent: Bool32 = @import("std").mem.zeroes(Bool32),
 };
 pub const PFN_createSharedSwapchainsKHR = ?*const fn (Device, u32, [*c]const SwapchainCreateInfoKHR, [*c]const AllocationCallbacks, [*c]SwapchainKHR) callconv(.c) Result;
-pub extern fn createSharedSwapchainsKHR(device: Device, swapchain_count: u32, p_create_infos: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchains: [*c]SwapchainKHR) Result;
+pub extern fn vkCreateSharedSwapchainsKHR(device: Device, swapchain_count: u32, p_create_infos: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchains: [*c]SwapchainKHR) Result;
+pub inline fn createSharedSwapchainsKHR(device: Device, swapchain_count: u32, p_create_infos: [*c]const SwapchainCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_swapchains: [*c]SwapchainKHR) Result {
+    return vkCreateSharedSwapchainsKHR(device, swapchain_count, p_create_infos, p_allocator, p_swapchains);
+}
 pub const VideoSessionKHR = enum(u64) { null = 0, _ };
 pub const VideoSessionParametersKHR = enum(u64) { null = 0, _ };
 pub const QueryResultStatusKHR = enum(i32) {
@@ -6796,18 +6862,54 @@ pub const PFN_destroyVideoSessionParametersKHR = ?*const fn (Device, VideoSessio
 pub const PFN_cmdBeginVideoCodingKHR = ?*const fn (CommandBuffer, [*c]const VideoBeginCodingInfoKHR) callconv(.c) void;
 pub const PFN_cmdEndVideoCodingKHR = ?*const fn (CommandBuffer, [*c]const VideoEndCodingInfoKHR) callconv(.c) void;
 pub const PFN_cmdControlVideoCodingKHR = ?*const fn (CommandBuffer, [*c]const VideoCodingControlInfoKHR) callconv(.c) void;
-pub extern fn getPhysicalDeviceVideoCapabilitiesKHR(physical_device: PhysicalDevice, p_video_profile: [*c]const VideoProfileInfoKHR, p_capabilities: [*c]VideoCapabilitiesKHR) Result;
-pub extern fn getPhysicalDeviceVideoFormatPropertiesKHR(physical_device: PhysicalDevice, p_video_format_info: [*c]const PhysicalDeviceVideoFormatInfoKHR, p_video_format_property_count: [*c]u32, p_video_format_properties: [*c]VideoFormatPropertiesKHR) Result;
-pub extern fn createVideoSessionKHR(device: Device, p_create_info: [*c]const VideoSessionCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session: [*c]VideoSessionKHR) Result;
-pub extern fn destroyVideoSessionKHR(device: Device, video_session: VideoSessionKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn getVideoSessionMemoryRequirementsKHR(device: Device, video_session: VideoSessionKHR, p_memory_requirements_count: [*c]u32, p_memory_requirements: [*c]VideoSessionMemoryRequirementsKHR) Result;
-pub extern fn bindVideoSessionMemoryKHR(device: Device, video_session: VideoSessionKHR, bind_session_memory_info_count: u32, p_bind_session_memory_infos: [*c]const BindVideoSessionMemoryInfoKHR) Result;
-pub extern fn createVideoSessionParametersKHR(device: Device, p_create_info: [*c]const VideoSessionParametersCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session_parameters: [*c]VideoSessionParametersKHR) Result;
-pub extern fn updateVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_update_info: [*c]const VideoSessionParametersUpdateInfoKHR) Result;
-pub extern fn destroyVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_allocator: [*c]const AllocationCallbacks) void;
-pub extern fn cmdBeginVideoCodingKHR(command_buffer: CommandBuffer, p_begin_info: [*c]const VideoBeginCodingInfoKHR) void;
-pub extern fn cmdEndVideoCodingKHR(command_buffer: CommandBuffer, p_end_coding_info: [*c]const VideoEndCodingInfoKHR) void;
-pub extern fn cmdControlVideoCodingKHR(command_buffer: CommandBuffer, p_coding_control_info: [*c]const VideoCodingControlInfoKHR) void;
+pub extern fn vkGetPhysicalDeviceVideoCapabilitiesKHR(physical_device: PhysicalDevice, p_video_profile: [*c]const VideoProfileInfoKHR, p_capabilities: [*c]VideoCapabilitiesKHR) Result;
+pub inline fn getPhysicalDeviceVideoCapabilitiesKHR(physical_device: PhysicalDevice, p_video_profile: [*c]const VideoProfileInfoKHR, p_capabilities: [*c]VideoCapabilitiesKHR) Result {
+    return vkGetPhysicalDeviceVideoCapabilitiesKHR(physical_device, p_video_profile, p_capabilities);
+}
+pub extern fn vkGetPhysicalDeviceVideoFormatPropertiesKHR(physical_device: PhysicalDevice, p_video_format_info: [*c]const PhysicalDeviceVideoFormatInfoKHR, p_video_format_property_count: [*c]u32, p_video_format_properties: [*c]VideoFormatPropertiesKHR) Result;
+pub inline fn getPhysicalDeviceVideoFormatPropertiesKHR(physical_device: PhysicalDevice, p_video_format_info: [*c]const PhysicalDeviceVideoFormatInfoKHR, p_video_format_property_count: [*c]u32, p_video_format_properties: [*c]VideoFormatPropertiesKHR) Result {
+    return vkGetPhysicalDeviceVideoFormatPropertiesKHR(physical_device, p_video_format_info, p_video_format_property_count, p_video_format_properties);
+}
+pub extern fn vkCreateVideoSessionKHR(device: Device, p_create_info: [*c]const VideoSessionCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session: [*c]VideoSessionKHR) Result;
+pub inline fn createVideoSessionKHR(device: Device, p_create_info: [*c]const VideoSessionCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session: [*c]VideoSessionKHR) Result {
+    return vkCreateVideoSessionKHR(device, p_create_info, p_allocator, p_video_session);
+}
+pub extern fn vkDestroyVideoSessionKHR(device: Device, video_session: VideoSessionKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyVideoSessionKHR(device: Device, video_session: VideoSessionKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyVideoSessionKHR(device, video_session, p_allocator);
+}
+pub extern fn vkGetVideoSessionMemoryRequirementsKHR(device: Device, video_session: VideoSessionKHR, p_memory_requirements_count: [*c]u32, p_memory_requirements: [*c]VideoSessionMemoryRequirementsKHR) Result;
+pub inline fn getVideoSessionMemoryRequirementsKHR(device: Device, video_session: VideoSessionKHR, p_memory_requirements_count: [*c]u32, p_memory_requirements: [*c]VideoSessionMemoryRequirementsKHR) Result {
+    return vkGetVideoSessionMemoryRequirementsKHR(device, video_session, p_memory_requirements_count, p_memory_requirements);
+}
+pub extern fn vkBindVideoSessionMemoryKHR(device: Device, video_session: VideoSessionKHR, bind_session_memory_info_count: u32, p_bind_session_memory_infos: [*c]const BindVideoSessionMemoryInfoKHR) Result;
+pub inline fn bindVideoSessionMemoryKHR(device: Device, video_session: VideoSessionKHR, bind_session_memory_info_count: u32, p_bind_session_memory_infos: [*c]const BindVideoSessionMemoryInfoKHR) Result {
+    return vkBindVideoSessionMemoryKHR(device, video_session, bind_session_memory_info_count, p_bind_session_memory_infos);
+}
+pub extern fn vkCreateVideoSessionParametersKHR(device: Device, p_create_info: [*c]const VideoSessionParametersCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session_parameters: [*c]VideoSessionParametersKHR) Result;
+pub inline fn createVideoSessionParametersKHR(device: Device, p_create_info: [*c]const VideoSessionParametersCreateInfoKHR, p_allocator: [*c]const AllocationCallbacks, p_video_session_parameters: [*c]VideoSessionParametersKHR) Result {
+    return vkCreateVideoSessionParametersKHR(device, p_create_info, p_allocator, p_video_session_parameters);
+}
+pub extern fn vkUpdateVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_update_info: [*c]const VideoSessionParametersUpdateInfoKHR) Result;
+pub inline fn updateVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_update_info: [*c]const VideoSessionParametersUpdateInfoKHR) Result {
+    return vkUpdateVideoSessionParametersKHR(device, video_session_parameters, p_update_info);
+}
+pub extern fn vkDestroyVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_allocator: [*c]const AllocationCallbacks) void;
+pub inline fn destroyVideoSessionParametersKHR(device: Device, video_session_parameters: VideoSessionParametersKHR, p_allocator: [*c]const AllocationCallbacks) void {
+    return vkDestroyVideoSessionParametersKHR(device, video_session_parameters, p_allocator);
+}
+pub extern fn vkCmdBeginVideoCodingKHR(command_buffer: CommandBuffer, p_begin_info: [*c]const VideoBeginCodingInfoKHR) void;
+pub inline fn cmdBeginVideoCodingKHR(command_buffer: CommandBuffer, p_begin_info: [*c]const VideoBeginCodingInfoKHR) void {
+    return vkCmdBeginVideoCodingKHR(command_buffer, p_begin_info);
+}
+pub extern fn vkCmdEndVideoCodingKHR(command_buffer: CommandBuffer, p_end_coding_info: [*c]const VideoEndCodingInfoKHR) void;
+pub inline fn cmdEndVideoCodingKHR(command_buffer: CommandBuffer, p_end_coding_info: [*c]const VideoEndCodingInfoKHR) void {
+    return vkCmdEndVideoCodingKHR(command_buffer, p_end_coding_info);
+}
+pub extern fn vkCmdControlVideoCodingKHR(command_buffer: CommandBuffer, p_coding_control_info: [*c]const VideoCodingControlInfoKHR) void;
+pub inline fn cmdControlVideoCodingKHR(command_buffer: CommandBuffer, p_coding_control_info: [*c]const VideoCodingControlInfoKHR) void {
+    return vkCmdControlVideoCodingKHR(command_buffer, p_coding_control_info);
+}
 pub const VideoDecodeCapabilityFlagsKHR = enum(u32) {
     null = 0,
     dpb_and_output_coincide_bit_khr = 1,
@@ -6843,7 +6945,10 @@ pub const VideoDecodeInfoKHR = extern struct {
     p_reference_slots: [*c]const VideoReferenceSlotInfoKHR = @import("std").mem.zeroes([*c]const VideoReferenceSlotInfoKHR),
 };
 pub const PFN_cmdDecodeVideoKHR = ?*const fn (CommandBuffer, [*c]const VideoDecodeInfoKHR) callconv(.c) void;
-pub extern fn cmdDecodeVideoKHR(command_buffer: CommandBuffer, p_decode_info: [*c]const VideoDecodeInfoKHR) void;
+pub extern fn vkCmdDecodeVideoKHR(command_buffer: CommandBuffer, p_decode_info: [*c]const VideoDecodeInfoKHR) void;
+pub inline fn cmdDecodeVideoKHR(command_buffer: CommandBuffer, p_decode_info: [*c]const VideoDecodeInfoKHR) void {
+    return vkCmdDecodeVideoKHR(command_buffer, p_decode_info);
+}
 pub const VideoH264ChromaFormatIdc = enum(u32) {
     h264_chroma_format_idc_monochrome = 0,
     h264_chroma_format_idc_420 = 1,

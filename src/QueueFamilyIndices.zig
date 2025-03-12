@@ -15,7 +15,7 @@ pub fn findQueueFamilies(surface: vk.SurfaceKHR, device: vk.PhysicalDevice) Self
     vk.getPhysicalDeviceQueueFamilyProperties(device, &n_qfis, &queue_families);
 
     for (queue_families[0..n_qfis], 0..) |queue_family, i| {
-        if (queue_family.queue_flags.mask & vk.QueueFlags.graphics_bit == vk.QueueFlags.graphics_bit) {
+        if (queue_family.queue_flags.isSet(.graphics_bit)) {
             qfi.graphics_family = @truncate(i);
         }
 
