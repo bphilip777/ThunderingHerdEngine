@@ -31,3 +31,5 @@
 - additional libraries combined with above two to provide extra features
 - GLAD = handles extensions across platforms
 - GLEW = handles loading vulkan functions across platforms
+
+## Implement Vericidiums Optimizations to Improve Game Performance
