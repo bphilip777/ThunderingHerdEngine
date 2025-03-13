@@ -92,11 +92,11 @@ graphics_queue: vk.Queue,
 present_queue: vk.Queue,
 
 swapchain: vk.SwapchainKHR,
-images: []vk.Image,
-format: vk.Format,
-extent: vk.Extent2D,
-views: []vk.ImageView,
-frame_buffers: []vk.Framebuffer,
+swapchain_images: []vk.Image,
+swapchain_format: vk.Format,
+swapchain_extent: vk.Extent2D,
+swapchain_views: []vk.ImageView,
+swapchain_framebuffers: []vk.Framebuffer,
 
 render_pass: vk.RenderPass,
 descriptor_set_layout: vk.DescriptorSetLayout,
@@ -107,6 +107,8 @@ command_pool: vk.CommandPool,
 
 texture_image: vk.Image,
 texture_image_memory: vk.DeviceMemory,
+texture_image_view: vk.ImageView,
+texture_sampler: vk.Sampler,
 
 vertex_buffer: vk.Buffer,
 vertex_buffer_memory: vk.DeviceMemory,
@@ -172,24 +174,22 @@ pub fn init(
     if (is_debug_mode) std.debug.print("# of Formats: {}\n", .{ssd.formats.len});
     if (is_debug_mode) std.debug.print("# of Present Modes: {}\n", .{ssd.present_modes.len});
 
-    const extent = ssd.chooseSwapExtent(width, height);
-    const format = ssd.chooseSwapSurfaceFormat();
-
     const swapchain = try createSwapchain(allo, surface, physical_device, device, width, height);
+    const swapchain_extent = ssd.chooseSwapExtent(width, height);
+    const swapchain_format = ssd.chooseSwapSurfaceFormat();
 
-    // allocate memory outside of the fn - one time call at initialization rather than every time recreate is called
     var n_images = try getNumberOfSwapchainImages(device, swapchain);
-    const images = try allo.alloc(vk.Image, n_images);
-    const views = try allo.alloc(vk.ImageView, n_images);
-    const frame_buffers = try allo.alloc(vk.Framebuffer, n_images);
+    const swapchain_images = try allo.alloc(vk.Image, n_images);
+    const swapchain_views = try allo.alloc(vk.ImageView, n_images);
+    const swapchain_framebuffers = try allo.alloc(vk.Framebuffer, n_images);
 
     const descriptor_set_layout = try createDescriptorSetLayout(device);
     const pipeline_layout = try createGraphicsPipelineLayout(device, &.{descriptor_set_layout});
-    const render_pass = try createRenderPass(device, format.format);
+    const render_pass = try createRenderPass(device, swapchain_format.format);
 
-    try getSwapchainImages(device, swapchain, &n_images, images);
-    try createImageViews(device, images, format.format, views);
-    try createFramebuffers(device, extent, views, render_pass, frame_buffers);
+    try getSwapchainImages(device, swapchain, &n_images, swapchain_images);
+    try createImageViews(device, swapchain_images, swapchain_format.format, swapchain_views);
+    try createFramebuffers(device, swapchain_extent, swapchain_views, render_pass, swapchain_framebuffers);
     const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
 
     const command_pool = try createCommandPool(surface, physical_device, device);
@@ -197,7 +197,16 @@ pub fn init(
     // should split up
     var texture_image: vk.Image = undefined;
     var texture_image_memory: vk.DeviceMemory = undefined;
-    try createTextureImage(physical_device, device, graphics_queue, command_pool, &texture_image, &texture_image_memory);
+    try createTextureImage(
+        physical_device,
+        device,
+        graphics_queue,
+        command_pool,
+        &texture_image,
+        &texture_image_memory,
+    );
+    const texture_image_view = try createTextureImageView(device, texture_image);
+    const texture_sampler = try createTextureSampler(physical_device, device);
 
     // should split up
     var vertex_buffer: vk.Buffer = undefined;
@@ -246,6 +255,8 @@ pub fn init(
         descriptor_set_layout,
         descriptor_pool,
         uniform_buffers,
+        texture_image_view,
+        texture_sampler,
     );
 
     const command_buffers = try createCommandBuffers(allo, device, command_pool);
@@ -269,11 +280,11 @@ pub fn init(
         .present_queue = present_queue,
 
         .swapchain = swapchain,
-        .images = images,
-        .format = format.format,
-        .extent = extent,
-        .views = views,
-        .frame_buffers = frame_buffers,
+        .swapchain_images = swapchain_images,
+        .swapchain_format = swapchain_format.format,
+        .swapchain_extent = swapchain_extent,
+        .swapchain_views = swapchain_views,
+        .swapchain_framebuffers = swapchain_framebuffers,
 
         .descriptor_set_layout = descriptor_set_layout,
         .pipeline_layout = pipeline_layout,
@@ -284,6 +295,8 @@ pub fn init(
 
         .texture_image = texture_image,
         .texture_image_memory = texture_image_memory,
+        .texture_image_view = texture_image_view,
+        .texture_sampler = texture_sampler,
 
         .vertex_buffer = vertex_buffer,
         .vertex_buffer_memory = vertex_buffer_memory,
@@ -352,6 +365,8 @@ pub fn deinit(self: *Self) void {
     }
 
     defer { // Texture Data
+        vk.destroySampler(self.device, self.texture_sampler, null);
+        vk.destroyImageView(self.device, self.texture_image_view, null);
         vk.destroyImage(self.device, self.texture_image, null);
         vk.freeMemory(self.device, self.texture_image_memory, null);
     }
@@ -373,9 +388,9 @@ pub fn deinit(self: *Self) void {
 
     defer { // Cleanup swapchain data
         self.cleanupSwapchain();
-        self.allo.free(self.images);
-        self.allo.free(self.views);
-        self.allo.free(self.frame_buffers);
+        self.allo.free(self.swapchain_images);
+        self.allo.free(self.swapchain_views);
+        self.allo.free(self.swapchain_framebuffers);
     }
 }
 
@@ -626,7 +641,11 @@ fn isDeviceSuitable(
     const is_swapchain_adequate = try SSD.isSwapchainAdequate(surface, device);
     if (is_debug_mode) std.debug.print("Is swapchain adequate? {}\n", .{is_swapchain_adequate});
 
-    return are_queues_complete and is_swapchain_adequate;
+    var supported_features: vk.PhysicalDeviceFeatures = .{};
+    vk.getPhysicalDeviceFeatures(device, &supported_features);
+    const supports_features = supported_features.sampler_anisotropy == .true;
+
+    return are_queues_complete and is_swapchain_adequate and supports_features;
 }
 
 fn printDeviceExtensions(device: vk.PhysicalDevice) !void {
@@ -728,7 +747,9 @@ fn createLogicalDevice(
     };
 
     const is_same_family = qfi.graphics_family.? == qfi.present_family.?;
-    const feats: vk.PhysicalDeviceFeatures = undefined;
+    const feats: vk.PhysicalDeviceFeatures = .{
+        .sampler_anisotropy = .true,
+    };
 
     const dci = vk.DeviceCreateInfo{
         .queue_create_info_count = if (is_same_family) 1 else @truncate(qcis.len),
@@ -740,7 +761,7 @@ fn createLogicalDevice(
         .pp_enabled_layer_names = null,
     };
 
-    var device: vk.Device = undefined;
+    var device: vk.Device = .null; // is it better to set to null or to a value
     try isSuccess(vk.createDevice(physical_device, &dci, null, &device));
     return device;
 }
@@ -865,9 +886,9 @@ fn recreateSwapchain(self: *Self) !void {
 fn cleanupSwapchain(self: *Self) void {
     // destroy the data but keep the memory - can i just revalue the data to undefined? - try it
     defer vk.destroySwapchainKHR(self.device, self.swapchain, null);
-    for (self.frame_buffers, self.views) |frame_buffer, view| {
+    for (self.swapchain_framebuffers, self.swapchain_views) |framebuffer, view| {
         defer vk.destroyImageView(self.device, view, null);
-        defer vk.destroyFramebuffer(self.device, frame_buffer, null);
+        defer vk.destroyFramebuffer(self.device, framebuffer, null);
     }
 }
 
@@ -898,26 +919,7 @@ fn createImageViews(
     views: []vk.ImageView,
 ) !void {
     for (images, views) |image, *view| {
-        const ivci = vk.ImageViewCreateInfo{
-            .p_next = null,
-            .image = image,
-            .view_type = .@"2d",
-            .format = format,
-            .components = .{
-                .r = .identity,
-                .g = .identity,
-                .b = .identity,
-                .a = .identity,
-            },
-            .subresource_range = .{
-                .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
-                .base_mip_level = 0,
-                .level_count = 1,
-                .base_array_layer = 0,
-                .layer_count = 1,
-            },
-        };
-        try isSuccess(vk.createImageView(device, &ivci, null, view));
+        view.* = try createImageView(device, image, format);
     }
 }
 
@@ -1009,16 +1011,26 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
 
 fn createDescriptorSetLayout(device: vk.Device) !vk.DescriptorSetLayout {
     // in the future, pass this into the fn to generate the descriptor set layout
-    const dslb = [_]vk.DescriptorSetLayoutBinding{
-        .{
-            .binding = 0,
-            .descriptor_count = 1,
-            .descriptor_type = .uniform_buffer, // vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .p_immutable_samplers = null,
-            .stage_flags = vk.ShaderStageFlags.initEnum(.vertex_bit),
-        },
+    const ubo_layout_binding = vk.DescriptorSetLayoutBinding{
+        .binding = 0,
+        .descriptor_count = 1,
+        .descriptor_type = .uniform_buffer, // vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .p_immutable_samplers = null,
+        .stage_flags = vk.ShaderStageFlags.initEnum(.vertex_bit),
     };
-    // syntax i want is .{.vertex_bit, .fragment_bit, ...}
+
+    const sampler_layout_binding = vk.DescriptorSetLayoutBinding{
+        .binding = 1,
+        .descriptor_count = 1,
+        .descriptor_type = .combined_image_sampler,
+        .p_immutable_samplers = null,
+        .stage_flags = vk.ShaderStageFlags.initEnum(.fragment_bit),
+    };
+
+    const dslb = [_]vk.DescriptorSetLayoutBinding{
+        ubo_layout_binding,
+        sampler_layout_binding,
+    };
 
     const dslci = vk.DescriptorSetLayoutCreateInfo{
         .binding_count = @truncate(dslb.len),
@@ -1233,8 +1245,6 @@ fn createTextureImage(
 
     var image = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
     defer image.deinit();
-    const size: vk.DeviceSize = width * height * 4; // set alpha values to 1 for now
-
     std.debug.print("Image Texture Data:\n", .{});
     std.debug.print("\tData Length: {}\n\tData Type: {s}\n\tWidth: {}\n\tHeight: {}\n\tChannels: {}\n\tBytes Per Component: {}\n\tBytes Per Row: {}\n\tIs HDR: {}\n", .{
         image.data.len,
@@ -1246,6 +1256,8 @@ fn createTextureImage(
         image.bytes_per_row,
         image.is_hdr,
     });
+
+    const size: vk.DeviceSize = width * height * 4; // set alpha values to 1 for now
 
     const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
     defer vk.destroyBuffer(device, staging_buffer, null);
@@ -1260,7 +1272,7 @@ fn createTextureImage(
 
         var image_data: [*]@TypeOf(image.data[0]) = @ptrCast(@alignCast(data));
         @memcpy(image_data[0..image.data.len], @as([*]@TypeOf(image.data[0]), @ptrCast(image.data)));
-        @memset(image_data[image.data.len .. image.data.len + width * height], 255); // alpha
+        @memset(image_data[image.data.len .. image.data.len + (width * height)], 0); // alpha
     }
 
     texture_image.* = try createImage(
@@ -1311,9 +1323,57 @@ fn createTextureImage(
     );
 }
 
+fn createTextureImageView(device: vk.Device, texture_image: vk.Image) !vk.ImageView {
+    const texture_image_view = try createImageView(device, texture_image, .r8g8b8a8_srgb);
+    return texture_image_view;
+}
+
+fn createTextureSampler(physical_device: vk.PhysicalDevice, device: vk.Device) !vk.Sampler {
+    var props: vk.PhysicalDeviceProperties = .{};
+    vk.getPhysicalDeviceProperties(physical_device, &props);
+
+    const sci = vk.SamplerCreateInfo{
+        .mag_filter = .linear,
+        .min_filter = .linear,
+        .address_mode_u = .repeat,
+        .address_mode_v = .repeat,
+        .address_mode_w = .repeat,
+        .anisotropy_enable = .true, // turn off for false
+        .max_anisotropy = props.limits.max_sampler_anisotropy,
+        .border_color = .int_opaque_black,
+        .unnormalized_coordinates = .false,
+        .compare_enable = .false,
+        .compare_op = .always,
+        .mipmap_mode = .linear,
+    };
+
+    var texture_sampler: vk.Sampler = undefined;
+    try isSuccess(vk.createSampler(device, &sci, null, &texture_sampler));
+    return texture_sampler;
+}
+
+fn createImageView(device: vk.Device, image: vk.Image, format: vk.Format) !vk.ImageView {
+    const ivci = vk.ImageViewCreateInfo{
+        .image = image,
+        .view_type = .@"2d",
+        .format = format,
+        .subresource_range = .{
+            .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
+            .base_mip_level = 0,
+            .level_count = 0,
+            .base_array_layer = 0,
+            .layer_count = 1,
+        },
+    };
+
+    var image_view: vk.ImageView = undefined;
+    try isSuccess(vk.createImageView(device, &ivci, null, &image_view));
+    return image_view;
+}
+
 fn createImage(
     device: vk.Device,
-    width: u32,
+    width: u32, // should this be stored as extent instead?
     height: u32,
     depth: u32,
     format: vk.Format,
@@ -1362,6 +1422,7 @@ fn createImageMemory(
 
     var texture_image_memory: vk.DeviceMemory = undefined;
     try isSuccess(vk.allocateMemory(device, &mai, null, &texture_image_memory));
+
     try isSuccess(vk.bindImageMemory(device, texture_image, texture_image_memory, 0));
     return texture_image_memory;
 }
@@ -1417,7 +1478,7 @@ fn transitionImageLayout(
         1,
         &barrier,
     );
-    try endSingleTimeCommands(device, graphics_queue, command_pool, command_buffer);
+    try endSingleTimeCommands(device, graphics_queue, command_pool, &command_buffer);
 }
 
 // need to optimize this code better
@@ -1430,7 +1491,7 @@ fn copyBufferToImage(
     width: u32,
     height: u32,
 ) !void {
-    const command_buffer: vk.CommandBuffer = try beginSingleTimeCommands(device, command_pool);
+    const command_buffer = try beginSingleTimeCommands(device, command_pool);
 
     const region = vk.BufferImageCopy{
         .buffer_offset = 0,
@@ -1451,11 +1512,12 @@ fn copyBufferToImage(
     };
 
     vk.cmdCopyBufferToImage(command_buffer, buffer, image, .transfer_dst_optimal, 1, &region);
+
     try endSingleTimeCommands(
         device,
         graphics_queue,
         command_pool,
-        command_buffer,
+        &command_buffer,
     );
 }
 
@@ -1465,7 +1527,7 @@ fn beginSingleTimeCommands(
     command_pool: vk.CommandPool,
 ) !vk.CommandBuffer {
     const ai = vk.CommandBufferAllocateInfo{
-        .level = .primary, // vk._COMMAND_BUFFER_LEVEL_PRIMARY,
+        .level = .primary,
         .command_pool = command_pool,
         .command_buffer_count = 1,
     };
@@ -1485,20 +1547,19 @@ fn endSingleTimeCommands(
     device: vk.Device,
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
-    command_buffer: vk.CommandBuffer,
+    command_buffer: *const vk.CommandBuffer,
 ) !void {
-    try isSuccess(vk.endCommandBuffer(command_buffer));
+    try isSuccess(vk.endCommandBuffer(command_buffer.*));
 
-    const command_buffers = [_]vk.CommandBuffer{command_buffer};
     const si = vk.SubmitInfo{
-        .command_buffer_count = @truncate(command_buffers.len),
-        .p_command_buffers = &command_buffers,
+        .command_buffer_count = 1,
+        .p_command_buffers = command_buffer,
     };
 
     try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, .null));
     try isSuccess(vk.queueWaitIdle(graphics_queue));
 
-    vk.freeCommandBuffers(device, command_pool, 1, &command_buffer);
+    vk.freeCommandBuffers(device, command_pool, 1, command_buffer);
 }
 
 fn createVertexBuffer(
@@ -1573,41 +1634,16 @@ fn copyBuffer(
     src_buffer: vk.Buffer,
     dst_buffer: vk.Buffer,
     size: vk.DeviceSize,
-    pool: vk.CommandPool,
+    command_pool: vk.CommandPool,
     graphics_queue: vk.Queue,
 ) !void {
-    const cbai = vk.CommandBufferAllocateInfo{
-        .level = .primary, // vk._COMMAND_BUFFER_LEVEL_PRIMARY,
-        .command_pool = pool,
-        .command_buffer_count = 1,
+    const command_buffer = try beginSingleTimeCommands(device, command_pool);
+
+    const copy_region = vk.BufferCopy{
+        .size = size,
     };
-    var command_buffer: vk.CommandBuffer = undefined;
-    try isSuccess(vk.allocateCommandBuffers(device, &cbai, &command_buffer));
-    defer vk.freeCommandBuffers(device, pool, 1, &command_buffer);
-
-    const cbbi = vk.CommandBufferBeginInfo{
-        .flags = vk.CommandBufferUsageFlags.initEnum(.one_time_submit_bit),
-    };
-    try isSuccess(vk.beginCommandBuffer(command_buffer, &cbbi));
-
-    {
-        var copy_region = vk.BufferCopy{
-            .src_offset = 0,
-            .dst_offset = 0,
-            .size = size,
-        };
-        vk.cmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
-    }
-
-    try isSuccess(vk.endCommandBuffer(command_buffer));
-
-    const si = vk.SubmitInfo{
-        .command_buffer_count = 1,
-        .p_command_buffers = &command_buffer,
-    };
-
-    try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, .null));
-    try isSuccess(vk.queueWaitIdle(graphics_queue));
+    vk.cmdCopyBuffer(command_buffer, src_buffer, dst_buffer, 1, &copy_region);
+    try endSingleTimeCommands(device, graphics_queue, command_pool, &command_buffer);
 }
 
 fn findMemoryType(
@@ -1694,6 +1730,10 @@ fn createDescriptorPool(device: vk.Device) !vk.DescriptorPool {
             .type = .uniform_buffer, // vk._DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptor_count = @as(u32, MAX_FRAMES_IN_FLIGHT),
         },
+        .{
+            .type = .combined_image_sampler,
+            .descriptor_count = @as(u32, MAX_FRAMES_IN_FLIGHT),
+        },
     };
 
     const dpci = vk.DescriptorPoolCreateInfo{
@@ -1713,6 +1753,8 @@ fn createDescriptorSets(
     descriptor_set_layout: vk.DescriptorSetLayout,
     descriptor_pool: vk.DescriptorPool,
     uniform_buffers: []vk.Buffer,
+    texture_image_view: vk.ImageView,
+    texture_sampler: vk.Sampler,
 ) ![]vk.DescriptorSet {
     const descriptor_set_layouts = try allo.alloc(vk.DescriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
     @memset(descriptor_set_layouts, descriptor_set_layout); // default value
@@ -1728,22 +1770,37 @@ fn createDescriptorSets(
     try isSuccess(vk.allocateDescriptorSets(device, &dsai, sets.ptr));
 
     // fails on second iteration - why?
-    for (0..MAX_FRAMES_IN_FLIGHT) |i| {
-        const dbi = vk.DescriptorBufferInfo{
+    for (0..MAX_FRAMES_IN_FLIGHT, sets) |i, set| {
+        const buffer_info = vk.DescriptorBufferInfo{
             .buffer = uniform_buffers[i],
             .offset = 0,
             .range = @sizeOf(UBO),
         };
 
+        const image_info = vk.DescriptorImageInfo{
+            .image_layout = .shader_read_only_optimal,
+            .image_view = texture_image_view,
+            .sampler = texture_sampler,
+        };
+
         const descriptor_write = [_]vk.WriteDescriptorSet{
             .{
-                .dst_set = sets[i],
+                .dst_set = set,
                 .dst_binding = 0,
                 .dst_array_element = 0,
-                .descriptor_type = vk.DescriptorType.uniform_buffer,
+                .descriptor_type = .uniform_buffer,
                 .descriptor_count = 1,
-                .p_buffer_info = &dbi,
+                .p_buffer_info = &buffer_info,
                 .p_image_info = null,
+                .p_texel_buffer_view = null,
+            },
+            .{
+                .dst_set = set,
+                .dst_binding = 1,
+                .dst_array_element = 0,
+                .descriptor_type = .sampler,
+                .descriptor_count = 1,
+                .p_image_info = &image_info,
                 .p_texel_buffer_view = null,
             },
         };
