@@ -1,6 +1,8 @@
 const std = @import("std");
 const EnumPackedStruct = @import("../helpers/helpers.zig").EnumPackedStruct;
 pub const subpass_external = ~@as(c_uint, 0);
+pub const queue_family_ignored = ~@as(c_uint, 0);
+// pub const @"null" = @import("std").zig.c_translation.cast(?*anyopaque, @as(c_int, 0));
 pub const Bool32 = enum(u32) {
     true = 1,
     false = 0,
@@ -2238,21 +2240,21 @@ pub const EventCreateFlagbits = enum(u32) {
 };
 pub const EventCreateFlags = EnumPackedStruct(EventCreateFlagbits);
 pub const QueryPipelineStatisticFlagbits = enum(u32) {
-    pub const @"null" = 0;
-    pub const input_assembly_vertices_bit = 1;
-    pub const input_assembly_primitives_bit = 2;
-    pub const vertex_shader_invocations_bit = 4;
-    pub const geometry_shader_invocations_bit = 8;
-    pub const geometry_shader_primitives_bit = 16;
-    pub const clipping_invocations_bit = 32;
-    pub const clipping_primitives_bit = 64;
-    pub const fragment_shader_invocations_bit = 128;
-    pub const tessellation_control_shader_patches_bit = 256;
-    pub const tessellation_evaluation_shader_invocations_bit = 512;
-    pub const compute_shader_invocations_bit = 1024;
-    pub const task_shader_invocations_bit_ext = 2048;
-    pub const mesh_shader_invocations_bit_ext = 4096;
-    pub const cluster_culling_shader_invocations_bit_huawei = 8192;
+    null = 0,
+    input_assembly_vertices_bit = 1,
+    input_assembly_primitives_bit = 2,
+    vertex_shader_invocations_bit = 4,
+    geometry_shader_invocations_bit = 8,
+    geometry_shader_primitives_bit = 16,
+    clipping_invocations_bit = 32,
+    clipping_primitives_bit = 64,
+    fragment_shader_invocations_bit = 128,
+    tessellation_control_shader_patches_bit = 256,
+    tessellation_evaluation_shader_invocations_bit = 512,
+    compute_shader_invocations_bit = 1024,
+    task_shader_invocations_bit_ext = 2048,
+    mesh_shader_invocations_bit_ext = 4096,
+    cluster_culling_shader_invocations_bit_huawei = 8192,
 };
 pub const QueryPipelineStatisticFlags = EnumPackedStruct(QueryPipelineStatisticFlagbits);
 pub const QueryPoolCreateFlags = Flags;
@@ -4201,7 +4203,7 @@ pub inline fn cmdWaitEvents(command_buffer: CommandBuffer, event_count: u32, p_e
 }
 pub extern fn vkCmdPipelineBarrier(command_buffer: CommandBuffer, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, dependency_flags: DependencyFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void;
 pub inline fn cmdPipelineBarrier(command_buffer: CommandBuffer, src_stage_mask: PipelineStageFlags, dst_stage_mask: PipelineStageFlags, dependency_flags: DependencyFlags, memory_barrier_count: u32, p_memory_barriers: [*c]const MemoryBarrier, buffer_memory_barrier_count: u32, p_buffer_memory_barriers: [*c]const BufferMemoryBarrier, image_memory_barrier_count: u32, p_image_memory_barriers: [*c]const ImageMemoryBarrier) void {
-    return vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, dependency_flags, memory_barrier_count, p_memory_barriers, p_image_memory_barriers, buffer_memory_barrier_count, p_buffer_memory_barriers, image_memory_barrier_count, p_image_memory_barriers);
+    return vkCmdPipelineBarrier(command_buffer, src_stage_mask, dst_stage_mask, dependency_flags, memory_barrier_count, p_memory_barriers, buffer_memory_barrier_count, p_buffer_memory_barriers, image_memory_barrier_count, p_image_memory_barriers);
 }
 pub extern fn vkCmdBeginQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags) void;
 pub inline fn cmdBeginQuery(command_buffer: CommandBuffer, query_pool: QueryPool, query: u32, flags: QueryControlFlags) void {

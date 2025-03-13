@@ -194,11 +194,12 @@ pub fn init(
 
     const command_pool = try createCommandPool(surface, physical_device, device);
 
+    // should split up
     var texture_image: vk.Image = undefined;
     var texture_image_memory: vk.DeviceMemory = undefined;
-    try createTextureImage(physical_device, device, &texture_image, &texture_image_memory);
+    try createTextureImage(physical_device, device, graphics_queue, command_pool, &texture_image, &texture_image_memory);
 
-    // change the way this function occurs
+    // should split up
     var vertex_buffer: vk.Buffer = undefined;
     var vertex_buffer_memory: vk.DeviceMemory = undefined;
     try createVertexBuffer(
@@ -212,6 +213,7 @@ pub fn init(
         @ptrCast(&square_vertices),
     );
 
+    // should split up
     var index_buffer: vk.Buffer = undefined;
     var index_buffer_memory: vk.DeviceMemory = undefined;
     try createIndexBuffer(
@@ -225,7 +227,7 @@ pub fn init(
         @ptrCast(&square_indices),
     );
 
-    // probably want to pass this into this fn
+    // should split up
     const uniform_buffers = try allo.alloc(vk.Buffer, MAX_FRAMES_IN_FLIGHT);
     const uniform_buffers_memory = try allo.alloc(vk.DeviceMemory, MAX_FRAMES_IN_FLIGHT);
     const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
@@ -1213,145 +1215,209 @@ fn createCommandPool(
     return command_pool;
 }
 
+// should probably split this fn into multiple smaller fns
 fn createTextureImage(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
+    graphics_queue: vk.Queue,
+    command_pool: vk.CommandPool,
     texture_image: *vk.Image,
     texture_image_memory: *vk.DeviceMemory,
 ) !void {
-    const width: i32, const height: i32, const channels: i32 = .{ undefined, undefined, undefined };
-    _ = channels;
-
     const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\src\\textures\\texture.jpg";
 
     const info = zstbi.Image.info(filepath);
-    // std.debug.print("Image Info: {any}\n", .{info});
+    if (!info.is_supported) return error.ImageFileTypeIsNotSupported;
+    const width, const height, const channels = .{ info.width, info.height, info.num_components };
+    _ = channels;
 
-    const pixels = try zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
-    const image_size: vk.DeviceSize = width * height * 4;
+    var image = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
+    defer image.deinit();
+    const size: vk.DeviceSize = width * height * 4; // set alpha values to 1 for now
 
-    // buffers
-    const staging_buffer = try createBuffer(device, image_size, &.{.transfer_src_bit});
+    std.debug.print("Image Texture Data:\n", .{});
+    std.debug.print("\tData Length: {}\n\tData Type: {s}\n\tWidth: {}\n\tHeight: {}\n\tChannels: {}\n\tBytes Per Component: {}\n\tBytes Per Row: {}\n\tIs HDR: {}\n", .{
+        image.data.len,
+        @typeName(@TypeOf(image.data)),
+        image.width,
+        image.height,
+        image.num_components,
+        image.bytes_per_component,
+        image.bytes_per_row,
+        image.is_hdr,
+    });
+
+    const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
     defer vk.destroyBuffer(device, staging_buffer, null);
 
     const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
     defer vk.freeMemory(device, staging_buffer_memory, null);
 
     {
-        var data = ?*anyopaque;
-        vk.mapMemory(device, staging_buffer_memory, 0, image_size, 0, &data);
-        vk.unmapMemory(device, staging_buffer_memory);
+        var data: ?*anyopaque = undefined;
+        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, size, vk.MemoryMapFlags.initEmpty(), &data));
+        defer vk.unmapMemory(device, staging_buffer_memory);
 
-        const T = @TypeOf(pixels);
-        const image_data: [*]T = @ptrCast(@alignCast(data));
-        @memcpy(image_data, pixels);
+        var image_data: [*]@TypeOf(image.data[0]) = @ptrCast(@alignCast(data));
+        @memcpy(image_data[0..image.data.len], @as([*]@TypeOf(image.data[0]), @ptrCast(image.data)));
+        @memset(image_data[image.data.len .. image.data.len + width * height], 255); // alpha
     }
 
-    createImage(
+    texture_image.* = try createImage(
+        device,
         width,
         height,
+        1,
         .r8g8b8a8_srgb,
         .optimal,
-        &.{ .transfer_dst_bit, .usage_sampled_bit },
-        &.{.device_local_bit},
-        texture_image,
-        texture_image_memory,
+        &.{ .transfer_dst_bit, .sampled_bit },
     );
 
-    transitionImageLayout(texture_image, .r8g8b8a8_srgb, .undefined, .transfer_dst_optimal);
-    copyBufferToImage(staging_buffer, texture_image, @as(u32, width), @as(u32, height));
-    transitionImageLayout(texture_image, .r8g8b8a8_srgb, .transfer_dst_optimal, .shader_read_only_optimal);
+    texture_image_memory.* = try createImageMemory(
+        physical_device,
+        device,
+        texture_image.*,
+        &.{.device_local_bit},
+    );
+
+    try transitionImageLayout(
+        device,
+        graphics_queue,
+        command_pool,
+        texture_image.*,
+        .r8g8b8a8_srgb,
+        .undefined,
+        .transfer_dst_optimal,
+    );
+
+    try copyBufferToImage(
+        device,
+        graphics_queue,
+        command_pool,
+        staging_buffer,
+        texture_image.*,
+        width,
+        height,
+    );
+
+    try transitionImageLayout(
+        device,
+        graphics_queue,
+        command_pool,
+        texture_image.*,
+        .r8g8b8a8_srgb,
+        .transfer_dst_optimal,
+        .shader_read_only_optimal,
+    );
 }
 
 fn createImage(
     device: vk.Device,
     width: u32,
     height: u32,
+    depth: u32,
     format: vk.Format,
     tiling: vk.ImageTiling,
-    usage: vk.ImageUsageFlags,
-    props: vk.MemoryPropertyflags,
-    texture_image: *vk.Image,
-    texture_image_memory: *vk.DeviceMemory,
-) void {
+    usage: []const vk.ImageUsageFlagbits,
+) !vk.Image {
     const ici = vk.ImageCreateInfo{
-        .image_type = vk._IMAGE_TYPE_2D,
+        .image_type = .@"2d",
         .extent = .{
             .width = width,
             .height = height,
-            .depth = 1,
+            .depth = depth,
         },
         .mip_levels = 1,
         .array_layers = 1,
         .format = format,
         .tiling = tiling,
-        .initial_layout = .undefined, // vk._IMAGE_LAYOUT_UNDEFINED,
-        .usage = usage,
-        .samples = .@"1_bit", // vk._SAMPLE_COUNT_1_BIT,
-        .sharing_mode = .exclusive, // vk._SHARING_MODE_EXCLUSIVE,
+        .initial_layout = .undefined,
+        .usage = vk.ImageUsageFlags.initEnums(usage),
+        .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
+        .sharing_mode = .exclusive,
     };
 
+    var texture_image: vk.Image = undefined;
     try isSuccess(vk.createImage(device, &ici, null, &texture_image));
+    return texture_image;
+}
 
-    const mem_reqs: vk.MemoryRequirements = undefined;
+fn createImageMemory(
+    physical_device: vk.PhysicalDevice,
+    device: vk.Device,
+    texture_image: vk.Image,
+    props: []const vk.MemoryPropertyFlagbits,
+) !vk.DeviceMemory {
+    var mem_reqs: vk.MemoryRequirements = undefined;
     vk.getImageMemoryRequirements(device, texture_image, &mem_reqs);
 
     const mai = vk.MemoryAllocateInfo{
         .allocation_size = mem_reqs.size,
-        .memory_type_index = findMemoryType(mem_reqs.memoryTypeBits, props),
+        .memory_type_index = try findMemoryType(
+            physical_device,
+            mem_reqs.memory_type_bits,
+            props,
+        ),
     };
 
+    var texture_image_memory: vk.DeviceMemory = undefined;
     try isSuccess(vk.allocateMemory(device, &mai, null, &texture_image_memory));
-
-    vk.bindImageMemory(device, texture_image, texture_image_memory, 0);
+    try isSuccess(vk.bindImageMemory(device, texture_image, texture_image_memory, 0));
+    return texture_image_memory;
 }
 
 fn transitionImageLayout(
     device: vk.Device,
+    graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
     image: vk.Image,
+    format: vk.Format,
     old_layout: vk.ImageLayout,
     new_layout: vk.ImageLayout,
-) void {
-    const command_buffer: vk.CommandBuffer = beginSingleTimeCommands(device, command_pool);
+) !void {
+    _ = format;
+    const command_buffer: vk.CommandBuffer = try beginSingleTimeCommands(device, command_pool);
 
-    var barrier = vk.ImageMemoryBarrier{
+    const flag1 = old_layout == .undefined and new_layout == .transfer_dst_optimal;
+    const flag2 = old_layout == .transfer_dst_optimal and new_layout == .shader_read_only_optimal;
+    if (!flag1 and !flag2) return error.UnsupportedLayerTransition;
+
+    const src_access_mask: vk.AccessFlagbits = if (flag1) .none else if (flag2) .transfer_write_bit else unreachable;
+    const dst_access_mask: vk.AccessFlagbits = if (flag1) .transfer_write_bit else if (flag2) .shader_read_bit else unreachable;
+
+    const barrier = vk.ImageMemoryBarrier{
         .old_layout = old_layout,
         .new_layout = new_layout,
-        .src_queue_family_index = vk._QUEUE_FAMILY_IGNORED,
-        .dst_queue_family_index = vk._QUEUE_FAMILY_IGNORED,
+        .src_queue_family_index = vk.queue_family_ignored,
+        .dst_queue_family_index = vk.queue_family_ignored,
         .image = image,
         .subresource_range = .{
-            .aspect_mask = vk._IMAGE_ASPECT_COLOR_BIT,
+            .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
             .base_mip_level = 0,
             .level_count = 1,
             .base_array_layer = 0,
             .layer_count = 1,
         },
+        .src_access_mask = vk.AccessFlags.initEnum(src_access_mask),
+        .dst_access_mask = vk.AccessFlags.initEnum(dst_access_mask),
     };
 
-    var src_stage: vk.PipelineStageFlags = undefined;
-    var dst_stage: vk.PipelineStageFlags = undefined;
+    const src_stage: vk.PipelineStageFlagbits = if (flag1) .top_of_pipe_bit else if (flag2) .transfer_bit else unreachable;
+    const dst_stage: vk.PipelineStageFlagbits = if (flag1) .transfer_bit else if (flag2) .fragment_shader_bit else unreachable;
 
-    // make below branchless in the future or use switch statement or something
-    if (old_layout == .undefined and new_layout == .transfer_dst_optimal) {
-        barrier.src_access_mask = 0;
-        barrier.dst_access_mask = .transfer_write_bit;
-
-        src_stage = .top_of_pipe_bit; // vk._PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        dst_stage = .transfer_bit; // vk._PIPELINE_STAGE_TRANSFER_BIT;
-    } else if (old_layout == vk._IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL and new_layout == vk._IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-        barrier.src_access_mask = .write_bit; // vk._ACCESS_TRANSFER_WRITE_BIT;
-        barrier.dst_access_mask = .read_bit; // vk._ACCESS_SHADER_READ_BIT;
-
-        src_stage = .transfer_bit; // vk._PIPELINE_STAGE_TRANSFER_BIT;
-        dst_stage = .fragment_shader_bit; // vk._PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    } else {
-        return error.UnsupportedLayerTransition;
-    }
-
-    vk.cmdPipelineBarrier(command_buffer, src_stage, dst_stage, 0, 0, null, 0, null, 1, &barrier);
-    endSingleTimeCommands(command_buffer);
+    vk.cmdPipelineBarrier(
+        command_buffer,
+        vk.PipelineStageFlags.initEnum(src_stage),
+        vk.PipelineStageFlags.initEnum(dst_stage),
+        vk.DependencyFlags.initEnum(.null),
+        0,
+        null,
+        0,
+        null,
+        1,
+        &barrier,
+    );
+    try endSingleTimeCommands(device, graphics_queue, command_pool, command_buffer);
 }
 
 // need to optimize this code better
@@ -1363,20 +1429,20 @@ fn copyBufferToImage(
     image: vk.Image,
     width: u32,
     height: u32,
-) void {
-    const command_buffer: vk.CommandBuffer = beginSingleTimeCommands();
+) !void {
+    const command_buffer: vk.CommandBuffer = try beginSingleTimeCommands(device, command_pool);
 
     const region = vk.BufferImageCopy{
         .buffer_offset = 0,
         .buffer_row_length = 0,
         .buffer_image_height = 0,
         .image_subresource = .{
-            .aspect_mask = vk._IMAGE_ASPECT_COLOR_BIT,
+            .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
             .mip_level = 0,
             .base_array_layer = 0,
             .layer_count = 1,
         },
-        .image_offset = .{ 0, 0, 0 },
+        .image_offset = .{},
         .image_extent = .{
             .width = width,
             .height = height,
@@ -1384,8 +1450,8 @@ fn copyBufferToImage(
         },
     };
 
-    vk.cmdCopyBufferToImage(command_buffer, buffer, image, vk._IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-    endSingleTimeCommands(
+    vk.cmdCopyBufferToImage(command_buffer, buffer, image, .transfer_dst_optimal, 1, &region);
+    try endSingleTimeCommands(
         device,
         graphics_queue,
         command_pool,
@@ -1397,7 +1463,7 @@ fn copyBufferToImage(
 fn beginSingleTimeCommands(
     device: vk.Device,
     command_pool: vk.CommandPool,
-) void {
+) !vk.CommandBuffer {
     const ai = vk.CommandBufferAllocateInfo{
         .level = .primary, // vk._COMMAND_BUFFER_LEVEL_PRIMARY,
         .command_pool = command_pool,
@@ -1405,13 +1471,12 @@ fn beginSingleTimeCommands(
     };
 
     var command_buffer: vk.CommandBuffer = undefined;
-    vk.allocateCommandBuffers(device, &ai, &command_buffer);
+    try isSuccess(vk.allocateCommandBuffers(device, &ai, &command_buffer));
 
-    const bi = vk.BeginInfo{
-        .sType = vk._STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .flags = vk._COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    const bi = vk.CommandBufferBeginInfo{
+        .flags = vk.CommandBufferUsageFlags.initEnum(.one_time_submit_bit),
     };
-    vk.beginCommandBuffer(command_buffer, &bi);
+    try isSuccess(vk.beginCommandBuffer(command_buffer, &bi));
 
     return command_buffer;
 }
@@ -1421,8 +1486,8 @@ fn endSingleTimeCommands(
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
     command_buffer: vk.CommandBuffer,
-) void {
-    vk.endCommandBuffer(command_buffer);
+) !void {
+    try isSuccess(vk.endCommandBuffer(command_buffer));
 
     const command_buffers = [_]vk.CommandBuffer{command_buffer};
     const si = vk.SubmitInfo{
@@ -1430,8 +1495,8 @@ fn endSingleTimeCommands(
         .p_command_buffers = &command_buffers,
     };
 
-    vk.queueSubmit(graphics_queue, 1, &si, null);
-    vk.queueWaitIdle(graphics_queue);
+    try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, .null));
+    try isSuccess(vk.queueWaitIdle(graphics_queue));
 
     vk.freeCommandBuffers(device, command_pool, 1, &command_buffer);
 }
@@ -1439,40 +1504,40 @@ fn endSingleTimeCommands(
 fn createVertexBuffer(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    vertex_buffer: vk.Buffer,
-    vertex_buffer_memory: vk.DeviceMemory,
+    vertex_buffer: *vk.Buffer,
+    vertex_buffer_memory: *vk.DeviceMemory,
     pool: vk.CommandPool,
     graphics_queue: vk.Queue,
     vertices: []const Vertex,
 ) !void {
-    const buffer_size: vk.DeviceSize = @sizeOf(Vertex) * vertices.len;
+    const size: vk.DeviceSize = @sizeOf(Vertex) * vertices.len;
 
-    const staging_buffer = try createBuffer(device, buffer_size, &.{.transfer_src_bit});
+    const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
     defer vk.destroyBuffer(device, staging_buffer, null);
 
-    const staging_buffer_memory = try createBufferMemory(physical_device, device, &.{ .host_visible_bit, .host_coherent_bit });
+    const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
     defer vk.freeMemory(device, staging_buffer_memory, null);
 
     {
         var data: ?*anyopaque = undefined;
-        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), &data));
+        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, size, vk.MemoryMapFlags.initEmpty(), &data));
         defer vk.unmapMemory(device, staging_buffer_memory);
 
         var gpu_vertices: [*]Vertex = @ptrCast(@alignCast(data));
         @memcpy(gpu_vertices[0..vertices.len], vertices);
     }
 
-    vertex_buffer = try createBuffer(device, buffer_size, &.{ .transfer_dst_bit, .vertex_buffer_bit });
-    vertex_buffer_memory = try createBufferMemory(physical_device, device, vertex_buffer, &.{.device_local_bit});
+    vertex_buffer.* = try createBuffer(device, size, &.{ .transfer_dst_bit, .vertex_buffer_bit });
+    vertex_buffer_memory.* = try createBufferMemory(physical_device, device, vertex_buffer.*, &.{.device_local_bit});
 
-    try copyBuffer(device, staging_buffer, vertex_buffer, buffer_size, pool, graphics_queue);
+    try copyBuffer(device, staging_buffer, vertex_buffer.*, size, pool, graphics_queue);
 }
 
-fn createBuffer(device: vk.Device, size: vk.DeviceSize, usage: vk.BufferUsageFlags) !vk.Buffer {
+fn createBuffer(device: vk.Device, size: vk.DeviceSize, usage: []const vk.BufferUsageFlagbits) !vk.Buffer {
     var buffer: vk.Buffer = undefined;
     const bci = vk.BufferCreateInfo{
         .size = size,
-        .usage = usage,
+        .usage = vk.BufferUsageFlags.initEnums(usage),
         .sharing_mode = .exclusive, // static for now, in the future, change this to a feature w/ a default
     };
     try isSuccess(vk.createBuffer(device, &bci, null, &buffer));
@@ -1483,10 +1548,10 @@ fn createBufferMemory(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
     buffer: vk.Buffer,
-    props: vk.MemoryPropertyFlags,
+    props: []const vk.MemoryPropertyFlagbits,
 ) !vk.DeviceMemory {
     var mem_reqs: vk.MemoryRequirements = undefined;
-    vk.getBufferMemoryRequirements(device, buffer.*, &mem_reqs);
+    vk.getBufferMemoryRequirements(device, buffer, &mem_reqs);
 
     const mai = vk.MemoryAllocateInfo{
         .allocation_size = mem_reqs.size,
@@ -1499,7 +1564,7 @@ fn createBufferMemory(
 
     var buffer_memory: vk.DeviceMemory = undefined;
     try isSuccess(vk.allocateMemory(device, &mai, null, @ptrCast(&buffer_memory)));
-    try isSuccess(vk.bindBufferMemory(device, buffer.*, buffer_memory, 0));
+    try isSuccess(vk.bindBufferMemory(device, buffer, buffer_memory, 0));
     return buffer_memory;
 }
 
@@ -1518,6 +1583,7 @@ fn copyBuffer(
     };
     var command_buffer: vk.CommandBuffer = undefined;
     try isSuccess(vk.allocateCommandBuffers(device, &cbai, &command_buffer));
+    defer vk.freeCommandBuffers(device, pool, 1, &command_buffer);
 
     const cbbi = vk.CommandBufferBeginInfo{
         .flags = vk.CommandBufferUsageFlags.initEnum(.one_time_submit_bit),
@@ -1542,20 +1608,20 @@ fn copyBuffer(
 
     try isSuccess(vk.queueSubmit(graphics_queue, 1, &si, .null));
     try isSuccess(vk.queueWaitIdle(graphics_queue));
-
-    vk.freeCommandBuffers(device, pool, 1, &command_buffer);
 }
 
 fn findMemoryType(
     physical_device: vk.PhysicalDevice,
     type_filter: u32,
-    props: vk.MemoryPropertyFlags,
+    props: []const vk.MemoryPropertyFlagbits,
 ) !u32 {
     var mem_props: vk.PhysicalDeviceMemoryProperties = undefined;
     vk.getPhysicalDeviceMemoryProperties(physical_device, &mem_props);
 
     for (0..mem_props.memory_type_count) |i| {
-        if ((type_filter & (@as(u32, 1) << @truncate(i))) > 0 and mem_props.memory_types[i].property_flags.has(props)) {
+        const match1 = (type_filter & (@as(u32, 1) << @truncate(i))) > 0;
+        const match2 = mem_props.memory_types[i].property_flags.has(vk.MemoryPropertyFlags.initEnums(props));
+        if (match1 and match2) {
             return @truncate(i);
         }
     }
@@ -1572,27 +1638,27 @@ fn createIndexBuffer(
     graphics_queue: vk.Queue,
     indices: []const u16,
 ) !void {
-    const buffer_size: vk.DeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
+    const size: vk.DeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
 
-    const staging_buffer = try createBuffer(device, buffer_size, &.{.transfer_src_bit});
+    const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
+    defer vk.destroyBuffer(device, staging_buffer, null);
+
     const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
+    defer vk.freeMemory(device, staging_buffer_memory, null);
 
     {
         var data: ?*anyopaque = undefined;
-        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), &data));
+        try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, size, vk.MemoryMapFlags.initEmpty(), &data));
         defer vk.unmapMemory(device, staging_buffer_memory);
 
         var gpu_indices: [*]u16 = @ptrCast(@alignCast(data));
         @memcpy(gpu_indices[0..indices.len], indices);
     }
 
-    index_buffer = try createBuffer(device, buffer_size, &.{ .transfer_dst_bit, .index_buffer_bit });
-    index_buffer_memory = try createBufferMemory(physical_device, device, index_buffer, &.{.device_local_bit});
+    index_buffer.* = try createBuffer(device, size, &.{ .transfer_dst_bit, .index_buffer_bit });
+    index_buffer_memory.* = try createBufferMemory(physical_device, device, index_buffer.*, &.{.device_local_bit});
 
-    try copyBuffer(device, staging_buffer, index_buffer.*, buffer_size, pool, graphics_queue);
-
-    vk.destroyBuffer(device, staging_buffer, null);
-    vk.freeMemory(device, staging_buffer_memory, null);
+    try copyBuffer(device, staging_buffer, index_buffer.*, size, pool, graphics_queue);
 }
 
 fn createUniformBuffers(
@@ -1606,7 +1672,7 @@ fn createUniformBuffers(
 
     for (uniform_buffers, uniform_buffers_memory, uniform_buffers_mapped) |*ub, *ub_mem, *ub_map| {
         ub.* = try createBuffer(device, buffer_size, &.{.uniform_buffer_bit});
-        ub_mem.* = try createBufferMemory(physical_device, device, ub, &.{ .host_visible_bit, .host_coherent_bit });
+        ub_mem.* = try createBufferMemory(physical_device, device, ub.*, &.{ .host_visible_bit, .host_coherent_bit });
         // try createBuffer(
         //     physical_device,
         //     device,
