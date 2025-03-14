@@ -14,6 +14,8 @@ const std = @import("std");
 const Allocator = std.mem.Allocator;
 const is_debug_mode = @import("builtin").mode == .Debug;
 
+const builtin = @import("builtin");
+
 const zstbi = @import("zstbi");
 
 const SSD = @import("SwapchainSupportDetails.zig");
@@ -79,7 +81,6 @@ const Self = @This();
 
 allo: Allocator,
 
-// all of the below should be changed with calls to specific graphics api
 window: *sdl.SDL_Window,
 
 instance: vk.Instance,
@@ -118,7 +119,7 @@ index_buffer_memory: vk.DeviceMemory,
 
 uniform_buffers: []vk.Buffer,
 uniform_buffers_memory: []vk.DeviceMemory,
-uniform_buffers_mapped: []?*anyopaque,
+uniform_buffers_mapped: []?*anyopaque, // do i really need this field? it's never used again - save the memory on the cpu
 
 descriptor_pool: vk.DescriptorPool,
 descriptor_sets: []vk.DescriptorSet,
@@ -142,12 +143,12 @@ pub fn init(
     height: i32,
 ) !Self {
 
-    // init sdl
+    // init sdl - low level interface w/ different systems
     errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
     if (is_debug_mode) getSDLVersion();
     initSDL();
 
-    // init zstbi
+    // init zstbi - image loader - swap with QOI for games
     zstbi.init(allo);
 
     // vulkan compatiable + resizable
@@ -207,6 +208,7 @@ pub fn init(
     );
     const texture_image_view = try createTextureImageView(device, texture_image);
     const texture_sampler = try createTextureSampler(physical_device, device);
+    if (builtin.mode == .Debug) std.debug.print("Textures Complete\n", .{});
 
     // should split up
     var vertex_buffer: vk.Buffer = undefined;
@@ -221,6 +223,7 @@ pub fn init(
         // &triangle_vertices,
         @ptrCast(&square_vertices),
     );
+    if (builtin.mode == .Debug) std.debug.print("Vertex Complete\n", .{});
 
     // should split up
     var index_buffer: vk.Buffer = undefined;
@@ -235,6 +238,7 @@ pub fn init(
         // &triangle_indices, // makes no sense since only 1 triangle
         @ptrCast(&square_indices),
     );
+    if (builtin.mode == .Debug) std.debug.print("Index Complete\n", .{});
 
     // should split up
     const uniform_buffers = try allo.alloc(vk.Buffer, MAX_FRAMES_IN_FLIGHT);
@@ -247,6 +251,7 @@ pub fn init(
         uniform_buffers_memory,
         uniform_buffers_mapped,
     );
+    if (builtin.mode == .Debug) std.debug.print("Uniform Buffers Complete\n", .{});
 
     const descriptor_pool = try createDescriptorPool(device);
     const descriptor_sets = try createDescriptorSets(
@@ -258,12 +263,14 @@ pub fn init(
         texture_image_view,
         texture_sampler,
     );
+    if (builtin.mode == .Debug) std.debug.print("Descriptor Sets Complete\n", .{});
 
     const command_buffers = try createCommandBuffers(allo, device, command_pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
     const render_finished_semaphores = try createSemaphores(allo, device);
     const in_flight_fences = try createFences(allo, device);
+    if (builtin.mode == .Debug) std.debug.print("Syncs Complete\n", .{});
 
     const time = Stopwatch.init();
 
@@ -437,7 +444,7 @@ pub fn mainLoop(self: *Self) !void {
             self.time.reset();
         }
 
-        try isSuccess(vk.DeviceWaitIdle(self.device));
+        try isSuccess(vk.deviceWaitIdle(self.device));
     }
 }
 
@@ -643,9 +650,9 @@ fn isDeviceSuitable(
 
     var supported_features: vk.PhysicalDeviceFeatures = .{};
     vk.getPhysicalDeviceFeatures(device, &supported_features);
-    const supports_features = supported_features.sampler_anisotropy == .true;
+    const are_desired_features_supported = supported_features.sampler_anisotropy == .true;
 
-    return are_queues_complete and is_swapchain_adequate and supports_features;
+    return are_queues_complete and is_swapchain_adequate and are_desired_features_supported;
 }
 
 fn printDeviceExtensions(device: vk.PhysicalDevice) !void {
@@ -873,18 +880,23 @@ fn recreateSwapchain(self: *Self) !void {
 
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
     // WARNING: will break if n_images changes after new swapchain created
-    var n_images: u32 = @truncate(self.images.len);
-    try getSwapchainImages(self.device, self.swapchain, &n_images, self.images); // do i need to reobtain the images?
-    try createImageViews(self.device, self.images, self.format, self.views);
-    self.extent = vk.Extent2D{
+    var n_images: u32 = @truncate(self.swapchain_images.len);
+    try getSwapchainImages(self.device, self.swapchain, &n_images, self.swapchain_images); // do i need to reobtain the images?
+    try createImageViews(self.device, self.swapchain_images, self.swapchain_format, self.swapchain_views);
+    self.swapchain_extent = vk.Extent2D{
         .width = @intCast(width),
         .height = @intCast(height),
     };
-    try createFramebuffers(self.device, self.extent, self.views, self.render_pass, self.frame_buffers);
+    try createFramebuffers(
+        self.device,
+        self.swapchain_extent,
+        self.swapchain_views,
+        self.render_pass,
+        self.swapchain_framebuffers,
+    );
 }
 
 fn cleanupSwapchain(self: *Self) void {
-    // destroy the data but keep the memory - can i just revalue the data to undefined? - try it
     defer vk.destroySwapchainKHR(self.device, self.swapchain, null);
     for (self.swapchain_framebuffers, self.swapchain_views) |framebuffer, view| {
         defer vk.destroyImageView(self.device, view, null);
@@ -1236,10 +1248,11 @@ fn createTextureImage(
     texture_image: *vk.Image,
     texture_image_memory: *vk.DeviceMemory,
 ) !void {
-    const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\src\\textures\\texture.jpg";
+    const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
 
     const info = zstbi.Image.info(filepath);
-    if (!info.is_supported) return error.ImageFileTypeIsNotSupported;
+    std.debug.print("Info: {any}\n", .{info});
+    if (!info.is_supported) return error.ImageFileTypeIsNotSupported; // Great Catch!
     const width, const height, const channels = .{ info.width, info.height, info.num_components };
     _ = channels;
 
@@ -1338,14 +1351,15 @@ fn createTextureSampler(physical_device: vk.PhysicalDevice, device: vk.Device) !
         .address_mode_u = .repeat,
         .address_mode_v = .repeat,
         .address_mode_w = .repeat,
-        .anisotropy_enable = .true, // turn off for false
-        .max_anisotropy = props.limits.max_sampler_anisotropy,
+        .anisotropy_enable = .true, // .false
+        .max_anisotropy = props.limits.max_sampler_anisotropy, // 1.0
         .border_color = .int_opaque_black,
         .unnormalized_coordinates = .false,
         .compare_enable = .false,
         .compare_op = .always,
         .mipmap_mode = .linear,
     };
+    // other option is false w/ max anisotropy set to 1.0
 
     var texture_sampler: vk.Sampler = undefined;
     try isSuccess(vk.createSampler(device, &sci, null, &texture_sampler));
@@ -1837,20 +1851,20 @@ fn recordCommandBuffer(
     image_index: u32,
 ) !void {
     const cbbi = vk.CommandBufferBeginInfo{
-        .pInheritanceInfo = null,
+        .p_inheritance_info = null,
     };
     try isSuccess(vk.beginCommandBuffer(command_buffer, &cbbi));
 
     const clear_colors = [_][4]f32{.{ 0, 0, 0, 1 }};
     const rpbi = vk.RenderPassBeginInfo{
         .render_pass = self.render_pass,
-        .framebuffer = self.frame_buffers[image_index],
+        .framebuffer = self.swapchain_framebuffers[image_index],
         .render_area = vk.Rect2D{
             .offset = .{
                 .x = 0,
                 .y = 0,
             },
-            .extent = self.extent,
+            .extent = self.swapchain_extent,
         },
         .clear_value_count = @truncate(clear_colors.len),
         .p_clear_values = &.{
@@ -1863,20 +1877,20 @@ fn recordCommandBuffer(
     vk.cmdBeginRenderPass(
         command_buffer,
         &rpbi,
-        vk.@"inline",
+        .@"inline",
     );
 
     vk.cmdBindPipeline(
         command_buffer,
-        vk._PIPELINE_BIND_POINT_GRAPHICS,
+        .graphics,
         self.pipeline,
     );
 
     const viewport = vk.Viewport{
         .x = 0,
         .y = 0,
-        .width = @floatFromInt(self.extent.width),
-        .height = @floatFromInt(self.extent.height),
+        .width = @floatFromInt(self.swapchain_extent.width),
+        .height = @floatFromInt(self.swapchain_extent.height),
         .min_depth = 0,
         .max_depth = 1,
     };
@@ -1887,7 +1901,7 @@ fn recordCommandBuffer(
             .x = 0,
             .y = 0,
         },
-        .extent = self.extent,
+        .extent = self.swapchain_extent,
     };
     vk.cmdSetScissor(command_buffer, 0, 1, &scissor);
 
@@ -1897,8 +1911,8 @@ fn recordCommandBuffer(
     const offsets = [_]vk.DeviceSize{0};
 
     vk.cmdBindVertexBuffers(command_buffer, 0, 1, &vertex_buffers, &offsets); // bind vertex buffers
-    vk.cmdBindIndexBuffer(command_buffer, index_buffer, 0, vk._INDEX_TYPE_UINT16); // bind indices
-    vk.cmdBindDescriptorSets(command_buffer, vk._PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, descriptor_set, 0, null); // bind descriptors
+    vk.cmdBindIndexBuffer(command_buffer, index_buffer, 0, .uint16); // bind indices
+    vk.cmdBindDescriptorSets(command_buffer, .graphics, pipeline_layout, 0, 1, descriptor_set, 0, null); // bind descriptors
     vk.cmdDrawIndexed(command_buffer, @truncate(square_indices.len), 1, 0, 0, 0); // draw indices
 
     vk.cmdEndRenderPass(command_buffer);
@@ -1937,22 +1951,28 @@ fn createSemaphores(
 }
 
 fn drawFrame(self: *Self) !void {
-    try isSuccess(vk.waitForFences(self.device, 1, &self.in_flight_fences[self.current_frame], 1, std.math.maxInt(u64)));
+    try isSuccess(vk.waitForFences(
+        self.device,
+        1,
+        &self.in_flight_fences[self.current_frame],
+        .true,
+        std.math.maxInt(u64),
+    ));
 
     // if out of date = recreate swapchain
     var image_index: u32 = undefined;
-    const r1: vk.Result = @enumFromInt(@as(i32, @intCast(vk.AcquireNextImageKHR(
+    const r1: vk.Result = vk.acquireNextImageKHR(
         self.device,
         self.swapchain,
         std.math.maxInt(u64),
         self.image_available_semaphores[self.current_frame],
-        null,
+        .null,
         &image_index,
-    ))));
+    );
 
     switch (r1) {
         .success => {},
-        .out_of_date => {
+        .error_out_of_date_khr => {
             try self.recreateSwapchain();
             return;
         },
@@ -1964,7 +1984,11 @@ fn drawFrame(self: *Self) !void {
     // only reset if doing work - prevents dead lock
     try isSuccess(vk.resetFences(self.device, 1, &self.in_flight_fences[self.current_frame]));
 
-    try isSuccess(vk.resetCommandBuffer(self.command_buffers[self.current_frame], 0));
+    try isSuccess(vk.resetCommandBuffer(
+        self.command_buffers[self.current_frame],
+        vk.CommandBufferResetFlags.initEnum(.null),
+    ));
+
     try self.recordCommandBuffer(
         self.command_buffers[self.current_frame],
         self.pipeline_layout,
@@ -1975,17 +1999,17 @@ fn drawFrame(self: *Self) !void {
     );
 
     const wait_semaphores = [1]vk.Semaphore{self.image_available_semaphores[self.current_frame]};
-    const wait_stages = [1]vk.PipelineStageFlags.initEnum(.color_attachment_output_bit);
+    const wait_stages = [1]vk.PipelineStageFlags{vk.PipelineStageFlags.initEnum(.color_attachment_output_bit)};
 
     std.debug.assert(wait_semaphores.len == wait_stages.len);
     const signal_semaphores = [1]vk.Semaphore{self.render_finished_semaphores[self.current_frame]};
 
     const submit_info = vk.SubmitInfo{
-        .waitSemaphoreCount = @truncate(wait_semaphores.len),
-        .pWaitSemaphores = &wait_semaphores,
-        .pWaitDstStageMask = &wait_stages,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &self.command_buffers[self.current_frame],
+        .wait_semaphore_count = @truncate(wait_semaphores.len),
+        .p_wait_semaphores = &wait_semaphores,
+        .p_wait_dst_stage_mask = &wait_stages,
+        .command_buffer_count = 1,
+        .p_command_buffers = &self.command_buffers[self.current_frame],
     };
 
     try isSuccess(
@@ -1994,18 +2018,18 @@ fn drawFrame(self: *Self) !void {
 
     const swapchains = [1]vk.SwapchainKHR{self.swapchain};
     const present_info = vk.PresentInfoKHR{
-        .waitSemaphoreCount = 1,
-        .pWaitSemaphores = @ptrCast(&signal_semaphores),
-        .swapchainCount = @truncate(swapchains.len),
-        .pSwapchains = @ptrCast(&swapchains),
-        .pImageIndices = @ptrCast(&image_index),
+        .wait_semaphore_count = 1,
+        .p_wait_semaphores = @ptrCast(&signal_semaphores),
+        .swapchain_count = @truncate(swapchains.len),
+        .p_swapchains = @ptrCast(&swapchains),
+        .p_image_indices = @ptrCast(&image_index),
     };
 
     // if suboptimal or out of date = update swapchain
-    const r2: vk.Result = @enumFromInt(@as(i32, @intCast(vk.queuePresentKHR(self.present_queue, &present_info))));
+    const r2: vk.Result = vk.queuePresentKHR(self.present_queue, &present_info);
     switch (r2) {
         .success => {},
-        .out_of_date, .suboptimal => {
+        .error_out_of_date_khr, .suboptimal_khr => {
             try self.recreateSwapchain();
         },
         inline else => |err| return @field(anyerror, @tagName(err)),
@@ -2017,10 +2041,10 @@ fn drawFrame(self: *Self) !void {
 fn updateUniformBuffer(self: *Self) void {
     const elapsed_time = @as(f32, @floatFromInt(self.time.elapsed()));
 
-    const model = math.rotation(std.math.d2r(90) * elapsed_time, math.VZ);
+    const model = math.rotation(d2r(90) * elapsed_time, math.VZ);
     const view = math.lookAt(math.Vector(3, f32).ones().mulScalar(2), math.Vector(3, f32).zeros(), math.VZ);
-    const aspect_ratio = @as(f32, @floatFromInt(self.extent.width)) / @as(f32, @floatFromInt(self.extent.height));
-    const proj = math.perspective(std.math.d2r(45), aspect_ratio, 0.1, 10);
+    const aspect_ratio = @as(f32, @floatFromInt(self.swapchain_extent.width)) / @as(f32, @floatFromInt(self.swapchain_extent.height));
+    const proj = math.perspective(d2r(45), aspect_ratio, 0.1, 10);
 
     // need to compute basics
     var ubo = [_]UBO{
