@@ -203,12 +203,14 @@ pub fn init(
     const depth_format = try findDepthFormat();
     const depth_image = try createImage(device, swapchain_extent.width, swapchain_extent.height, depth_format, .optimal, .depth_stencil_attachment_bit, .local_bit);
     const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.local_bit});
+    const depth_image_view = try createImageView(device, depth_image, depth_format, .depth_bit);
 
     // split up create texture image to just straight up calls here instead
     // var texture_image: vk.Image = undefined;
     // var texture_image_memory: vk.DeviceMemory = undefined;
     // should return a struct that destructures into image and memory
     // below might not work, use blk syntax in that scenario
+    // If below isn't what I want - split fn up into separate parts here
     const texture_image, const texture_image_memory = try createTextureImage(
         physical_device,
         device,
@@ -312,6 +314,7 @@ pub fn init(
         .depth_format = depth_format,
         .depth_image = depth_image,
         .depth_image_memory = depth_image_memory,
+        .depth_image_view = depth_image_view,
 
         .texture_image = texture_image,
         .texture_image_memory = texture_image_memory,
@@ -950,8 +953,8 @@ fn createImageViews(
     format: vk.Format,
     views: []vk.ImageView,
 ) !void {
-    for (images, views) |image, *view| {
-        view.* = try createImageView(device, image, format);
+    for (images, views) |image, view| {
+        view = try createImageView(device, image, format, .color_bit);
     }
 }
 
@@ -988,8 +991,8 @@ fn createGraphicsPipelineLayout(
 }
 
 fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
-    const color_attachment = [1]vk.AttachmentDescription{
-        .{
+    const attachments = [1]vk.AttachmentDescription{
+        .{ // color
             .format = format,
             .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
             .load_op = .clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
@@ -998,6 +1001,16 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
             .stencil_store_op = .dont_care, // vk._ATTACHMENT_STORE_OP_DONT_CARE,
             .initial_layout = .undefined, // vk._IMAGE_LAYOUT_UNDEFINED,
             .final_layout = .present_src_khr, // vk._IMAGE_LAYOUT_PRESENT_SRC_KHR,
+        },
+        .{ // depth
+            .format = findDepthFormat(),
+            .samples = .@"1_bit",
+            .load_op = .clear,
+            .store_op = .dont_care,
+            .stencil_load_op = .dont_care,
+            .stencil_store_op = .dont_care,
+            .initial_layout = .undefined,
+            .final_layout = .attachment_optimal,
         },
     };
 
@@ -1028,9 +1041,9 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
     };
 
     const rpci = vk.RenderPassCreateInfo{
-        .attachment_count = @truncate(color_attachment.len),
-        .p_attachments = &color_attachment,
-        .subpass_count = @truncate(subpasses.len), // should be based on machine - not default to truncate
+        .attachment_count = @truncate(attachments.len),
+        .p_attachments = &attachments,
+        .subpass_count = @truncate(subpasses.len),
         .p_subpasses = &subpasses,
         .dependency_count = @truncate(dependencies.len),
         .p_dependencies = &dependencies,
@@ -1399,8 +1412,9 @@ fn createTextureImage(
     return .{ .image = image, .memory = memory };
 }
 
+// this is not great - should just be single call to createImageView
 fn createTextureImageView(device: vk.Device, texture_image: vk.Image) !vk.ImageView {
-    const texture_image_view = try createImageView(device, texture_image, .r8g8b8a8_srgb);
+    const texture_image_view = try createImageView(device, texture_image, .r8g8b8a8_srgb, .color_bit);
     return texture_image_view;
 }
 
@@ -1429,13 +1443,18 @@ fn createTextureSampler(physical_device: vk.PhysicalDevice, device: vk.Device) !
     return texture_sampler;
 }
 
-fn createImageView(device: vk.Device, image: vk.Image, format: vk.Format) !vk.ImageView {
+fn createImageView(
+    device: vk.Device,
+    image: vk.Image,
+    format: vk.Format,
+    aspect_mask: vk.ImageAspectFlagbits,
+) !vk.ImageView {
     const ivci = vk.ImageViewCreateInfo{
         .image = image,
         .view_type = .@"2d",
         .format = format,
         .subresource_range = .{
-            .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
+            .aspect_mask = vk.ImageAspectFlags.initEnum(aspect_mask), // .color_bit
             .base_mip_level = 0,
             .level_count = 1,
             .base_array_layer = 0,
