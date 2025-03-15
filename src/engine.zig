@@ -9,6 +9,8 @@
 //  - store UBO in another file
 // 7. Need to update the slices
 // 8. Convert a lot of syscalls to all into arrays
+// 9. Need to automate the way models interact with shader - include 2d or 3d connections
+// 10. implement vericidium's optimizations
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
@@ -22,8 +24,6 @@ const SSD = @import("SwapchainSupportDetails.zig");
 const QFI = @import("QueueFamilyIndices.zig");
 const Stopwatch = @import("Stopwatch.zig");
 
-pub const std_options: std.Options = .{ .log_level = .debug };
-
 // libraries
 const vk = @import("vulkan/vulkan3.zig");
 const isSuccess = @import("vulkan/vulkan3.zig").isSuccess;
@@ -31,7 +31,7 @@ const isSuccess = @import("vulkan/vulkan3.zig").isSuccess;
 const math = @import("math/math.zig");
 const d2r = std.math.degreesToRadians;
 
-// sdl - huge library that may not be what i want
+// sdl - huge library - hopefully drop support in the future
 const sdl = @cImport({
     @cDefine("SDL_DISABLE_OLD_NAMES", {});
     @cInclude("SDL3/SDL.h");
@@ -60,8 +60,8 @@ const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 
 // Model Info
 const Vertex = @import("models/vertex.zig");
-const square_indices = @import("models/square.zig").indices;
-const square_vertices = @import("models/square.zig").vertices;
+const square_indices = @import("models/square_3d.zig").indices; // @import("models/square_2d.zig").indices;
+const square_vertices = @import("models/square_3d.zig").vertices; // @import("models/square_2d.zig").vertices;
 
 // Frame Rate
 const FPS = enum {
@@ -96,7 +96,7 @@ swapchain: vk.SwapchainKHR,
 swapchain_images: []vk.Image,
 swapchain_format: vk.Format,
 swapchain_extent: vk.Extent2D,
-swapchain_views: []vk.ImageView,
+swapchain_image_views: []vk.ImageView,
 swapchain_framebuffers: []vk.Framebuffer,
 
 render_pass: vk.RenderPass,
@@ -105,6 +105,11 @@ pipeline_layout: vk.PipelineLayout,
 pipeline: vk.Pipeline,
 
 command_pool: vk.CommandPool,
+
+depth_image: vk.Image,
+depth_image_memory: vk.DeviceMemory,
+depth_image_view: vk.ImageView,
+depth_format: vk.Format,
 
 texture_image: vk.Image,
 texture_image_memory: vk.DeviceMemory,
@@ -181,7 +186,7 @@ pub fn init(
 
     var n_images = try getNumberOfSwapchainImages(device, swapchain);
     const swapchain_images = try allo.alloc(vk.Image, n_images);
-    const swapchain_views = try allo.alloc(vk.ImageView, n_images);
+    const swapchain_image_views = try allo.alloc(vk.ImageView, n_images);
     const swapchain_framebuffers = try allo.alloc(vk.Framebuffer, n_images);
 
     const descriptor_set_layout = try createDescriptorSetLayout(device);
@@ -189,26 +194,30 @@ pub fn init(
     const render_pass = try createRenderPass(device, swapchain_format.format);
 
     try getSwapchainImages(device, swapchain, &n_images, swapchain_images);
-    try createImageViews(device, swapchain_images, swapchain_format.format, swapchain_views);
-    try createFramebuffers(device, swapchain_extent, swapchain_views, render_pass, swapchain_framebuffers);
+    try createImageViews(device, swapchain_images, swapchain_format.format, swapchain_image_views);
+    try createFramebuffers(device, swapchain_extent, swapchain_image_views, render_pass, swapchain_framebuffers);
     const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
 
     const command_pool = try createCommandPool(surface, physical_device, device);
 
-    // should split up
-    var texture_image: vk.Image = undefined;
-    var texture_image_memory: vk.DeviceMemory = undefined;
-    try createTextureImage(
+    const depth_format = try findDepthFormat();
+    const depth_image = try createImage(device, swapchain_extent.width, swapchain_extent.height, depth_format, .optimal, .depth_stencil_attachment_bit, .local_bit);
+    const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.local_bit});
+
+    // split up create texture image to just straight up calls here instead
+    // var texture_image: vk.Image = undefined;
+    // var texture_image_memory: vk.DeviceMemory = undefined;
+    // should return a struct that destructures into image and memory
+    // below might not work, use blk syntax in that scenario
+    const texture_image, const texture_image_memory = try createTextureImage(
         physical_device,
         device,
         graphics_queue,
         command_pool,
-        &texture_image,
-        &texture_image_memory,
     );
     const texture_image_view = try createTextureImageView(device, texture_image);
     const texture_sampler = try createTextureSampler(physical_device, device);
-    if (builtin.mode == .Debug) std.debug.print("Textures Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Textures Complete\n", .{});
 
     // should split up
     var vertex_buffer: vk.Buffer = undefined;
@@ -223,7 +232,7 @@ pub fn init(
         // &triangle_vertices,
         @ptrCast(&square_vertices),
     );
-    if (builtin.mode == .Debug) std.debug.print("Vertex Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Vertex Complete\n", .{});
 
     // should split up
     var index_buffer: vk.Buffer = undefined;
@@ -238,7 +247,7 @@ pub fn init(
         // &triangle_indices, // makes no sense since only 1 triangle
         @ptrCast(&square_indices),
     );
-    if (builtin.mode == .Debug) std.debug.print("Index Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Index Complete\n", .{});
 
     // should split up
     const uniform_buffers = try allo.alloc(vk.Buffer, MAX_FRAMES_IN_FLIGHT);
@@ -251,7 +260,7 @@ pub fn init(
         uniform_buffers_memory,
         uniform_buffers_mapped,
     );
-    if (builtin.mode == .Debug) std.debug.print("Uniform Buffers Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Uniform Buffers Complete\n", .{});
 
     const descriptor_pool = try createDescriptorPool(device);
     const descriptor_sets = try createDescriptorSets(
@@ -263,14 +272,14 @@ pub fn init(
         texture_image_view,
         texture_sampler,
     );
-    if (builtin.mode == .Debug) std.debug.print("Descriptor Sets Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Descriptor Sets Complete\n", .{});
 
     const command_buffers = try createCommandBuffers(allo, device, command_pool);
 
     const image_available_semaphores = try createSemaphores(allo, device);
     const render_finished_semaphores = try createSemaphores(allo, device);
     const in_flight_fences = try createFences(allo, device);
-    if (builtin.mode == .Debug) std.debug.print("Syncs Complete\n", .{});
+    if (is_debug_mode) std.debug.print("Syncs Complete\n", .{});
 
     const time = Stopwatch.init();
 
@@ -290,7 +299,7 @@ pub fn init(
         .swapchain_images = swapchain_images,
         .swapchain_format = swapchain_format.format,
         .swapchain_extent = swapchain_extent,
-        .swapchain_views = swapchain_views,
+        .swapchain_image_views = swapchain_image_views,
         .swapchain_framebuffers = swapchain_framebuffers,
 
         .descriptor_set_layout = descriptor_set_layout,
@@ -299,6 +308,10 @@ pub fn init(
         .pipeline = pipeline,
 
         .command_pool = command_pool,
+
+        .depth_format = depth_format,
+        .depth_image = depth_image,
+        .depth_image_memory = depth_image_memory,
 
         .texture_image = texture_image,
         .texture_image_memory = texture_image_memory,
@@ -396,7 +409,7 @@ pub fn deinit(self: *Self) void {
     defer { // Cleanup swapchain data
         self.cleanupSwapchain();
         self.allo.free(self.swapchain_images);
-        self.allo.free(self.swapchain_views);
+        self.allo.free(self.swapchain_image_views);
         self.allo.free(self.swapchain_framebuffers);
     }
 }
@@ -882,7 +895,7 @@ fn recreateSwapchain(self: *Self) !void {
     // WARNING: will break if n_images changes after new swapchain created
     var n_images: u32 = @truncate(self.swapchain_images.len);
     try getSwapchainImages(self.device, self.swapchain, &n_images, self.swapchain_images); // do i need to reobtain the images?
-    try createImageViews(self.device, self.swapchain_images, self.swapchain_format, self.swapchain_views);
+    try createImageViews(self.device, self.swapchain_images, self.swapchain_format, self.swapchain_image_views);
     self.swapchain_extent = vk.Extent2D{
         .width = @intCast(width),
         .height = @intCast(height),
@@ -890,17 +903,24 @@ fn recreateSwapchain(self: *Self) !void {
     try createFramebuffers(
         self.device,
         self.swapchain_extent,
-        self.swapchain_views,
+        self.swapchain_image_views,
         self.render_pass,
         self.swapchain_framebuffers,
     );
 }
 
 fn cleanupSwapchain(self: *Self) void {
+    {
+        defer vk.destroy(self.device, self.depth_image_memory, null);
+        defer vk.destroyImage(self.device, null);
+        defer vk.destroyImageView(self.device, self.depth_image_view, null);
+    }
+
     defer vk.destroySwapchainKHR(self.device, self.swapchain, null);
-    for (self.swapchain_framebuffers, self.swapchain_views) |framebuffer, view| {
+    for (self.swapchain_framebuffers, self.swapchain_image_views, self.swapchain_images) |framebuffer, view, image| {
         defer vk.destroyImageView(self.device, view, null);
         defer vk.destroyFramebuffer(self.device, framebuffer, null);
+        defer vk.destroyImage(self.device, image, null);
     }
 }
 
@@ -1201,24 +1221,25 @@ fn createGraphicsPipelines(
 
 fn createFramebuffers(
     device: vk.Device,
-    extent: vk.Extent2D,
-    views: []vk.ImageView,
+    swapchain_extent: vk.Extent2D,
+    swapchain_image_views: []vk.ImageView,
+    depth_image_views: []vk.ImageView,
     render_pass: vk.RenderPass,
-    frame_buffers: []vk.Framebuffer,
+    swapchain_framebuffers: []vk.Framebuffer,
 ) !void {
-    for (views, frame_buffers) |view, *frame_buffer| {
-        const attachments = [_]vk.ImageView{view};
+    for (swapchain_image_views, swapchain_framebuffers, depth_image_views) |image_view, *framebuffer, depth_image_view| {
+        const attachments = [_]vk.ImageView{ image_view, depth_image_view };
 
         const fci = vk.FramebufferCreateInfo{
             .render_pass = render_pass,
             .attachment_count = @truncate(attachments.len),
             .p_attachments = @ptrCast(&attachments),
-            .width = extent.width,
-            .height = extent.height,
+            .width = swapchain_extent.width,
+            .height = swapchain_extent.height,
             .layers = 1,
         };
 
-        try isSuccess(vk.createFramebuffer(device, &fci, null, frame_buffer));
+        try isSuccess(vk.createFramebuffer(device, &fci, null, framebuffer));
     }
 }
 
@@ -1239,15 +1260,48 @@ fn createCommandPool(
     return command_pool;
 }
 
+fn findBestSupportedFormat(
+    physical_device: vk.PhysicalDevice,
+    candidates: []const vk.Format,
+    tiling: vk.ImageTiling,
+    features: vk.FormatFeatureFlags,
+) !vk.Format {
+    for (candidates) |candidate| {
+        var props: vk.FormatProperties = undefined;
+        vk.getPhysicalDeviceFormatProperties(physical_device, candidate, &props);
+
+        if (tiling == .linear and (props.linear_tiling_features & features) == features) {
+            return candidate;
+        } else if (tiling == .optimal and (props.optimal_tiling_features & features) == features) {
+            return candidate;
+        }
+    }
+    return error.FailedToFindSupportedFormat;
+}
+
+fn findDepthFormat() !vk.Format {
+    return try findBestSupportedFormat(
+        &.{ .d32_sfloat, .d32_sfloat_s8_uint, .d24_unorm_s8_uint },
+        .optimal,
+        .depth_stencil_attachment_bit,
+    );
+}
+
+fn hasStencilComponent(format: vk.Format) bool {
+    return switch (format) {
+        .d32_sfloat_s8_uint, .d24_unorm_s8_uint => true,
+        else => false,
+    };
+}
+
 // should probably split this fn into multiple smaller fns
 fn createTextureImage(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
-    texture_image: *vk.Image,
-    texture_image_memory: *vk.DeviceMemory,
-) !void {
+) !DeviceImageData {
+    // TODO: swap from stbi to QOI format - faster + less memory used
     const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
 
     const info = zstbi.Image.info(filepath);
@@ -1256,26 +1310,32 @@ fn createTextureImage(
     const width, const height, const channels = .{ info.width, info.height, info.num_components };
     _ = channels;
 
-    var image = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
-    defer image.deinit();
+    var image_data = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
+    defer image_data.deinit();
     std.debug.print("Image Texture Data:\n", .{});
     std.debug.print("\tData Length: {}\n\tData Type: {s}\n\tWidth: {}\n\tHeight: {}\n\tChannels: {}\n\tBytes Per Component: {}\n\tBytes Per Row: {}\n\tIs HDR: {}\n", .{
-        image.data.len,
-        @typeName(@TypeOf(image.data)),
-        image.width,
-        image.height,
-        image.num_components,
-        image.bytes_per_component,
-        image.bytes_per_row,
-        image.is_hdr,
+        image_data.data.len,
+        @typeName(@TypeOf(image_data.data)),
+        image_data.width,
+        image_data.height,
+        image_data.num_components,
+        image_data.bytes_per_component,
+        image_data.bytes_per_row,
+        image_data.is_hdr,
     });
 
-    const size: vk.DeviceSize = width * height * 4; // set alpha values to 1 for now
+    // when writing data - rgba - all u8
+    const size: vk.DeviceSize = width * height * 4;
 
     const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
     defer vk.destroyBuffer(device, staging_buffer, null);
 
-    const staging_buffer_memory = try createBufferMemory(physical_device, device, staging_buffer, &.{ .host_visible_bit, .host_coherent_bit });
+    const staging_buffer_memory = try createBufferMemory(
+        physical_device,
+        device,
+        staging_buffer,
+        &.{ .host_visible_bit, .host_coherent_bit },
+    );
     defer vk.freeMemory(device, staging_buffer_memory, null);
 
     {
@@ -1283,12 +1343,13 @@ fn createTextureImage(
         try isSuccess(vk.mapMemory(device, staging_buffer_memory, 0, size, vk.MemoryMapFlags.initEmpty(), &data));
         defer vk.unmapMemory(device, staging_buffer_memory);
 
-        var image_data: [*]@TypeOf(image.data[0]) = @ptrCast(@alignCast(data));
-        @memcpy(image_data[0..image.data.len], @as([*]@TypeOf(image.data[0]), @ptrCast(image.data)));
-        @memset(image_data[image.data.len .. image.data.len + (width * height)], 0); // alpha
+        var image_copy: [*]u8 = @ptrCast(@alignCast(data)); // @TypeOf(image_data.data[0]);
+        @memcpy(image_copy[0..image_data.data.len], @as([*]@TypeOf(image_data.data[0]), @ptrCast(image_data.data)));
+        // alpha, idk if 0,1, or 255 - default to 255
+        @memset(image_copy[image_data.data.len .. image_data.data.len + (width * height)], 255);
     }
 
-    texture_image.* = try createImage(
+    const image = try createImage(
         device,
         width,
         height,
@@ -1298,10 +1359,10 @@ fn createTextureImage(
         &.{ .transfer_dst_bit, .sampled_bit },
     );
 
-    texture_image_memory.* = try createImageMemory(
+    const memory = try createImageMemory(
         physical_device,
         device,
-        texture_image.*,
+        image,
         &.{.device_local_bit},
     );
 
@@ -1309,7 +1370,7 @@ fn createTextureImage(
         device,
         graphics_queue,
         command_pool,
-        texture_image.*,
+        image,
         .r8g8b8a8_srgb,
         .undefined,
         .transfer_dst_optimal,
@@ -1320,7 +1381,7 @@ fn createTextureImage(
         graphics_queue,
         command_pool,
         staging_buffer,
-        texture_image.*,
+        image,
         width,
         height,
     );
@@ -1329,11 +1390,13 @@ fn createTextureImage(
         device,
         graphics_queue,
         command_pool,
-        texture_image.*,
+        image,
         .r8g8b8a8_srgb,
         .transfer_dst_optimal,
         .shader_read_only_optimal,
     );
+
+    return .{ .image = image, .memory = memory };
 }
 
 fn createTextureImageView(device: vk.Device, texture_image: vk.Image) !vk.ImageView {
@@ -1374,7 +1437,7 @@ fn createImageView(device: vk.Device, image: vk.Image, format: vk.Format) !vk.Im
         .subresource_range = .{
             .aspect_mask = vk.ImageAspectFlags.initEnum(.color_bit),
             .base_mip_level = 0,
-            .level_count = 0,
+            .level_count = 1,
             .base_array_layer = 0,
             .layer_count = 1,
         },
@@ -1419,11 +1482,11 @@ fn createImage(
 fn createImageMemory(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    texture_image: vk.Image,
+    image: vk.Image,
     props: []const vk.MemoryPropertyFlagbits,
 ) !vk.DeviceMemory {
     var mem_reqs: vk.MemoryRequirements = undefined;
-    vk.getImageMemoryRequirements(device, texture_image, &mem_reqs);
+    vk.getImageMemoryRequirements(device, image, &mem_reqs);
 
     const mai = vk.MemoryAllocateInfo{
         .allocation_size = mem_reqs.size,
@@ -1434,11 +1497,11 @@ fn createImageMemory(
         ),
     };
 
-    var texture_image_memory: vk.DeviceMemory = undefined;
-    try isSuccess(vk.allocateMemory(device, &mai, null, &texture_image_memory));
+    var memory: vk.DeviceMemory = undefined;
+    try isSuccess(vk.allocateMemory(device, &mai, null, &memory));
 
-    try isSuccess(vk.bindImageMemory(device, texture_image, texture_image_memory, 0));
-    return texture_image_memory;
+    try isSuccess(vk.bindImageMemory(device, image, memory, 0));
+    return memory;
 }
 
 fn transitionImageLayout(
@@ -1723,15 +1786,6 @@ fn createUniformBuffers(
     for (uniform_buffers, uniform_buffers_memory, uniform_buffers_mapped) |*ub, *ub_mem, *ub_map| {
         ub.* = try createBuffer(device, buffer_size, &.{.uniform_buffer_bit});
         ub_mem.* = try createBufferMemory(physical_device, device, ub.*, &.{ .host_visible_bit, .host_coherent_bit });
-        // try createBuffer(
-        //     physical_device,
-        //     device,
-        //     buffer_size,
-        //     vk.BufferUsageFlags.initEnum(.uniform_buffer_bit),
-        //     vk.MemoryPropertyFlags.initEnums(&.{ .host_visible_bit, .host_coherent_bit }),
-        //     ub,
-        //     ub_mem,
-        // );
 
         try isSuccess(vk.mapMemory(device, ub_mem.*, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), @ptrCast(ub_map)));
     }
@@ -2059,3 +2113,8 @@ fn updateUniformBuffer(self: *Self) void {
     var ubos_mapped: [*]UBO = @ptrCast(@alignCast(self.uniform_buffers_mapped[self.current_frame]));
     @memcpy(ubos_mapped[0..ubo.len], @as([*]UBO, @ptrCast(&ubo)));
 }
+
+const DeviceImageData = struct {
+    image: vk.Image,
+    memory: vk.DeviceMemory,
+};
