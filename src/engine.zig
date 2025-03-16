@@ -20,8 +20,13 @@ const builtin = @import("builtin");
 
 const zstbi = @import("zstbi");
 
+// Custom Structs
 const SSD = @import("SwapchainSupportDetails.zig");
 const QFI = @import("QueueFamilyIndices.zig");
+const UBO = @import("UniformBufferObject.zig");
+const ImageResources = @import("ImageResources.zig");
+const Buffer = @import("Buffer.zig");
+const BufferMap = @import("BufferMap.zig");
 const Stopwatch = @import("Stopwatch.zig");
 
 // libraries
@@ -71,9 +76,6 @@ const FPS = enum {
     one_fourty_four,
 };
 
-// UBOs
-const UBO = @import("UniformBufferObject.zig");
-
 // App Data
 const MAX_FRAMES_IN_FLIGHT: i32 = 2;
 
@@ -122,9 +124,11 @@ vertex_buffer_memory: vk.DeviceMemory,
 index_buffer: vk.Buffer,
 index_buffer_memory: vk.DeviceMemory,
 
-uniform_buffers: []vk.Buffer,
-uniform_buffers_memory: []vk.DeviceMemory,
-uniform_buffers_mapped: []?*anyopaque, // do i really need this field? it's never used again - save the memory on the cpu
+// stoore in a multiarraylist or something
+uniform_buffers: []BufferMap,
+// uniform_buffers: []vk.Buffer,
+// uniform_buffers_memory: []vk.DeviceMemory,
+// uniform_buffers_mapped: []?*anyopaque,
 
 descriptor_pool: vk.DescriptorPool,
 descriptor_sets: []vk.DescriptorSet,
@@ -141,12 +145,7 @@ fps: FPS = .sixty,
 time: Stopwatch,
 
 // public functions
-pub fn init(
-    allo: Allocator,
-    app_name: [*:0]const u8,
-    width: i32,
-    height: i32,
-) !Self {
+pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
 
     // init sdl - low level interface w/ different systems
     errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
@@ -157,16 +156,7 @@ pub fn init(
     zstbi.init(allo);
 
     // vulkan compatiable + resizable
-    const window: *sdl.SDL_Window = sdl.SDL_CreateWindow(
-        app_name,
-        width,
-        height,
-        sdl.SDL_WINDOW_VULKAN | sdl.SDL_WINDOW_RESIZABLE,
-    ) orelse {
-        std.debug.print("Failed to create window:{s}\n", .{sdl.SDL_GetError()});
-        return error.FailedToCreateWindow;
-    };
-
+    const window = createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
     const instance = try createInstance(allo);
     const surface = try createSurface(window, &instance);
     const physical_device: vk.PhysicalDevice = try pickPhysicalDevice(instance, surface);
@@ -180,8 +170,8 @@ pub fn init(
     if (is_debug_mode) std.debug.print("# of Formats: {}\n", .{ssd.formats.len});
     if (is_debug_mode) std.debug.print("# of Present Modes: {}\n", .{ssd.present_modes.len});
 
-    const swapchain = try createSwapchain(allo, surface, physical_device, device, width, height);
-    const swapchain_extent = ssd.chooseSwapExtent(width, height);
+    const swapchain = try createSwapchain(allo, surface, physical_device, device, initial_extent);
+    const swapchain_extent = ssd.chooseSwapExtent(initial_extent);
     const swapchain_format = ssd.chooseSwapSurfaceFormat();
 
     var n_images = try getNumberOfSwapchainImages(device, swapchain);
@@ -200,35 +190,24 @@ pub fn init(
 
     const command_pool = try createCommandPool(surface, physical_device, device);
 
-    const depth_format = try findDepthFormat();
-    const depth_image = try createImage(device, swapchain_extent.width, swapchain_extent.height, depth_format, .optimal, .depth_stencil_attachment_bit, .local_bit);
-    const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.local_bit});
-    const depth_image_view = try createImageView(device, depth_image, depth_format, .depth_bit);
+    const depth_format, const depth_image, const depth_image_memory, const depth_image_view = try createDepthResources(
+        physical_device,
+        device,
+        swapchain_extent,
+    );
 
-    // split up create texture image to just straight up calls here instead
-    // var texture_image: vk.Image = undefined;
-    // var texture_image_memory: vk.DeviceMemory = undefined;
-    // should return a struct that destructures into image and memory
-    // below might not work, use blk syntax in that scenario
-    // If below isn't what I want - split fn up into separate parts here
-    const texture_image, const texture_image_memory = try createTextureImage(
+    const texture_image, const texture_image_memory, const texture_image_view, const texture_sampler = createTextureResources(
         physical_device,
         device,
         graphics_queue,
         command_pool,
     );
-    const texture_image_view = try createTextureImageView(device, texture_image);
-    const texture_sampler = try createTextureSampler(physical_device, device);
     if (is_debug_mode) std.debug.print("Textures Complete\n", .{});
 
     // should split up
-    var vertex_buffer: vk.Buffer = undefined;
-    var vertex_buffer_memory: vk.DeviceMemory = undefined;
-    try createVertexBuffer(
+    const vertex_buffer, const vertex_buffer_memory = try createVertexBuffer(
         physical_device,
         device,
-        &vertex_buffer,
-        &vertex_buffer_memory,
         command_pool,
         graphics_queue,
         // &triangle_vertices,
@@ -237,13 +216,9 @@ pub fn init(
     if (is_debug_mode) std.debug.print("Vertex Complete\n", .{});
 
     // should split up
-    var index_buffer: vk.Buffer = undefined;
-    var index_buffer_memory: vk.DeviceMemory = undefined;
-    try createIndexBuffer(
+    const index_buffer, const index_buffer_memory = try createIndexBuffer(
         physical_device,
         device,
-        &index_buffer,
-        &index_buffer_memory,
         command_pool,
         graphics_queue,
         // &triangle_indices, // makes no sense since only 1 triangle
@@ -252,16 +227,10 @@ pub fn init(
     if (is_debug_mode) std.debug.print("Index Complete\n", .{});
 
     // should split up
-    const uniform_buffers = try allo.alloc(vk.Buffer, MAX_FRAMES_IN_FLIGHT);
-    const uniform_buffers_memory = try allo.alloc(vk.DeviceMemory, MAX_FRAMES_IN_FLIGHT);
-    const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
-    try createUniformBuffers(
-        physical_device,
-        device,
-        uniform_buffers,
-        uniform_buffers_memory,
-        uniform_buffers_mapped,
-    );
+    // const uniform_buffers = try allo.alloc(vk.Buffer, MAX_FRAMES_IN_FLIGHT);
+    // const uniform_buffers_memory = try allo.alloc(vk.DeviceMemory, MAX_FRAMES_IN_FLIGHT);
+    // const uniform_buffers_mapped = try allo.alloc(?*anyopaque, MAX_FRAMES_IN_FLIGHT);
+    const uniform_buffers = try createUniformBuffers(allo, physical_device, device);
     if (is_debug_mode) std.debug.print("Uniform Buffers Complete\n", .{});
 
     const descriptor_pool = try createDescriptorPool(device);
@@ -490,6 +459,24 @@ fn initSDL() void {
     sdl.SDL_SetMainReady();
     _ = sdl.SDL_SetAppMetadata("No Way", "0.0.0", "this may work!");
     _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
+}
+
+fn createWindow(app_name: [*:0]const u8, extent: vk.Extent2D, flags: []const sdl.SDL_WindowFlags) !*sdl.Window {
+    var combo: u64 = 0;
+    for (flags) |flag| {
+        combo |= flag;
+    }
+
+    return sdl.SDL_CreateWindow(
+        app_name,
+        @intCast(extent.width),
+        @intCast(extent.height),
+        combo,
+        // sdl.SDL_WINDOW_VULKAN | sdl.SDL_WINDOW_RESIZABLE,
+    ) orelse {
+        std.debug.print("Failed to create window:{s}\n", .{sdl.SDL_GetError()});
+        return error.FailedToCreateWindow;
+    };
 }
 
 fn createInstance(allo: std.mem.Allocator) !vk.Instance {
@@ -823,15 +810,14 @@ fn createSwapchain(
     surface: vk.SurfaceKHR,
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    width: i32,
-    height: i32,
+    initial_extent: vk.Extent2D,
 ) !vk.SwapchainKHR {
     var ssd = try SSD.init(allo, surface, physical_device);
     defer ssd.deinit(allo);
 
     const format = ssd.chooseSwapSurfaceFormat();
     const present_mode = ssd.chooseSwapPresentMode();
-    const extent = ssd.chooseSwapExtent(width, height);
+    const extent = ssd.chooseSwapExtent(initial_extent);
     // if (is_debug_mode) std.debug.print("Extent: {any}\n", .{extent});
 
     const min = ssd.capabilities.min_image_count + 1;
@@ -903,6 +889,9 @@ fn recreateSwapchain(self: *Self) !void {
         .width = @intCast(width),
         .height = @intCast(height),
     };
+    // TODO: recreate depth resources
+    try createDepthResources();
+
     try createFramebuffers(
         self.device,
         self.swapchain_extent,
@@ -1004,7 +993,7 @@ fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
         },
         .{ // depth
             .format = findDepthFormat(),
-            .samples = .@"1_bit",
+            .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
             .load_op = .clear,
             .store_op = .dont_care,
             .stencil_load_op = .dont_care,
@@ -1307,13 +1296,70 @@ fn hasStencilComponent(format: vk.Format) bool {
     };
 }
 
-// should probably split this fn into multiple smaller fns
+const DepthResources = struct {
+    format: vk.Format,
+    image_resources: ImageResources,
+    view: vk.ImageView,
+};
+
+fn createDepthResources(
+    physical_device: vk.PhysicalDevice,
+    device: vk.Device,
+    swapchain_extent: vk.Extent2D,
+) !DepthResources {
+    const depth_format = findDepthFormat();
+    const depth_image = try createImage(swapchain_extent.width, swapchain_extent.height, depth_format, .optimal, .attachment_bit);
+    const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.local_bit});
+    const depth_image_view = try createImageView(device, depth_image, depth_format, .depth_bit);
+    return .{
+        .format = depth_format,
+        .image = depth_image,
+        .memory = depth_image_memory,
+        .view = depth_image_view,
+    };
+}
+
+const TextureResources = struct {
+    image_resources: ImageResources,
+    view: vk.ImageView,
+    sampler: vk.Sampler,
+};
+
+fn createTextureResources(
+    physical_device: vk.PhysicalDevice,
+    device: vk.Device,
+    graphics_queue: vk.Queue,
+    command_pool: vk.CommandPool,
+) !TextureResources {
+    const texture_image, const texture_image_memory = try createTextureImage(
+        physical_device,
+        device,
+        graphics_queue,
+        command_pool,
+    );
+    const texture_image_view = try createTextureImageView(device, texture_image);
+    const texture_sampler = try createTextureSampler(physical_device, device);
+    return .{
+        .image_resources = .{
+            .image = texture_image,
+            .memory = texture_image_memory,
+        },
+        .view = texture_image_view,
+        .sampler = texture_sampler,
+    };
+}
+
+const TextureData = struct {
+    image: vk.Image,
+    memory: vk.DeviceMemory,
+};
+
 fn createTextureImage(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
-) !DeviceImageData {
+) !TextureData {
     // TODO: swap from stbi to QOI format - faster + less memory used
     const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
 
@@ -1661,12 +1707,10 @@ fn endSingleTimeCommands(
 fn createVertexBuffer(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    vertex_buffer: *vk.Buffer,
-    vertex_buffer_memory: *vk.DeviceMemory,
     pool: vk.CommandPool,
     graphics_queue: vk.Queue,
     vertices: []const Vertex,
-) !void {
+) !Buffer {
     const size: vk.DeviceSize = @sizeOf(Vertex) * vertices.len;
 
     const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
@@ -1684,10 +1728,15 @@ fn createVertexBuffer(
         @memcpy(gpu_vertices[0..vertices.len], vertices);
     }
 
-    vertex_buffer.* = try createBuffer(device, size, &.{ .transfer_dst_bit, .vertex_buffer_bit });
-    vertex_buffer_memory.* = try createBufferMemory(physical_device, device, vertex_buffer.*, &.{.device_local_bit});
+    const buffer = try createBuffer(device, size, &.{ .transfer_dst_bit, .vertex_buffer_bit });
+    const memory = try createBufferMemory(physical_device, device, buffer, &.{.device_local_bit});
 
-    try copyBuffer(device, staging_buffer, vertex_buffer.*, size, pool, graphics_queue);
+    try copyBuffer(device, staging_buffer, buffer, size, pool, graphics_queue);
+
+    return .{
+        .buffer = buffer,
+        .memory = memory,
+    };
 }
 
 fn createBuffer(device: vk.Device, size: vk.DeviceSize, usage: []const vk.BufferUsageFlagbits) !vk.Buffer {
@@ -1764,12 +1813,10 @@ fn findMemoryType(
 fn createIndexBuffer(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    index_buffer: *vk.Buffer,
-    index_buffer_memory: *vk.DeviceMemory,
     pool: vk.CommandPool,
     graphics_queue: vk.Queue,
     indices: []const u16,
-) !void {
+) !Buffer {
     const size: vk.DeviceSize = @sizeOf(@TypeOf(indices[0])) * indices.len;
 
     const staging_buffer = try createBuffer(device, size, &.{.transfer_src_bit});
@@ -1787,27 +1834,44 @@ fn createIndexBuffer(
         @memcpy(gpu_indices[0..indices.len], indices);
     }
 
-    index_buffer.* = try createBuffer(device, size, &.{ .transfer_dst_bit, .index_buffer_bit });
-    index_buffer_memory.* = try createBufferMemory(physical_device, device, index_buffer.*, &.{.device_local_bit});
+    const buffer = try createBuffer(device, size, &.{ .transfer_dst_bit, .index_buffer_bit });
+    const memory = try createBufferMemory(physical_device, device, buffer, &.{.device_local_bit});
 
-    try copyBuffer(device, staging_buffer, index_buffer.*, size, pool, graphics_queue);
+    try copyBuffer(device, staging_buffer, buffer, size, pool, graphics_queue);
+
+    return .{
+        .buffer = buffer,
+        .memory = memory,
+    };
 }
 
 fn createUniformBuffers(
+    allo: Allocator,
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
-    uniform_buffers: []vk.Buffer,
-    uniform_buffers_memory: []vk.DeviceMemory,
-    uniform_buffers_mapped: []?*anyopaque,
-) !void {
+    // uniform_buffers: []vk.Buffer,
+    // uniform_buffers_memory: []vk.DeviceMemory,
+    // uniform_buffers_mapped: []?*anyopaque,
+) ![]BufferMap {
     const buffer_size: vk.DeviceSize = @sizeOf(UBO);
+    const ubs = try allo.alloc(BufferMap, 3);
 
-    for (uniform_buffers, uniform_buffers_memory, uniform_buffers_mapped) |*ub, *ub_mem, *ub_map| {
-        ub.* = try createBuffer(device, buffer_size, &.{.uniform_buffer_bit});
-        ub_mem.* = try createBufferMemory(physical_device, device, ub.*, &.{ .host_visible_bit, .host_coherent_bit });
+    for (ubs) |*ub| {
+        ub.buffer.buffer = try createBuffer(
+            device,
+            buffer_size,
+            &.{.uniform_buffer_bit},
+        );
+        ub.buffer.memory = try createBufferMemory(
+            physical_device,
+            device,
+            ub.buffer.buffer,
+            &.{ .host_visible_bit, .host_coherent_bit },
+        );
 
-        try isSuccess(vk.mapMemory(device, ub_mem.*, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), @ptrCast(ub_map)));
+        try isSuccess(vk.mapMemory(device, ub.buffer.memory, 0, buffer_size, vk.MemoryMapFlags.initEmpty(), @ptrCast(ub.map)));
     }
+    return ubs;
 }
 
 fn createDescriptorPool(device: vk.Device) !vk.DescriptorPool {
@@ -2132,8 +2196,3 @@ fn updateUniformBuffer(self: *Self) void {
     var ubos_mapped: [*]UBO = @ptrCast(@alignCast(self.uniform_buffers_mapped[self.current_frame]));
     @memcpy(ubos_mapped[0..ubo.len], @as([*]UBO, @ptrCast(&ubo)));
 }
-
-const DeviceImageData = struct {
-    image: vk.Image,
-    memory: vk.DeviceMemory,
-};

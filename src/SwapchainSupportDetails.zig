@@ -94,18 +94,15 @@ pub fn chooseSwapPresentMode(self: *const Self) vk.PresentModeKHR {
 
 pub fn chooseSwapExtent(
     self: *const Self,
-    width: i32,
-    height: i32,
+    extent: vk.Extent2D,
 ) vk.Extent2D {
     const caps = self.capabilities;
     if (caps.current_extent.width != std.math.maxInt(u32)) {
         return caps.current_extent;
     }
 
-    const w: u32 = @max(@as(u32, @intCast(width)), 0);
-    const h: u32 = @max(@as(u32, @intCast(height)), 0);
-    return vk.Extent2D{
-        .width = std.math.clamp(w, caps.min_image_extent.width, caps.max_image_extent.width),
-        .height = std.math.clamp(h, caps.min_image_extent.height, caps.max_image_extent.height),
+    return .{
+        .width = std.math.clamp(extent.width, caps.min_image_extent.width, caps.max_image_extent.width),
+        .height = std.math.clamp(extent.height, caps.min_image_extent.height, caps.max_image_extent.height),
     };
 }
