@@ -10922,20 +10922,22 @@ pub const PhysicalDeviceRelaxedLineRasterizationFeaturesIMG = extern struct {
 };
 pub const DebugUtilsMessengerEXT = enum(u64) { null = 0, _ };
 pub const DebugUtilsMessengerCallbackDataFlagsEXT = Flags;
-pub const DebugUtilsMessageSeverityFlagsEXT = enum(u32) {
+pub const DebugUtilsMessageSeverityFlagbitsEXT = enum(u32) {
     null = 0,
     verbose_bit_ext = 1,
     info_bit_ext = 16,
     warning_bit_ext = 256,
     error_bit_ext = 4096,
 };
-pub const DebugUtilsMessageTypeFlagsEXT = enum(u32) {
+pub const DebugUtilsMessageSeverityFlagsEXT = EnumPackedStruct(DebugUtilsMessageSeverityFlagbitsEXT);
+pub const DebugUtilsMessageTypeFlagbitsEXT = enum(u32) {
     null = 0,
     general_bit_ext = 1,
     validation_bit_ext = 2,
     performance_bit_ext = 4,
     device_address_binding_bit_ext = 8,
 };
+pub const DebugUtilsMessageTypeFlagsEXT = EnumPackedStruct(DebugUtilsMessageTypeFlagbitsEXT);
 pub const DebugUtilsMessengerCreateFlagsEXT = Flags;
 pub const DebugUtilsLabelEXT = extern struct {
     s_type: StructureType = StructureType.debug_utils_label_ext,

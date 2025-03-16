@@ -1,16 +1,12 @@
 // TODO:
-// 1. need to implement both the draw and draw indexed functions (only indexed right now) - call correct one based on data
-// 2. need to separate engine and app into separate files = separation of concerns + orderliness
-// 3. need to fix loading primitives to make passing data easier
-// 4. need to swap from 2d to 3d mode
+// 1. Implement all the different draw calls - data-drive which version to use
+// 2. Separate engine vs impl - have an initVulkan/initDirectX/initMetal calls
+// 3. Separate engine vs app logic
+// 4. Use QOI, QOA, and QOD to load images/audio/data model files easier
 // 5. poll 1x every frame = check frame rate
 //      - need to create a fn that takes in other fns and runs them based on the time left - only need to check elapsed time as an argument for that function
-// 6. Need a way to abstract uniform buffer calls from specific impl in init - like side functions that call those functions
-//  - store UBO in another file
-// 7. Need to update the slices
-// 8. Convert a lot of syscalls to all into arrays
-// 9. Need to automate the way models interact with shader - include 2d or 3d connections
-// 10. implement vericidium's optimizations
+// 6. ShaderText = handles interactions b/w model and shader, handles 2d vs 3d edges cases
+// 7. implement vericidium's optimizations
 
 const std = @import("std");
 const Allocator = std.mem.Allocator;
@@ -49,6 +45,38 @@ const sdl = @cImport({
     @cInclude("SDL3/SDL_main.h");
 });
 
+const validation_layers = [_][*:0]const u8{
+    "VK_LAYER_KHRONOS_validation",
+};
+
+// set to false for now
+const enable_validation_layers = is_debug_mode and false;
+
+fn createDebugUtilsMessengerEXT(
+    instance: vk.Instance,
+    p_create_info: *const vk.DebugUtilsMessengerCreateInfoEXT,
+    p_allocator: *const vk.AllocationCallbacks,
+    p_debug_messenger: vk.DebugUtilsMessengerEXT,
+) vk.Result {
+    const maybe_func = vk.getInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    if (maybe_func) |func| {
+        return func(instance, p_create_info, p_allocator, p_debug_messenger);
+    } else {
+        return error.ValidationExtensionNotPresent;
+    }
+}
+
+fn destroyDebugUtilsMessengerEXT(
+    instance: vk.Instance,
+    debug_messenger: vk.DebugUtilsMessengerEXT,
+    p_allocator: *const vk.AllocationCallbacks,
+) void {
+    const maybe_func = vk.getInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    if (maybe_func) |func| {
+        func(instance, debug_messenger, p_allocator);
+    }
+}
+
 // Extensions
 const required_device_extensions = [_][*:0]const u8{
     vk.ExtensionNames.swapchain,
@@ -64,7 +92,7 @@ const vert_spv align(@alignOf(u32)) = @embedFile("vertex_shader").*;
 const frag_spv align(@alignOf(u32)) = @embedFile("fragment_shader").*;
 
 // Model Info
-const Vertex = @import("models/vertex.zig");
+const Vertex = @import("models/Vertex3D.zig");
 const square_indices = @import("models/square_3d.zig").indices; // @import("models/square_2d.zig").indices;
 const square_vertices = @import("models/square_3d.zig").vertices; // @import("models/square_2d.zig").vertices;
 
@@ -86,9 +114,10 @@ allo: Allocator,
 window: *sdl.SDL_Window,
 
 instance: vk.Instance,
+debug_messenger: vk.DebugUtilsMessengerEXT,
 surface: vk.SurfaceKHR,
 
-physical_device: vk.PhysicalDevice,
+physical_device: vk.PhysicalDevice = .null,
 device: vk.Device,
 
 graphics_queue: vk.Queue,
@@ -103,15 +132,14 @@ swapchain_framebuffers: []vk.Framebuffer,
 
 render_pass: vk.RenderPass,
 descriptor_set_layout: vk.DescriptorSetLayout,
-pipeline_layout: vk.PipelineLayout,
-pipeline: vk.Pipeline,
+graphics_pipeline_layout: vk.PipelineLayout,
+graphics_pipeline: vk.Pipeline,
 
 command_pool: vk.CommandPool,
 
 depth_image: vk.Image,
 depth_image_memory: vk.DeviceMemory,
 depth_image_view: vk.ImageView,
-depth_format: vk.Format,
 
 texture_image: vk.Image,
 texture_image_memory: vk.DeviceMemory,
@@ -124,11 +152,9 @@ vertex_buffer_memory: vk.DeviceMemory,
 index_buffer: vk.Buffer,
 index_buffer_memory: vk.DeviceMemory,
 
-// stoore in a multiarraylist or something
-uniform_buffers: []BufferMap,
-// uniform_buffers: []vk.Buffer,
-// uniform_buffers_memory: []vk.DeviceMemory,
-// uniform_buffers_mapped: []?*anyopaque,
+uniform_buffers: []vk.Buffer,
+uniform_buffers_memory: []vk.DeviceMemory,
+uniform_buffers_mapped: []?*anyopaque,
 
 descriptor_pool: vk.DescriptorPool,
 descriptor_sets: []vk.DescriptorSet,
@@ -141,7 +167,6 @@ in_flight_fences: []vk.Fence,
 
 current_frame: u32 = 0,
 resize: bool = false,
-fps: FPS = .sixty,
 time: Stopwatch,
 
 // public functions
@@ -158,6 +183,8 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     // vulkan compatiable + resizable
     const window = createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
     const instance = try createInstance(allo);
+    const debug_messenger = try createDebugMessenger(instance);
+
     const surface = try createSurface(window, &instance);
     const physical_device: vk.PhysicalDevice = try pickPhysicalDevice(instance, surface);
     const device = try createLogicalDevice(surface, physical_device);
@@ -259,6 +286,7 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
 
         .window = window,
         .instance = instance,
+        .debug_messenger = debug_messenger,
         .surface = surface,
         .physical_device = physical_device,
         .device = device,
@@ -296,9 +324,10 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
         .index_buffer = index_buffer,
         .index_buffer_memory = index_buffer_memory,
 
-        .uniform_buffers = uniform_buffers,
-        .uniform_buffers_memory = uniform_buffers_memory,
-        .uniform_buffers_mapped = uniform_buffers_mapped,
+        .uniform_buffers = BufferMap,
+        // .uniform_buffers = uniform_buffers,
+        // .uniform_buffers_memory = uniform_buffers_memory,
+        // .uniform_buffers_mapped = uniform_buffers_mapped,
 
         .descriptor_pool = descriptor_pool,
         .descriptor_sets = descriptor_sets,
@@ -314,21 +343,26 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
 }
 
 pub fn deinit(self: *Self) void {
-    defer { // Cleanup vulkan instance/window/surface/quit sdl
+    defer { // Vulkan instance/window/surface/quit sdl
         vk.destroyDevice(self.device, null);
+
+        if (enable_validation_layers) destroyDebugUtilsMessengerEXT(self.instance, self.debug_messenger, null);
+
         sdl.SDL_Vulkan_DestroySurface(@ptrCast(&self.instance), @ptrCast(&self.surface), null); // sdl
         vk.destroyInstance(self.instance, null);
+
         sdl.SDL_DestroyWindow(self.window);
         zstbi.deinit();
+
         sdl.SDL_Quit();
     }
 
-    defer { // Cleanup command pool/buffers
+    defer { // Command pool/buffers
         vk.destroyCommandPool(self.device, self.command_pool, null);
         self.allo.free(self.command_buffers);
     }
 
-    defer { // Cleanup sync objects
+    defer { // Sync objects
         for (0..MAX_FRAMES_IN_FLIGHT) |i| {
             vk.destroySemaphore(self.device, self.image_available_semaphores[i], null);
             vk.destroySemaphore(self.device, self.render_finished_semaphores[i], null);
@@ -339,21 +373,18 @@ pub fn deinit(self: *Self) void {
         self.allo.free(self.render_finished_semaphores);
     }
 
-    defer { // Cleanup vertex buffers
+    defer { // Vertex buffers
         vk.freeMemory(self.device, self.vertex_buffer_memory, null);
         vk.destroyBuffer(self.device, self.vertex_buffer, null);
     }
 
-    defer { // Cleanup index buffers
+    defer { // Index buffers
         vk.destroyBuffer(self.device, self.index_buffer, null);
         vk.freeMemory(self.device, self.index_buffer_memory, null);
     }
 
-    defer { // Cleanup layout/renderpass/pipeline/pipeline specific descriptor set layout
+    defer { // DescriptorSetLayout
         vk.destroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
-        vk.destroyPipelineLayout(self.device, self.pipeline_layout, null);
-        vk.destroyRenderPass(self.device, self.render_pass, null);
-        vk.destroyPipeline(self.device, self.pipeline, null);
     }
 
     defer { // Texture Data
@@ -363,13 +394,16 @@ pub fn deinit(self: *Self) void {
         vk.freeMemory(self.device, self.texture_image_memory, null);
     }
 
-    defer { // Cleanup descriptor sets/layouts/pool - used with UBO
+    defer { // Descriptor sets/layouts/pool - used with UBO
         vk.destroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
         self.allo.free(self.descriptor_sets);
     }
 
-    defer { // Cleanup uniform buffers
-        for (self.uniform_buffers, self.uniform_buffers_memory) |ub, ub_mem| {
+    defer { // Uniform buffers
+        for (
+            self.uniform_buffers,
+            self.uniform_buffers_memory,
+        ) |ub, ub_mem| {
             vk.destroyBuffer(self.device, ub, null);
             vk.freeMemory(self.device, ub_mem, null);
         }
@@ -378,7 +412,13 @@ pub fn deinit(self: *Self) void {
         self.allo.free(self.uniform_buffers_memory);
     }
 
-    defer { // Cleanup swapchain data
+    defer { // Pipeline, PipelineLayout, Renderpass
+        vk.destroyPipeline(self.device, self.graphics_pipeline, null);
+        vk.destroyPipelineLayout(self.device, self.graphics_pipeline_layout, null);
+        vk.destroyRenderPass(self.device, self.render_pass, null);
+    }
+
+    defer { // swapchain data
         self.cleanupSwapchain();
         self.allo.free(self.swapchain_images);
         self.allo.free(self.swapchain_image_views);
@@ -422,8 +462,6 @@ pub fn mainLoop(self: *Self) !void {
             try self.recreateSwapchain();
         }
 
-        // only draw at 60 fps
-        // not ideal - should set up a poll like above or keep track of previous posiitons and smoothly interpolate b/w them
         if (self.time.elapsed() > (std.time.ns_per_ms * 1_000)) {
             try self.drawFrame();
             self.time.reset();
@@ -433,7 +471,6 @@ pub fn mainLoop(self: *Self) !void {
     }
 }
 
-// private functions
 fn getSDLVersion() void {
     // catch sdl version for build/release
     if (is_debug_mode) {
@@ -480,13 +517,15 @@ fn createWindow(app_name: [*:0]const u8, extent: vk.Extent2D, flags: []const sdl
 }
 
 fn createInstance(allo: std.mem.Allocator) !vk.Instance {
+    if (enable_validation_layers and !checkValidationLayerSupport()) return error.ValiddationLayersRequestedButUnavailable;
+
     const ai = vk.ApplicationInfo{
         .p_next = null,
         .p_application_name = "Mauhlt",
         .application_version = vk.makeApiVersion(0, 1, 0, 0),
         .p_engine_name = "ThunderingHerd",
         .engine_version = vk.makeApiVersion(0, 1, 0, 0),
-        .api_version = vk.API_VERSION_1_0, // up to 1.4 - need to use asserts on fns/data that are different version
+        .api_version = vk.API_VERSION_1_4, // up to 1.4 - need to use asserts on fns/data that are different version
     };
 
     var n_req_exts: u32 = 0;
@@ -536,12 +575,14 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
 
     if (is_debug_mode) printChosenInstanceExtensions(instance_extensions.items);
 
+    var debug_create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
+
     const ici = vk.InstanceCreateInfo{
-        .p_next = null,
+        .p_next = if (enable_validation_layers) @as(*vk.DebugUtilsMessengerCreateInfoEXT, @ptrCast(&debug_create_info)) else null,
         .flags = vk.InstanceCreateFlags.initEmpty(),
         .p_application_info = &ai,
-        .enabled_layer_count = 0,
-        .pp_enabled_layer_names = null,
+        .enabled_layer_count = if (enable_validation_layers) @truncate(validation_layers.len) else 0,
+        .pp_enabled_layer_names = if (enable_validation_layers) @ptrCast(&validation_layers) else null,
         .enabled_extension_count = @truncate(instance_extensions.items.len),
         .pp_enabled_extension_names = instance_extensions.items.ptr,
     };
@@ -549,6 +590,34 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
     var instance: vk.Instance = undefined;
     try vk.isSuccess(vk.createInstance(&ici, null, &instance));
     return instance;
+}
+
+fn populateDebugMessengerCreateInfo(
+    create_info: *vk.DebugUtilsMessengerCreateInfoEXT,
+    debug_callback: vk.DebugUtilsMessengerEXT,
+) void {
+    create_info.s_type = vk.StructureType.debug_utils_messenger_create_info_ext;
+    create_info.message_severity = vk.DebugUtilsMessageSeverityFlagsEXT.initEnums(&.{
+        .error_bit_ext,
+        .warning_bit_ext,
+        .verbose_bit_ext,
+    });
+    create_info.message_type = vk.DebugUtilsMessageTypeFlagsEXT.initEnums(&.{
+        .performance_bit_ext,
+        .validation_bit_ext,
+        .general_bit_ext,
+    });
+    create_info.pfn_user_callback = debug_callback;
+}
+
+fn createDebugMessenger(instance: vk.Instance) !vk.DebugUtilsMessengerEXT {
+    if (!enable_validation_layers) return;
+    var create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
+    populateDebugMessengerCreateInfo(&create_info);
+
+    var debug_messenger: vk.DebugUtilsMessengerEXT = undefined;
+    try isSuccess(vk.createDebugUtilsMessengerEXT(instance, &create_info, null, &debug_messenger));
+    return debug_messenger;
 }
 
 fn createSurface(window: *sdl.SDL_Window, instance: *const vk.Instance) !vk.SurfaceKHR {
@@ -860,7 +929,7 @@ fn createSwapchain(
 }
 
 fn recreateSwapchain(self: *Self) !void {
-    // set window resize flag to false
+    // reset resize flag
     self.resize = false;
 
     // resize window -> wait for size to become non zero -> cleanup engine
@@ -883,13 +952,14 @@ fn recreateSwapchain(self: *Self) !void {
     self.swapchain = try createSwapchain(self.allo, self.surface, self.physical_device, self.device, width, height);
     // WARNING: will break if n_images changes after new swapchain created
     var n_images: u32 = @truncate(self.swapchain_images.len);
-    try getSwapchainImages(self.device, self.swapchain, &n_images, self.swapchain_images); // do i need to reobtain the images?
+    try getSwapchainImages(self.device, self.swapchain, &n_images, self.swapchain_images);
+
     try createImageViews(self.device, self.swapchain_images, self.swapchain_format, self.swapchain_image_views);
     self.swapchain_extent = vk.Extent2D{
         .width = @intCast(width),
         .height = @intCast(height),
     };
-    // TODO: recreate depth resources
+
     try createDepthResources();
 
     try createFramebuffers(
@@ -903,17 +973,22 @@ fn recreateSwapchain(self: *Self) !void {
 
 fn cleanupSwapchain(self: *Self) void {
     {
-        defer vk.destroy(self.device, self.depth_image_memory, null);
-        defer vk.destroyImage(self.device, null);
         defer vk.destroyImageView(self.device, self.depth_image_view, null);
+        defer vk.destroyImage(self.device, null);
+        defer vk.freeMemory(self.device, self.depth_image_memory, null);
     }
 
-    defer vk.destroySwapchainKHR(self.device, self.swapchain, null);
-    for (self.swapchain_framebuffers, self.swapchain_image_views, self.swapchain_images) |framebuffer, view, image| {
-        defer vk.destroyImageView(self.device, view, null);
+    for (
+        self.swapchain_framebuffers,
+        self.swapchain_image_views,
+        self.swapchain_images,
+    ) |framebuffer, view, image| {
         defer vk.destroyFramebuffer(self.device, framebuffer, null);
+        defer vk.destroyImageView(self.device, view, null);
         defer vk.destroyImage(self.device, image, null);
     }
+
+    vk.destroySwapchainKHR(self.device, self.swapchain, null);
 }
 
 fn getNumberOfSwapchainImages(
@@ -2195,4 +2270,45 @@ fn updateUniformBuffer(self: *Self) void {
 
     var ubos_mapped: [*]UBO = @ptrCast(@alignCast(self.uniform_buffers_mapped[self.current_frame]));
     @memcpy(ubos_mapped[0..ubo.len], @as([*]UBO, @ptrCast(&ubo)));
+}
+
+fn debugCallback(
+    message_severity: vk.DebugUtilsMessageSeverityFlagBitsEXT,
+    message_type: vk.DebugUtilsMessageTypeFlagsEXT,
+    p_callback_data: *const vk.DebugUtilsMessengerCallbackDataEXT,
+    p_user_data: ?*anyopaque,
+) vk.Bool32 {
+    _ = message_severity;
+    _ = message_type;
+    _ = p_user_data;
+    std.log.err("Validation Layer: {s}", .{p_callback_data.p_message});
+    return .false;
+}
+
+fn checkValidationLayerSupport() !bool {
+    var n_layers: u32 = 0;
+    try isSuccess(vk.enumerateInstanceLayerProperties(&n_layers, null));
+
+    const available_layers: [64]vk.LayerProperties = undefined;
+    try isSuccess(vk.enumerateInstanceLayerProperties(&n_layers, &available_layers));
+
+    for (validation_layers) |layer_name| {
+        const ln = std.mem.span(layer_name);
+        var layer_found: bool = false;
+
+        for (available_layers) |available_layer| {
+            const len = std.mem.indexOf(u8, available_layer.layer_name, 0).?;
+            const name = available_layer.layer_name[0..len];
+            if (std.mem.eql(u8, name, ln)) {
+                layer_found = true;
+                break;
+            }
+        }
+
+        if (!layer_found) {
+            std.debug.print("Failed to find {s}\n", .{});
+        }
+    }
+
+    return true;
 }

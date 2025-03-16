@@ -1,4 +1,4 @@
-const Vertex = @import("./Vertex.zig");
+const Vertex = @import("./Vertex3D.zig");
 
 // should apply qoi to compress this data as well
 // or use lz77 compression

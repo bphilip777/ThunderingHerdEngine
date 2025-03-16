@@ -1,5 +1,6 @@
 #version 460
 
+// replace with quats = less data + fewer calcs
 layout(binding = 0) uniform UniformBufferObject {
   mat4 model;
   mat4 view;

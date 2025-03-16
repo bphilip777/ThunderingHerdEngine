@@ -1,4 +1,4 @@
-const Vertex = @import("./Vertex.zig");
+const Vertex = @import("./Vertex2D.zig");
 
 pub const vertices = [_]Vertex{
     .{ .pos = .{ -0.5, -0.5 }, .color = .{ 1.0, 0.0, 0.0 }, .tex_coord = .{ 1.0, 0.0 } },
