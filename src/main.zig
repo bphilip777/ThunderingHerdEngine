@@ -9,7 +9,11 @@ pub fn main() !void {
     const allo = gpa.allocator();
     defer _ = gpa.deinit();
 
-    var engine = try Engine.init(allo, "Mauhlt", .{ 1280, 960 });
+    var engine = try Engine.init(
+        allo,
+        "Mauhlt",
+        .{ .width = 1280, .height = 960 },
+    );
     defer engine.deinit();
     try engine.mainLoop(); // should this be main loop or just run
 

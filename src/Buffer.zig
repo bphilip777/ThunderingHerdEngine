@@ -1,4 +1,4 @@
-const vk = @import("vulkan/vulkan3.zig").vk;
+const vk = @import("vulkan/vulkan3.zig");
 
 buffer: vk.Buffer,
-memory: vk.BufferMemory,
+memory: vk.DeviceMemory,

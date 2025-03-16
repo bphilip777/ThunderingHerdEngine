@@ -181,7 +181,7 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     zstbi.init(allo);
 
     // vulkan compatiable + resizable
-    const window = createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
+    const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
     const instance = try createInstance(allo);
     const debug_messenger = try createDebugMessenger(instance);
 
@@ -201,6 +201,7 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     const swapchain_extent = ssd.chooseSwapExtent(initial_extent);
     const swapchain_format = ssd.chooseSwapSurfaceFormat();
 
+    // consider making this static rather than a syscall
     var n_images = try getNumberOfSwapchainImages(device, swapchain);
     const swapchain_images = try allo.alloc(vk.Image, n_images);
     const swapchain_image_views = try allo.alloc(vk.ImageView, n_images);
@@ -208,27 +209,34 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
 
     const descriptor_set_layout = try createDescriptorSetLayout(device);
     const pipeline_layout = try createGraphicsPipelineLayout(device, &.{descriptor_set_layout});
-    const render_pass = try createRenderPass(device, swapchain_format.format);
+    const render_pass = try createRenderPass(physical_device, device, swapchain_format.format);
 
     try getSwapchainImages(device, swapchain, &n_images, swapchain_images);
     try createImageViews(device, swapchain_images, swapchain_format.format, swapchain_image_views);
-    try createFramebuffers(device, swapchain_extent, swapchain_image_views, render_pass, swapchain_framebuffers);
-    const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
 
+    const pipeline = try createGraphicsPipelines(device, pipeline_layout, render_pass);
     const command_pool = try createCommandPool(surface, physical_device, device);
 
-    const depth_format, const depth_image, const depth_image_memory, const depth_image_view = try createDepthResources(
-        physical_device,
-        device,
-        swapchain_extent,
-    );
+    const depth_format, const depth_image, const depth_image_memory, const depth_image_view = blk: {
+        const drs = try createDepthResources(
+            physical_device,
+            device,
+            swapchain_extent,
+        );
+        break :blk .{ drs.format, drs.image_resources.image, drs.image_resources.memory, drs.view };
+    };
 
-    const texture_image, const texture_image_memory, const texture_image_view, const texture_sampler = createTextureResources(
-        physical_device,
-        device,
-        graphics_queue,
-        command_pool,
-    );
+    try createFramebuffers(device, swapchain_extent, swapchain_image_views, depth_image_view, render_pass, swapchain_framebuffers);
+
+    const texture_image, const texture_image_memory, const texture_image_view, const texture_sampler = blk: {
+        const trs: TextureResources = try createTextureResources(
+            physical_device,
+            device,
+            graphics_queue,
+            command_pool,
+        );
+        break :blk .{ trs.image_resources.image, trs.image_resources.memory, trs.view, trs.sampler };
+    };
     if (is_debug_mode) std.debug.print("Textures Complete\n", .{});
 
     // should split up
@@ -498,7 +506,11 @@ fn initSDL() void {
     _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
 }
 
-fn createWindow(app_name: [*:0]const u8, extent: vk.Extent2D, flags: []const sdl.SDL_WindowFlags) !*sdl.Window {
+fn createWindow(
+    app_name: [*:0]const u8,
+    extent: vk.Extent2D,
+    flags: []const sdl.SDL_WindowFlags,
+) !*sdl.SDL_Window {
     var combo: u64 = 0;
     for (flags) |flag| {
         combo |= flag;
@@ -525,7 +537,7 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
         .application_version = vk.makeApiVersion(0, 1, 0, 0),
         .p_engine_name = "ThunderingHerd",
         .engine_version = vk.makeApiVersion(0, 1, 0, 0),
-        .api_version = vk.API_VERSION_1_4, // up to 1.4 - need to use asserts on fns/data that are different version
+        .api_version = vk.makeApiVersion(0, 1, 1, 0), // up to 1.4 - need to use asserts on fns/data that are different version
     };
 
     var n_req_exts: u32 = 0;
@@ -611,7 +623,7 @@ fn populateDebugMessengerCreateInfo(
 }
 
 fn createDebugMessenger(instance: vk.Instance) !vk.DebugUtilsMessengerEXT {
-    if (!enable_validation_layers) return;
+    if (!enable_validation_layers) return .null;
     var create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
     populateDebugMessengerCreateInfo(&create_info);
 
@@ -966,6 +978,7 @@ fn recreateSwapchain(self: *Self) !void {
         self.device,
         self.swapchain_extent,
         self.swapchain_image_views,
+        self.depth_image_view,
         self.render_pass,
         self.swapchain_framebuffers,
     );
@@ -1017,8 +1030,8 @@ fn createImageViews(
     format: vk.Format,
     views: []vk.ImageView,
 ) !void {
-    for (images, views) |image, view| {
-        view = try createImageView(device, image, format, .color_bit);
+    for (images, views) |image, *view| {
+        view.* = try createImageView(device, image, format, .color_bit);
     }
 }
 
@@ -1054,20 +1067,24 @@ fn createGraphicsPipelineLayout(
     return layout;
 }
 
-fn createRenderPass(device: vk.Device, format: vk.Format) !vk.RenderPass {
-    const attachments = [1]vk.AttachmentDescription{
+fn createRenderPass(
+    physical_device: vk.PhysicalDevice,
+    device: vk.Device,
+    format: vk.Format,
+) !vk.RenderPass {
+    const attachments = [_]vk.AttachmentDescription{
         .{ // color
             .format = format,
             .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
-            .load_op = .clear, // vk._ATTACHMENT_LOAD_OP_CLEAR,
-            .store_op = .store, // vk._ATTACHMENT_STORE_OP_STORE,
-            .stencil_load_op = .dont_care, // vk._ATTACHMENT_LOAD_OP_DONT_CARE,
-            .stencil_store_op = .dont_care, // vk._ATTACHMENT_STORE_OP_DONT_CARE,
-            .initial_layout = .undefined, // vk._IMAGE_LAYOUT_UNDEFINED,
-            .final_layout = .present_src_khr, // vk._IMAGE_LAYOUT_PRESENT_SRC_KHR,
+            .load_op = .clear,
+            .store_op = .store,
+            .stencil_load_op = .dont_care,
+            .stencil_store_op = .dont_care,
+            .initial_layout = .undefined,
+            .final_layout = .present_src_khr,
         },
         .{ // depth
-            .format = findDepthFormat(),
+            .format = try findDepthFormat(physical_device),
             .samples = vk.SampleCountFlags.initEnum(.@"1_bit"),
             .load_op = .clear,
             .store_op = .dont_care,
@@ -1300,11 +1317,11 @@ fn createFramebuffers(
     device: vk.Device,
     swapchain_extent: vk.Extent2D,
     swapchain_image_views: []vk.ImageView,
-    depth_image_views: []vk.ImageView,
+    depth_image_view: vk.ImageView,
     render_pass: vk.RenderPass,
     swapchain_framebuffers: []vk.Framebuffer,
 ) !void {
-    for (swapchain_image_views, swapchain_framebuffers, depth_image_views) |image_view, *framebuffer, depth_image_view| {
+    for (swapchain_image_views, swapchain_framebuffers) |image_view, *framebuffer| {
         const attachments = [_]vk.ImageView{ image_view, depth_image_view };
 
         const fci = vk.FramebufferCreateInfo{
@@ -1341,23 +1358,22 @@ fn findBestSupportedFormat(
     physical_device: vk.PhysicalDevice,
     candidates: []const vk.Format,
     tiling: vk.ImageTiling,
-    features: vk.FormatFeatureFlags,
+    feature_flags: vk.FormatFeatureFlagbits,
 ) !vk.Format {
+    const feature = vk.FormatFeatureFlags.initEnum(feature_flags);
     for (candidates) |candidate| {
         var props: vk.FormatProperties = undefined;
         vk.getPhysicalDeviceFormatProperties(physical_device, candidate, &props);
 
-        if (tiling == .linear and (props.linear_tiling_features & features) == features) {
-            return candidate;
-        } else if (tiling == .optimal and (props.optimal_tiling_features & features) == features) {
-            return candidate;
-        }
+        if (tiling == .linear and feature.has(props.linear_tiling_features)) return candidate;
+        if (tiling == .optimal and feature.has(props.optimal_tiling_features)) return candidate;
     }
     return error.FailedToFindSupportedFormat;
 }
 
-fn findDepthFormat() !vk.Format {
+fn findDepthFormat(physical_device: vk.PhysicalDevice) !vk.Format {
     return try findBestSupportedFormat(
+        physical_device,
         &.{ .d32_sfloat, .d32_sfloat_s8_uint, .d24_unorm_s8_uint },
         .optimal,
         .depth_stencil_attachment_bit,
@@ -1382,14 +1398,22 @@ fn createDepthResources(
     device: vk.Device,
     swapchain_extent: vk.Extent2D,
 ) !DepthResources {
-    const depth_format = findDepthFormat();
-    const depth_image = try createImage(swapchain_extent.width, swapchain_extent.height, depth_format, .optimal, .attachment_bit);
-    const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.local_bit});
+    const depth_format = try findDepthFormat(physical_device);
+    const depth_image = try createImage(
+        device,
+        .{ .width = swapchain_extent.width, .height = swapchain_extent.height, .depth = 1 },
+        depth_format,
+        .optimal,
+        &.{.depth_stencil_attachment_bit},
+    );
+    const depth_image_memory = try createImageMemory(physical_device, device, depth_image, &.{.device_local_bit});
     const depth_image_view = try createImageView(device, depth_image, depth_format, .depth_bit);
     return .{
         .format = depth_format,
-        .image = depth_image,
-        .memory = depth_image_memory,
+        .image_resources = .{
+            .image = depth_image,
+            .memory = depth_image_memory,
+        },
         .view = depth_image_view,
     };
 }
@@ -1406,35 +1430,27 @@ fn createTextureResources(
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
 ) !TextureResources {
-    const texture_image, const texture_image_memory = try createTextureImage(
+    const ti = try createTextureImage(
         physical_device,
         device,
         graphics_queue,
         command_pool,
     );
-    const texture_image_view = try createTextureImageView(device, texture_image);
+    const texture_image_view = try createTextureImageView(device, ti.image);
     const texture_sampler = try createTextureSampler(physical_device, device);
     return .{
-        .image_resources = .{
-            .image = texture_image,
-            .memory = texture_image_memory,
-        },
+        .image_resources = ti,
         .view = texture_image_view,
         .sampler = texture_sampler,
     };
 }
-
-const TextureData = struct {
-    image: vk.Image,
-    memory: vk.DeviceMemory,
-};
 
 fn createTextureImage(
     physical_device: vk.PhysicalDevice,
     device: vk.Device,
     graphics_queue: vk.Queue,
     command_pool: vk.CommandPool,
-) !TextureData {
+) !ImageResources {
     // TODO: swap from stbi to QOI format - faster + less memory used
     const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
 
@@ -1485,9 +1501,11 @@ fn createTextureImage(
 
     const image = try createImage(
         device,
-        width,
-        height,
-        1,
+        .{
+            .width = width,
+            .height = height,
+            .depth = 1,
+        },
         .r8g8b8a8_srgb,
         .optimal,
         &.{ .transfer_dst_bit, .sampled_bit },
@@ -1590,20 +1608,14 @@ fn createImageView(
 
 fn createImage(
     device: vk.Device,
-    width: u32, // should this be stored as extent instead?
-    height: u32,
-    depth: u32,
+    extent: vk.Extent3D,
     format: vk.Format,
     tiling: vk.ImageTiling,
     usage: []const vk.ImageUsageFlagbits,
 ) !vk.Image {
     const ici = vk.ImageCreateInfo{
         .image_type = .@"2d",
-        .extent = .{
-            .width = width,
-            .height = height,
-            .depth = depth,
-        },
+        .extent = extent,
         .mip_levels = 1,
         .array_layers = 1,
         .format = format,

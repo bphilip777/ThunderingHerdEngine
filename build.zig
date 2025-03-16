@@ -42,7 +42,7 @@ pub fn build(b: *std.Build) void {
     // Modules can depend on one another using the `std.Build.Module.addImport` function.
     // This is what allows Zig source code to use `@import("foo")` where 'foo' is not a
     // file path. In this case, we set up `exe_mod` to import `lib_mod`.
-    exe_mod.addImport("GameEngine2_lib", lib_mod);
+    exe_mod.addImport("ThunderingHerd_lib", lib_mod);
 
     // Now, we will create a static library based on the module we created above.
     // This creates a `std.Build.Step.Compile`, which is the build step responsible
@@ -61,7 +61,7 @@ pub fn build(b: *std.Build) void {
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
     const exe = b.addExecutable(.{
-        .name = "GameEngine2",
+        .name = "ThunderingHerd",
         .root_module = exe_mod,
     });
 
@@ -100,8 +100,8 @@ pub fn build(b: *std.Build) void {
     const shaders_dir = "shaders";
 
     const vert_cmd = b.addSystemCommand(&cmd_str);
-    const vert_spv = vert_cmd.addOutputFileArg(shaders_dir ++ "/triangle.vert.spv");
-    vert_cmd.addFileArg(b.path(shaders_dir ++ "/triangle.vert"));
+    const vert_spv = vert_cmd.addOutputFileArg(shaders_dir ++ "/triangle_3d.vert.spv");
+    vert_cmd.addFileArg(b.path(shaders_dir ++ "/triangle_3d.vert"));
     exe.root_module.addAnonymousImport("vertex_shader", .{
         .root_source_file = vert_spv,
     });

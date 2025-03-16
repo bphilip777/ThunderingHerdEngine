@@ -1997,7 +1997,7 @@ pub const AccessFlagbits = enum(u32) {
     pub const shading_rate_image_read_bit_nv = Self.fragment_shading_rate_attachment_read_bit_khr;
 };
 pub const AccessFlags = EnumPackedStruct(AccessFlagbits);
-const ImageAspectFlagbits = enum(u32) {
+pub const ImageAspectFlagbits = enum(u32) {
     none = 0,
     color_bit = 1,
     depth_bit = 2,
