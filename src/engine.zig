@@ -13,9 +13,12 @@ const std = @import("std");
 const Allocator = std.mem.Allocator;
 const is_debug_mode = @import("builtin").mode == .Debug;
 
+const vk = @import("vulkan/vulkan3.zig");
+const isSuccess = vk.isSuccess;
+
 const builtin = @import("builtin");
 const zstbi = @import("zstbi");
-const initVulkan = @import("GraphicsAPIs/vulkan.zig").initVulkan;
+const Vulkan = @import("GraphicsAPIs/vulkan/vulkan.zig");
 const Stopwatch = @import("Stopwatch.zig");
 
 // sdl - huge library - hopefully drop support in the future
@@ -35,6 +38,7 @@ const Self = @This();
 
 allo: Allocator,
 window: *sdl.SDL_Window,
+vulkan: Vulkan,
 
 current_frame: u32 = 0,
 resize: bool = false,
@@ -52,7 +56,7 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     zstbi.init(allo);
 
     const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
-    const vulkan = try initVulkan(false);
+    const vulkan = try Vulkan.init(allo, false);
 
     const time = Stopwatch.init();
     if (is_debug_mode) std.debug.print("Stopwatch started\n", .{});
@@ -61,16 +65,16 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
         .allo = allo,
         .window = window,
         .vulkan = vulkan,
-        .surface = surface,
+        // .surface = surface,
         .time = time,
     };
 }
 
 pub fn deinit(self: *Self) void {
-    sdl.SDL_DestroyWindow(self.window);
-    sdl.SDL_Vulkan_DestroySurface(@ptrCast(&self.vulkan.instance), @ptrCast(&self.vulkan.surface), null);
-    zstbi.deinit();
-    sdl.SDL_Quit();
+    defer sdl.SDL_Quit();
+    defer zstbi.deinit();
+    defer sdl.SDL_DestroyWindow(self.window);
+    defer self.vulkan.deinit(self.allo);
 }
 
 pub fn mainLoop(self: *Self) !void {
@@ -158,44 +162,6 @@ fn createWindow(
         std.debug.print("Failed to create window:{s}\n", .{sdl.SDL_GetError()});
         return error.FailedToCreateWindow;
     };
-}
-
-fn populateDebugMessengerCreateInfo(
-    create_info: *vk.DebugUtilsMessengerCreateInfoEXT,
-    debug_callback: vk.DebugUtilsMessengerEXT,
-) void {
-    create_info.s_type = vk.StructureType.debug_utils_messenger_create_info_ext;
-    create_info.message_severity = vk.DebugUtilsMessageSeverityFlagsEXT.initEnums(&.{
-        .error_bit_ext,
-        .warning_bit_ext,
-        .verbose_bit_ext,
-    });
-    create_info.message_type = vk.DebugUtilsMessageTypeFlagsEXT.initEnums(&.{
-        .performance_bit_ext,
-        .validation_bit_ext,
-        .general_bit_ext,
-    });
-    create_info.pfn_user_callback = debug_callback;
-}
-
-fn createDebugMessenger(instance: vk.Instance) !vk.DebugUtilsMessengerEXT {
-    if (!enable_validation_layers) return .null;
-    var create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
-    populateDebugMessengerCreateInfo(&create_info);
-
-    var debug_messenger: vk.DebugUtilsMessengerEXT = undefined;
-    try isSuccess(vk.createDebugUtilsMessengerEXT(instance, &create_info, null, &debug_messenger));
-    return debug_messenger;
-}
-
-fn createSurface(window: *sdl.SDL_Window, instance: *const vk.Instance) !vk.SurfaceKHR {
-    var surface: sdl.VkSurfaceKHR = undefined;
-    if (!sdl.SDL_Vulkan_CreateSurface(window, @as(*const sdl.VkInstance, @ptrCast(instance)).*, null, &surface)) {
-        std.debug.print("Failed to create surface: {s}\n", .{sdl.SDL_GetError()});
-        return error.FailedToCreateSurface;
-    }
-    const new_surface = @as(*const vk.SurfaceKHR, @ptrCast(&surface)).*;
-    return new_surface;
 }
 
 fn loadImage(filepath: []const u8) !zstbi.Image {

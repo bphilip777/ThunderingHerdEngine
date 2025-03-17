@@ -1,7 +1,7 @@
 const std = @import("std");
 const Allocator = std.mem.Allocator;
 
-const vk = @import("vulkan/vulkan3.zig");
+const vk = @import("../../vulkan/vulkan3.zig");
 const isSuccess = vk.isSuccess;
 // const vk = @import("libs.zig").vk;
 
