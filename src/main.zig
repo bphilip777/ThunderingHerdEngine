@@ -15,7 +15,7 @@ pub fn main() !void {
         .{ .width = 1280, .height = 960 },
     );
     defer engine.deinit();
-    try engine.mainLoop(); // should this be main loop or just run
+    // try engine.mainLoop(); // should this be main loop or just run
 
     // var text = try TextData.init(allo, "src/vulkan/vulkan.zig", "src/vulkan/vulkan2.zig");
     // defer text.deinit();
