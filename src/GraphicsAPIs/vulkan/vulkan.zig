@@ -247,18 +247,14 @@ pub fn init(allo: Allocator, enable_validation_layers: bool) !Vulkan {
 
 pub fn deinit(self: *Vulkan, allo: Allocator) void {
     _ = allo;
-    defer self.deinitBasics();
-    // defer self.deinitCommandPool();
-    // defer self.deinitBuffer(.vertex);
-    // defer self.deinitBuffer(.index);
-    // defer self.deinitSync();
-}
-
-fn deinitBasics(self: *Vulkan) void {
     defer vk.destroyInstance(self.instance, null);
     // defer sdl.SDL_Vulkan_DestroySurface(@ptrCast(&self.vulkan.instance), @ptrCast(&self.vulkan.surface), null);
     // vk.destroyDevice(self.device, null);
     // if (self.debug_messenger) |debug_messenger| destroyDebugUtilsMessengerEXT(self.instance, self.debug_messenger, null);
+    // defer self.deinitCommandPool();
+    // defer self.deinitBuffer(.vertex);
+    // defer self.deinitBuffer(.index);
+    // defer self.deinitSync();
 }
 
 fn deinitCommandPool(self: *Vulkan, allo: Allocator) void {
@@ -277,68 +273,68 @@ fn deinitSync(self: *Vulkan, allo: Allocator) void {
     allo.free(self.render_finished_semaphores);
 }
 
-pub const BufferType = enum {
-    vertex,
-    index,
-};
-
-fn deinitBuffer(self: *Vulkan, buffer_type: BufferType) void {
-    switch (buffer_type) {
-        .vertex => {
-            vk.destroyBuffer(self.device, self.vertex_buffer.buffer, null);
-            vk.freeMemory(self.device, self.vertex_buffer.memory, null);
-        },
-        .index => {
-            vk.destroyBuffer(self.device, self.index_buffer.buffer, null);
-            vk.freeMemory(self.device, self.index_buffer.memory, null);
-        },
-    }
-}
-
-fn deinitDescriptorSetLayout(self: *Vulkan) void {
-    vk.destroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
-}
-
-fn deinitTexture(self: *Vulkan) void {
-    vk.destroySampler(self.device, self.texture.sampler, null);
-    vk.destroyImageView(self.device, self.texture.view, null);
-    vk.destroyImage(self.device, self.texture.image.image, null);
-    vk.freeMemory(self.device, self.texture.image.memory, null);
-}
-
-fn deinitDescriptorSet(self: *Vulkan, allo: Allocator) void {
-    vk.destroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
-    allo.free(self.descriptor_sets);
-}
-
-const BufferMapType = enum {
-    uniform_buffers,
-};
-
-fn deinitBufferMap(self: *Vulkan, buffermap_type: BufferMapType, allo: Allocator) void {
-    switch (buffermap_type) {
-        .uniform_buffers => {
-            for (self.uniform_buffers) |*ub| {
-                vk.destroyBuffer(self.device, ub.buffer.buffer, null);
-                vk.freeMemory(self.device, ub.buffer.memory, null);
-            }
-            allo.free(self.uniform_buffers);
-        },
-    }
-}
-
-fn deinitPipeline(self: *Vulkan) void {
-    vk.destroyPipeline(self.device, self.graphics_pipeline, null);
-    vk.destroyPipelineLayout(self.device, self.graphics_pipeline_layout, null);
-    vk.destroyRenderPass(self.device, self.render_pass, null);
-}
-
-fn deinitSwapchain(self: *Vulkan, allo: Allocator) void {
-    self.cleanupSwapchain();
-    allo.free(self.swapchain_images);
-    allo.free(self.swapchain_image_views);
-    allo.free(self.swapchain_framebuffers);
-}
+// pub const BufferType = enum {
+//     vertex,
+//     index,
+// };
+//
+// fn deinitBuffer(self: *Vulkan, buffer_type: BufferType) void {
+//     switch (buffer_type) {
+//         .vertex => {
+//             vk.destroyBuffer(self.device, self.vertex_buffer.buffer, null);
+//             vk.freeMemory(self.device, self.vertex_buffer.memory, null);
+//         },
+//         .index => {
+//             vk.destroyBuffer(self.device, self.index_buffer.buffer, null);
+//             vk.freeMemory(self.device, self.index_buffer.memory, null);
+//         },
+//     }
+// }
+//
+// fn deinitDescriptorSetLayout(self: *Vulkan) void {
+//     vk.destroyDescriptorSetLayout(self.device, self.descriptor_set_layout, null);
+// }
+//
+// fn deinitTexture(self: *Vulkan) void {
+//     vk.destroySampler(self.device, self.texture.sampler, null);
+//     vk.destroyImageView(self.device, self.texture.view, null);
+//     vk.destroyImage(self.device, self.texture.image.image, null);
+//     vk.freeMemory(self.device, self.texture.image.memory, null);
+// }
+//
+// fn deinitDescriptorSet(self: *Vulkan, allo: Allocator) void {
+//     vk.destroyDescriptorPool(self.device, self.descriptor_pool, null); // destroys sets + layouts too
+//     allo.free(self.descriptor_sets);
+// }
+//
+// const BufferMapType = enum {
+//     uniform_buffers,
+// };
+//
+// fn deinitBufferMap(self: *Vulkan, buffermap_type: BufferMapType, allo: Allocator) void {
+//     switch (buffermap_type) {
+//         .uniform_buffers => {
+//             for (self.uniform_buffers) |*ub| {
+//                 vk.destroyBuffer(self.device, ub.buffer.buffer, null);
+//                 vk.freeMemory(self.device, ub.buffer.memory, null);
+//             }
+//             allo.free(self.uniform_buffers);
+//         },
+//     }
+// }
+//
+// fn deinitPipeline(self: *Vulkan) void {
+//     vk.destroyPipeline(self.device, self.graphics_pipeline, null);
+//     vk.destroyPipelineLayout(self.device, self.graphics_pipeline_layout, null);
+//     vk.destroyRenderPass(self.device, self.render_pass, null);
+// }
+//
+// fn deinitSwapchain(self: *Vulkan, allo: Allocator) void {
+//     self.cleanupSwapchain();
+//     allo.free(self.swapchain_images);
+//     allo.free(self.swapchain_image_views);
+//     allo.free(self.swapchain_framebuffers);
+// }
 
 fn createInstance(allo: std.mem.Allocator, enable_validation_layers: bool) !vk.Instance {
     if (is_debug_mode) printAvailableValidationLayers();
@@ -441,71 +437,71 @@ fn printChosenInstanceExtensions(extensions: [][*:0]const u8) void {
     }
 }
 
-// fn populateDebugMessengerCreateInfo(
-//     create_info: *vk.DebugUtilsMessengerCreateInfoEXT,
-//     debug_callback: vk.DebugUtilsMessengerEXT,
-// ) void {
-//     create_info.s_type = vk.StructureType.debug_utils_messenger_create_info_ext;
-//     create_info.message_severity = vk.DebugUtilsMessageSeverityFlagsEXT.initEnums(&.{
-//         .error_bit_ext,
-//         .warning_bit_ext,
-//         .verbose_bit_ext,
-//     });
-//     create_info.message_type = vk.DebugUtilsMessageTypeFlagsEXT.initEnums(&.{
-//         .performance_bit_ext,
-//         .validation_bit_ext,
-//         .general_bit_ext,
-//     });
-//     create_info.pfn_user_callback = debug_callback;
-// }
-//
-// fn createDebugMessenger(instance: vk.Instance) !vk.DebugUtilsMessengerEXT {
-//     // if (!enable_validation_layers) return .null;
-//     var create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
-//     populateDebugMessengerCreateInfo(&create_info);
-//
-//     var debug_messenger: vk.DebugUtilsMessengerEXT = undefined;
-//     try isSuccess(vk.createDebugUtilsMessengerEXT(instance, &create_info, null, &debug_messenger));
-//     return debug_messenger;
-// }
-//
-// fn createDebugUtilsMessengerEXT(
-//     instance: vk.Instance,
-//     p_create_info: *const vk.DebugUtilsMessengerCreateInfoEXT,
-//     p_allocator: *const vk.AllocationCallbacks,
-//     p_debug_messenger: vk.DebugUtilsMessengerEXT,
-// ) vk.Result {
-//     const maybe_func = vk.getInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-//     if (maybe_func) |func| {
-//         return func(instance, p_create_info, p_allocator, p_debug_messenger);
-//     } else {
-//         return error.ValidationExtensionNotPresent;
-//     }
-// }
-//
-// fn destroyDebugUtilsMessengerEXT(
-//     instance: vk.Instance,
-//     debug_messenger: vk.DebugUtilsMessengerEXT,
-//     p_allocator: *const vk.AllocationCallbacks,
-// ) void {
-//     const maybe_func = vk.getInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-//     if (maybe_func) |func| {
-//         func(instance, debug_messenger, p_allocator);
-//     }
-// }
-//
-// fn debugCallback(
-//     message_severity: vk.DebugUtilsMessageSeverityFlagBitsEXT,
-//     message_type: vk.DebugUtilsMessageTypeFlagsEXT,
-//     p_callback_data: *const vk.DebugUtilsMessengerCallbackDataEXT,
-//     p_user_data: ?*anyopaque,
-// ) vk.Bool32 {
-//     _ = message_severity;
-//     _ = message_type;
-//     _ = p_user_data;
-//     std.log.err("Validation Layer: {s}", .{p_callback_data.p_message});
-//     return .false;
-// }
+// // fn populateDebugMessengerCreateInfo(
+// //     create_info: *vk.DebugUtilsMessengerCreateInfoEXT,
+// //     debug_callback: vk.DebugUtilsMessengerEXT,
+// // ) void {
+// //     create_info.s_type = vk.StructureType.debug_utils_messenger_create_info_ext;
+// //     create_info.message_severity = vk.DebugUtilsMessageSeverityFlagsEXT.initEnums(&.{
+// //         .error_bit_ext,
+// //         .warning_bit_ext,
+// //         .verbose_bit_ext,
+// //     });
+// //     create_info.message_type = vk.DebugUtilsMessageTypeFlagsEXT.initEnums(&.{
+// //         .performance_bit_ext,
+// //         .validation_bit_ext,
+// //         .general_bit_ext,
+// //     });
+// //     create_info.pfn_user_callback = debug_callback;
+// // }
+// //
+// // fn createDebugMessenger(instance: vk.Instance) !vk.DebugUtilsMessengerEXT {
+// //     // if (!enable_validation_layers) return .null;
+// //     var create_info: vk.DebugUtilsMessengerCreateInfoEXT = undefined;
+// //     populateDebugMessengerCreateInfo(&create_info);
+// //
+// //     var debug_messenger: vk.DebugUtilsMessengerEXT = undefined;
+// //     try isSuccess(vk.createDebugUtilsMessengerEXT(instance, &create_info, null, &debug_messenger));
+// //     return debug_messenger;
+// // }
+// //
+// // fn createDebugUtilsMessengerEXT(
+// //     instance: vk.Instance,
+// //     p_create_info: *const vk.DebugUtilsMessengerCreateInfoEXT,
+// //     p_allocator: *const vk.AllocationCallbacks,
+// //     p_debug_messenger: vk.DebugUtilsMessengerEXT,
+// // ) vk.Result {
+// //     const maybe_func = vk.getInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+// //     if (maybe_func) |func| {
+// //         return func(instance, p_create_info, p_allocator, p_debug_messenger);
+// //     } else {
+// //         return error.ValidationExtensionNotPresent;
+// //     }
+// // }
+// //
+// // fn destroyDebugUtilsMessengerEXT(
+// //     instance: vk.Instance,
+// //     debug_messenger: vk.DebugUtilsMessengerEXT,
+// //     p_allocator: *const vk.AllocationCallbacks,
+// // ) void {
+// //     const maybe_func = vk.getInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+// //     if (maybe_func) |func| {
+// //         func(instance, debug_messenger, p_allocator);
+// //     }
+// // }
+// //
+// // fn debugCallback(
+// //     message_severity: vk.DebugUtilsMessageSeverityFlagBitsEXT,
+// //     message_type: vk.DebugUtilsMessageTypeFlagsEXT,
+// //     p_callback_data: *const vk.DebugUtilsMessengerCallbackDataEXT,
+// //     p_user_data: ?*anyopaque,
+// // ) vk.Bool32 {
+// //     _ = message_severity;
+// //     _ = message_type;
+// //     _ = p_user_data;
+// //     std.log.err("Validation Layer: {s}", .{p_callback_data.p_message});
+// //     return .false;
+// // }
 
 fn checkValidationLayerSupport() bool {
     var n_layers: u32 = 0;

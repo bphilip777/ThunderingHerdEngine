@@ -1,7 +1,7 @@
 const std = @import("std");
 // TODO: drop use of sdl
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
@@ -48,6 +48,8 @@ pub fn build(b: *std.Build) void {
     // }).module("vulkan-zig");
     // exe.root_module.addImport("vulkan", vulkan);
 
+    std.debug.print("{s}\n", .{@typeName(@TypeOf(exe))});
+
     // sdl3
     const sdl_dep = b.dependency("sdl", .{
         .target = target,
@@ -58,24 +60,7 @@ pub fn build(b: *std.Build) void {
     exe.root_module.linkLibrary(sdl_lib);
     // const sdl_test_lib = sdl_dep.artifact("SDL3_test");
 
-    // compile shaders
-    // to do: have a for loop that runs through directory and builds everything from the start
-    const cmd_str = [_][]const u8{ "glslc", "--target-env=vulkan1.2", "-o" };
-    const shaders_dir = "shaders";
-
-    const vert_cmd = b.addSystemCommand(&cmd_str);
-    const vert_spv = vert_cmd.addOutputFileArg(shaders_dir ++ "/triangle_3d.vert.spv");
-    vert_cmd.addFileArg(b.path(shaders_dir ++ "/triangle_3d.vert"));
-    exe.root_module.addAnonymousImport("vertex_shader", .{
-        .root_source_file = vert_spv,
-    });
-
-    const frag_cmd = b.addSystemCommand(&cmd_str);
-    const frag_spv = frag_cmd.addOutputFileArg(shaders_dir ++ "/triangle.frag.spv");
-    frag_cmd.addFileArg(b.path(shaders_dir ++ "/triangle.frag"));
-    exe.root_module.addAnonymousImport("fragment_shader", .{
-        .root_source_file = frag_spv,
-    });
+    try compileShaders(b, exe);
 
     b.installArtifact(exe);
 
@@ -105,4 +90,55 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
+}
+
+fn compileShaders(b: *std.Build, exe: *std.Build.Step.Compile) !void {
+    const cmd_str = [_][]const u8{ "glslc", "--target-env=vulkan1.2", "-o" };
+    const shaders_dir = "shaders";
+    var dir = try std.fs.cwd().openDir(shaders_dir, .{ .iterate = true });
+    defer dir.close();
+    var walker = try dir.walk(b.allocator);
+    defer walker.deinit();
+    const allowed_exts = [_][]const u8{ ".vert", ".frag" };
+    while (try walker.next()) |entry| {
+        if (entry.kind != .file) continue;
+        const ext = std.fs.path.extension(entry.basename);
+        const is_allowed_ext: bool = blk: {
+            for (allowed_exts) |allowed_ext| {
+                if (std.mem.eql(u8, ext, allowed_ext)) {
+                    break :blk true;
+                }
+            } else break :blk false;
+        };
+        if (!is_allowed_ext) continue;
+        const cmd = b.addSystemCommand(&cmd_str);
+
+        const new_filename = try std.fmt.allocPrint(b.allocator, "{s}/{s}.spv", .{ shaders_dir, entry.basename });
+        defer b.allocator.free(new_filename);
+
+        const spv = cmd.addOutputFileArg(new_filename);
+
+        const new_filepath = try std.fmt.allocPrint(b.allocator, "{s}/{s}", .{ shaders_dir, entry.basename });
+        defer b.allocator.free(new_filepath);
+
+        std.debug.print("{s}\n", .{new_filepath});
+        cmd.addFileArg(b.path(new_filepath));
+        exe.root_module.addAnonymousImport(entry.basename, .{
+            .root_source_file = spv,
+        });
+    }
+
+    // const vert_cmd = b.addSystemCommand(&cmd_str);
+    // const vert_spv = vert_cmd.addOutputFileArg(shaders_dir ++ "/triangle_3d.vert.spv");
+    // vert_cmd.addFileArg(b.path(shaders_dir ++ "/triangle_3d.vert"));
+    // exe.root_module.addAnonymousImport("vertex_shader", .{
+    //     .root_source_file = vert_spv,
+    // });
+    //
+    // const frag_cmd = b.addSystemCommand(&cmd_str);
+    // const frag_spv = frag_cmd.addOutputFileArg(shaders_dir ++ "/triangle.frag.spv");
+    // frag_cmd.addFileArg(b.path(shaders_dir ++ "/triangle.frag"));
+    // exe.root_module.addAnonymousImport("fragment_shader", .{
+    //     .root_source_file = frag_spv,
+    // });
 }
