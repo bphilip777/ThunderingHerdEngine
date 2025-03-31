@@ -46,7 +46,6 @@ time: Stopwatch,
 
 // public functions
 pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
-
     // TODO: drop sdl use in the future
     errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
     if (is_debug_mode) getSDLVersion();
@@ -55,7 +54,10 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     // TODO: swap with custom QOI loader - faster + memory efficient
     zstbi.init(allo);
 
-    const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{ sdl.SDL_WINDOW_VULKAN, sdl.SDL_WINDOW_RESIZABLE });
+    const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{
+        sdl.SDL_WINDOW_VULKAN,
+        sdl.SDL_WINDOW_RESIZABLE,
+    });
     const vulkan = try Vulkan.init(allo, false);
 
     const time = Stopwatch.init();
@@ -106,7 +108,7 @@ pub fn mainLoop(self: *Self) !void {
             try self.recreateSwapchain();
         }
 
-        if (self.time.elapsed() > (2 * std.time.ns_per_ms * 1_000)) {
+        if (self.time.elapsed() > (2 * std.time.ns_per_ms)) {
             try self.drawFrame();
             self.time.reset();
         }

@@ -70,7 +70,6 @@ const MAX_FRAMES_IN_FLIGHT: i32 = 2;
 const Vulkan = @This();
 
 instance: vk.Instance,
-// debug_messenger: vk.DebugUtilsMessengerEXT,
 // surface: vk.SurfaceKHR,
 //
 // physical_device: vk.PhysicalDevice = .null,
@@ -209,7 +208,6 @@ pub fn init(allo: Allocator, enable_validation_layers: bool) !Vulkan {
 
     return .{
         .instance = instance,
-        // .debug_messenger = debug_messenger,
         // .physical_device = physical_device,
         // .device = device,
         //

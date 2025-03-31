@@ -1,4 +1,5 @@
 const std = @import("std");
+// TODO: drop use of sdl
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
