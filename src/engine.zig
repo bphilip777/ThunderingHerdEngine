@@ -38,11 +38,13 @@ const Self = @This();
 
 allo: Allocator,
 window: *sdl.SDL_Window,
-vulkan: Vulkan,
+vulkan: ?Vulkan = null,
+metal: ?Metal = null,
+directX: ?DirectX = null,
 
-current_frame: u32 = 0,
-resize: bool = false,
-time: Stopwatch,
+// current_frame: u32 = 0,
+// resize: bool = false,
+// time: Stopwatch,
 
 // public functions
 pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
@@ -52,23 +54,23 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     initSDL();
 
     // TODO: swap with custom QOI loader - faster + memory efficient
-    zstbi.init(allo);
+    // zstbi.init(allo);
 
     const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{
         sdl.SDL_WINDOW_VULKAN,
         sdl.SDL_WINDOW_RESIZABLE,
     });
-    const vulkan = try Vulkan.init(allo, false);
+    const vulkan = try Vulkan.init(allo);
 
-    const time = Stopwatch.init();
-    if (is_debug_mode) std.debug.print("Stopwatch started\n", .{});
+    // const time = Stopwatch.init();
+    // if (is_debug_mode) std.debug.print("Stopwatch started\n", .{});
 
     return Self{
         .allo = allo,
         .window = window,
         .vulkan = vulkan,
         // .surface = surface,
-        .time = time,
+        // .time = time,
     };
 }
 
@@ -76,7 +78,7 @@ pub fn deinit(self: *Self) void {
     defer sdl.SDL_Quit();
     defer zstbi.deinit();
     defer sdl.SDL_DestroyWindow(self.window);
-    defer self.vulkan.deinit(self.allo);
+    defer self.vulkan.deinit();
 }
 
 pub fn mainLoop(self: *Self) !void {

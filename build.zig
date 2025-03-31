@@ -1,35 +1,19 @@
 const std = @import("std");
-// TODO: drop use of sdl
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib_mod = b.createModule(.{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
     const exe_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    exe_mod.addImport("ThunderingHerd_lib", lib_mod);
-
-    const lib = b.addLibrary(.{
-        .linkage = .static,
-        .name = "ThunderingHerdEngine",
-        .root_module = lib_mod,
-    });
-
-    b.installArtifact(lib);
 
     const exe = b.addExecutable(.{
         .name = "ThunderingHerd",
         .root_module = exe_mod,
     });
-
     exe.linkLibC();
 
     // add vulkan lib - no need for proc addr now
@@ -42,13 +26,17 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("zstbi", zstbi.module("root"));
     exe.linkLibrary(zstbi.artifact("zstbi"));
 
-    // // snektron
+    // snektron
     // const vulkan = b.dependency("vulkan_zig", std.Build.LazyPath{
     //     .registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml"),
     // }).module("vulkan-zig");
     // exe.root_module.addImport("vulkan", vulkan);
 
-    std.debug.print("{s}\n", .{@typeName(@TypeOf(exe))});
+    // shaders
+    // compileShaders(b, exe) catch |err| {
+    // std.log.info("Failed to compile shaders.", .{});
+    // return error.FailedToCompileShaders;
+    // }
 
     // sdl3
     const sdl_dep = b.dependency("sdl", .{
@@ -60,14 +48,10 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.linkLibrary(sdl_lib);
     // const sdl_test_lib = sdl_dep.artifact("SDL3_test");
 
-    try compileShaders(b, exe);
-
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
-
     run_cmd.step.dependOn(b.getInstallStep());
-
     if (b.args) |args| {
         run_cmd.addArgs(args);
     }
@@ -75,20 +59,12 @@ pub fn build(b: *std.Build) !void {
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
-    const lib_unit_tests = b.addTest(.{
-        .root_module = lib_mod,
-    });
-
-    const run_lib_unit_tests = b.addRunArtifact(lib_unit_tests);
-
     const exe_unit_tests = b.addTest(.{
         .root_module = exe_mod,
     });
-
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
 
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
 }
 
@@ -121,7 +97,7 @@ fn compileShaders(b: *std.Build, exe: *std.Build.Step.Compile) !void {
         const new_filepath = try std.fmt.allocPrint(b.allocator, "{s}/{s}", .{ shaders_dir, entry.basename });
         defer b.allocator.free(new_filepath);
 
-        std.debug.print("{s}\n", .{new_filepath});
+        // std.log.info("{s}\n", .{new_filepath});
         cmd.addFileArg(b.path(new_filepath));
         exe.root_module.addAnonymousImport(entry.basename, .{
             .root_source_file = spv,

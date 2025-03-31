@@ -2,8 +2,6 @@ const std = @import("std");
 const Engine = @import("engine.zig");
 // const TextData = @import("./vulkan/TextData.zig").TextData;
 
-const zstbi = @import("zstbi");
-
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allo = gpa.allocator();
@@ -22,16 +20,17 @@ pub fn main() !void {
     // try text.parse();
 }
 
-test "Loading image with zstbi" {
-    const allo = std.testing.allocator;
-
-    zstbi.init(allo);
-    defer zstbi.deinit();
-
-    const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\Successes\\triangle.png";
-    const info = zstbi.Image.info(filepath);
-    std.debug.print("Info: {any}\n", .{info});
-
-    const data = try zstbi.Image.loadFromFile(filepath, info.num_components);
-    std.debug.print("Data: {any}\n", .{data});
-}
+// test "Loading image with zstbi" {
+//     const zstbi = @import("zstbi");
+//     const allo = std.testing.allocator;
+//
+//     zstbi.init(allo);
+//     defer zstbi.deinit();
+//
+//     const filepath = "C:\\Users\\bphil\\Code\\Zig\\GameEngine2\\Successes\\triangle.png";
+//     const info = zstbi.Image.info(filepath);
+//     std.debug.print("Info: {any}\n", .{info});
+//
+//     const data = try zstbi.Image.loadFromFile(filepath, info.num_components);
+//     std.debug.print("Data: {any}\n", .{data});
+// }
