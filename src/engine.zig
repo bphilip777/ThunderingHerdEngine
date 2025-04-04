@@ -18,8 +18,8 @@ const isSuccess = vk.isSuccess;
 
 const builtin = @import("builtin");
 // const zstbi = @import("zstbi");
-const Window = @import("Window.zig");
-const Vulkan = @import("GraphicsAPIs/vulkan/vulkan.zig");
+const Window = @import("Windows\\Windows.zig");
+const Vulkan = @import("GraphicsAPIs\\vulkan\\vulkan.zig");
 // const Metal = @import("GraphicsAPIs/metal/metal.zig");
 // const DirectX = @import("GraphicsAPIs/directx12/directx.zig");
 
@@ -53,6 +53,11 @@ window: *Window,
 
 // public functions
 pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
+    _ = app_name;
+    _ = initial_extent;
+    // const window: *Window = Window.init(app_name);
+    const window = Window.main();
+
     // TODO: drop sdl use in the future
     // errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
     // if (is_debug_mode) getSDLVersion();
@@ -86,121 +91,122 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
 }
 
 pub fn deinit(self: *Self) void {
+    self.window.DestroyWindow(self.window);
     // defer sdl.SDL_Quit();
     // defer zstbi.deinit();
     // defer sdl.SDL_DestroyWindow(self.window);
     // defer self.vulkan.deinit();
 }
 
-pub fn mainLoop(self: *Self) !void {
-    // Main Loop
-    outer: while (true) {
-        var event: sdl.SDL_Event = undefined;
-        while (sdl.SDL_PollEvent(&event)) {
-            switch (event.type) {
-                sdl.SDL_EVENT_QUIT => break :outer,
-                // sdl.SDL_EVENT_WINDOW_SHOWN,
-                sdl.SDL_EVENT_WINDOW_RESIZED,
-                // sdl.SDL_EVENT_WINDOW_MAXIMIZED,
-                // sdl.SDL_EVENT_WINDOW_EXPOSED,
-                // sdl.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED,
-                // sdl.SDL_EVENT_WINDOW_METAL_VIEW_RESIZED,
-                // sdl.SDL_EVENT_WINDOW_RESTORED,
-                // sdl.SDL_EVENT_WINDOW_DISPLAY_CHANGED,
-                // sdl.SDL_EVENT_WINDOW_ENTER_FULLSCREEN,
-                // sdl.SDL_EVENT_WINDOW_LEAVE_FULLSCREEN,
-                => {
-                    self.resize = true;
-                    break;
-                },
-                else => {},
-            }
-        }
+// pub fn mainLoop(self: *Self) !void {
+//     // Main Loop
+//     outer: while (true) {
+//         // var event: sdl.SDL_Event = undefined;
+//         while (sdl.SDL_PollEvent(&event)) {
+//             switch (event.type) {
+//                 sdl.SDL_EVENT_QUIT => break :outer,
+//                 // sdl.SDL_EVENT_WINDOW_SHOWN,
+//                 sdl.SDL_EVENT_WINDOW_RESIZED,
+//                 // sdl.SDL_EVENT_WINDOW_MAXIMIZED,
+//                 // sdl.SDL_EVENT_WINDOW_EXPOSED,
+//                 // sdl.SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED,
+//                 // sdl.SDL_EVENT_WINDOW_METAL_VIEW_RESIZED,
+//                 // sdl.SDL_EVENT_WINDOW_RESTORED,
+//                 // sdl.SDL_EVENT_WINDOW_DISPLAY_CHANGED,
+//                 // sdl.SDL_EVENT_WINDOW_ENTER_FULLSCREEN,
+//                 // sdl.SDL_EVENT_WINDOW_LEAVE_FULLSCREEN,
+//                 => {
+//                     self.resize = true;
+//                     break;
+//                 },
+//                 else => {},
+//             }
+//         }
+//
+//         if (self.resize) {
+//             try self.recreateSwapchain();
+//         }
+//
+//         if (self.time.elapsed() > (2 * std.time.ns_per_ms)) {
+//             try self.drawFrame();
+//             self.time.reset();
+//         }
+//
+//         try isSuccess(vk.deviceWaitIdle(self.device));
+//     }
+// }
 
-        if (self.resize) {
-            try self.recreateSwapchain();
-        }
+// fn getSDLVersion() void {
+//     // catch sdl version for build/release
+//     if (is_debug_mode) {
+//         std.debug.print("SDL Version @ Build Time: {d}.{d}.{d}\n", .{
+//             sdl.SDL_MAJOR_VERSION,
+//             sdl.SDL_MINOR_VERSION,
+//             sdl.SDL_MICRO_VERSION,
+//         });
+//         std.debug.print("SDL build time revision: {s}\n", .{sdl.SDL_REVISION});
+//     } else {
+//         const version = sdl.SDL_GetVersion();
+//         std.debug.print("SDL runtime version: {d}.{d}.{d}\n", .{
+//             sdl.SDL_VERSIONNUM_MAJOR(version),
+//             sdl.SDL_VERSIONNUM_MINOR(version),
+//             sdl.SDL_VERSIONNUM_MICRO(version),
+//         });
+//         const revision: [*:0]const u8 = sdl.SDL_GetRevision();
+//         std.debug.print("SDL runtime revision: {s}\n", .{revision});
+//     }
+// }
 
-        if (self.time.elapsed() > (2 * std.time.ns_per_ms)) {
-            try self.drawFrame();
-            self.time.reset();
-        }
+// fn initSDL() void {
+//     sdl.SDL_SetMainReady();
+//     _ = sdl.SDL_SetAppMetadata("No Way", "0.0.0", "this may work!");
+//     _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
+// }
 
-        try isSuccess(vk.deviceWaitIdle(self.device));
-    }
-}
+// fn createWindow(
+//     app_name: [*:0]const u8,
+//     extent: vk.Extent2D,
+//     flags: []const sdl.SDL_WindowFlags,
+// ) !*sdl.SDL_Window {
+//     var combo: u64 = 0;
+//     for (flags) |flag| {
+//         combo |= flag;
+//     }
+//
+//     const window = sdl.SDL_CreateWindow(
+//         app_name,
+//         @as(c_int, @intCast(extent.width)),
+//         @as(c_int, @intCast(extent.height)),
+//         combo,
+//     ) orelse {
+//         std.debug.print("Failed to create window: {s}\n", .{sdl.SDL_GetError()});
+//         return error.FailedToCreateWindow;
+//     };
+//
+//     return window;
+// }
 
-fn getSDLVersion() void {
-    // catch sdl version for build/release
-    if (is_debug_mode) {
-        std.debug.print("SDL Version @ Build Time: {d}.{d}.{d}\n", .{
-            sdl.SDL_MAJOR_VERSION,
-            sdl.SDL_MINOR_VERSION,
-            sdl.SDL_MICRO_VERSION,
-        });
-        std.debug.print("SDL build time revision: {s}\n", .{sdl.SDL_REVISION});
-    } else {
-        const version = sdl.SDL_GetVersion();
-        std.debug.print("SDL runtime version: {d}.{d}.{d}\n", .{
-            sdl.SDL_VERSIONNUM_MAJOR(version),
-            sdl.SDL_VERSIONNUM_MINOR(version),
-            sdl.SDL_VERSIONNUM_MICRO(version),
-        });
-        const revision: [*:0]const u8 = sdl.SDL_GetRevision();
-        std.debug.print("SDL runtime revision: {s}\n", .{revision});
-    }
-}
-
-fn initSDL() void {
-    sdl.SDL_SetMainReady();
-    _ = sdl.SDL_SetAppMetadata("No Way", "0.0.0", "this may work!");
-    _ = sdl.SDL_Init(sdl.SDL_INIT_VIDEO);
-}
-
-fn createWindow(
-    app_name: [*:0]const u8,
-    extent: vk.Extent2D,
-    flags: []const sdl.SDL_WindowFlags,
-) !*sdl.SDL_Window {
-    var combo: u64 = 0;
-    for (flags) |flag| {
-        combo |= flag;
-    }
-
-    const window = sdl.SDL_CreateWindow(
-        app_name,
-        @as(c_int, @intCast(extent.width)),
-        @as(c_int, @intCast(extent.height)),
-        combo,
-    ) orelse {
-        std.debug.print("Failed to create window: {s}\n", .{sdl.SDL_GetError()});
-        return error.FailedToCreateWindow;
-    };
-
-    return window;
-}
-
-fn loadImage(filepath: []const u8) !zstbi.Image {
-    // TODO: swap from stbi to QOI format - faster + less memory used
-    // const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
-
-    const info = zstbi.Image.info(filepath);
-    std.debug.print("Info: {any}\n", .{info});
-    if (!info.is_supported) return error.ImageFileTypeIsNotSupported;
-
-    var image_data = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
-    defer image_data.deinit();
-    std.debug.print("Image Texture Data:\n", .{});
-    std.debug.print("\tData Length: {}\n\tData Type: {s}\n\tWidth: {}\n\tHeight: {}\n\tChannels: {}\n\tBytes Per Component: {}\n\tBytes Per Row: {}\n\tIs HDR: {}\n", .{
-        image_data.data.len,
-        @typeName(@TypeOf(image_data.data)),
-        image_data.width,
-        image_data.height,
-        image_data.num_components,
-        image_data.bytes_per_component,
-        image_data.bytes_per_row,
-        image_data.is_hdr,
-    });
-
-    return image_data;
-}
+// fn loadImage(filepath: []const u8) !zstbi.Image {
+//     // TODO: swap from stbi to QOI format - faster + less memory used
+//     // const filepath = "C:\\Users\\bphil\\Code\\Zig\\ThunderingHerd\\src\\textures\\texture.jpg";
+//
+//     const info = zstbi.Image.info(filepath);
+//     std.debug.print("Info: {any}\n", .{info});
+//     if (!info.is_supported) return error.ImageFileTypeIsNotSupported;
+//
+//     var image_data = zstbi.Image.loadFromFile(filepath, info.num_components) catch return error.FailedToLoadTextureImage;
+//     defer image_data.deinit();
+//     std.debug.print("Image Texture Data:\n", .{});
+//     std.debug.print("\tData Length: {}\n\tData Type: {s}\n\tWidth: {}\n\tHeight: {}\n\tChannels: {}\n\tBytes Per Component: {}\n\tBytes Per Row: {}\n\tIs HDR: {}\n", .{
+//         image_data.data.len,
+//         @typeName(@TypeOf(image_data.data)),
+//         image_data.width,
+//         image_data.height,
+//         image_data.num_components,
+//         image_data.bytes_per_component,
+//         image_data.bytes_per_row,
+//         image_data.is_hdr,
+//     });
+//
+//     return image_data;
+// }
