@@ -41,7 +41,7 @@ const Stopwatch = @import("Stopwatch.zig");
 const Self = @This();
 
 allo: Allocator,
-window: *Window,
+window: Window,
 // graphics_api: GraphicsAPI, // should be a tagged union
 // vulkan: Vulkan,
 // metal: ?Metal = null,
@@ -53,10 +53,8 @@ window: *Window,
 
 // public functions
 pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
-    _ = app_name;
     _ = initial_extent;
-    // const window: *Window = Window.init(app_name);
-    const window = Window.main();
+    const window = try Window.createWindow(app_name);
 
     // TODO: drop sdl use in the future
     // errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
@@ -90,8 +88,8 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     };
 }
 
-pub fn deinit(self: *Self) void {
-    self.window.DestroyWindow(self.window);
+pub fn deinit(self: *Self) !void {
+    try self.window.destroyWindow();
     // defer sdl.SDL_Quit();
     // defer zstbi.deinit();
     // defer sdl.SDL_DestroyWindow(self.window);
