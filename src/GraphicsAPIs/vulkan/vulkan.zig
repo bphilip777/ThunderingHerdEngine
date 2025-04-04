@@ -8,37 +8,42 @@ const builtin = @import("builtin");
 const is_debug_mode = builtin.mode == .Debug;
 
 // SDL - just way to big for no reason
-const sdl = @cImport({
-    @cDefine("SDL_DISABLE_OLD_NAMES", {});
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_revision.h");
+// const sdl = @cImport({
+//     @cDefine("SDL_DISABLE_OLD_NAMES", {});
+//     @cInclude("SDL3/SDL.h");
+//     @cInclude("SDL3/SDL_revision.h");
+//
+//     // @cDefine("VULKAN_H_", "1");
+//     @cInclude("SDL3/SDL_vulkan.h");
+//
+//     @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
+//     @cInclude("SDL3/SDL_main.h");
+// });
 
-    // @cDefine("VULKAN_H_", "1");
-    @cInclude("SDL3/SDL_vulkan.h");
-
-    @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
-    @cInclude("SDL3/SDL_main.h");
-});
-
-// Short Data
-const Buffer = @import("Buffer.zig");
-const BufferMap = @import("BufferMap.zig");
-
-// Miscellaneous Structs
-const SSD = @import("SwapchainSupportDetails.zig");
-const QFI = @import("QueueFamilyIndices.zig");
-const UBO = @import("UniformBufferObject.zig");
-
-// Resources - just a namespace
-const Resources = struct {
-    const Image = @import("Resources/Image.zig");
-    const Depth = @import("Resources/Depth.zig");
-    const Texture = @import("Resources/Texture.zig");
-};
+// // Short Data
+// const Buffer = @import("Buffer.zig");
+// const BufferMap = @import("BufferMap.zig");
+//
+// // Miscellaneous Structs
+// const SSD = @import("SwapchainSupportDetails.zig");
+// const QFI = @import("QueueFamilyIndices.zig");
+// const UBO = @import("UniformBufferObject.zig");
+//
+// // Resources - just a namespace
+// const Resources = struct {
+//     const Image = @import("Resources/Image.zig");
+//     const Depth = @import("Resources/Depth.zig");
+//     const Texture = @import("Resources/Texture.zig");
+// };
 
 // Extensions
 const required_device_extensions = [_][*:0]const u8{
     vk.ExtensionNames.swapchain,
+};
+
+const required_instance_extensions = [_][*:0]const u8{
+    vk.ExtensionNames.swapchain,
+    vk.ExtensionNames.surface,
 };
 
 const optional_instance_extensions = [_][*:0]const u8{
@@ -342,12 +347,15 @@ fn createInstance(allo: std.mem.Allocator) !vk.Instance {
         .application_version = vk.makeApiVersion(0, 1, 0, 0),
         .p_engine_name = "ThunderingHerd",
         .engine_version = vk.makeApiVersion(0, 1, 0, 0),
-        .api_version = vk.makeApiVersion(0, 1, 1, 0), // up to 1.4 - need to use asserts on fns/data that are different version
+        .api_version = vk.makeApiVersion(0, 1, 2, 0), // up to 1.4 - need to use asserts on fns/data that are different version
     };
 
-    var n_req_exts: u32 = 0;
-    const extension_names = sdl.SDL_Vulkan_GetInstanceExtensions(&n_req_exts);
+    // var n_req_exts: u32 = 0;
+    // const extension_names = sdl.SDL_Vulkan_GetInstanceExtensions(&n_req_exts);
+    const extension_names = required_instance_extensions;
+    const n_req_exts = extension_names.len;
     std.debug.assert(n_req_exts > 0);
+    std.debug.print("# of Required Extensions: {}\n", .{n_req_exts});
 
     var instance_extensions = try std.ArrayList([*:0]const u8).initCapacity(allo, 8);
     defer instance_extensions.deinit();

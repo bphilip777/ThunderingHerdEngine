@@ -17,30 +17,35 @@ const vk = @import("vulkan/vulkan3.zig");
 const isSuccess = vk.isSuccess;
 
 const builtin = @import("builtin");
-const zstbi = @import("zstbi");
+// const zstbi = @import("zstbi");
+const Window = @import("Window.zig");
 const Vulkan = @import("GraphicsAPIs/vulkan/vulkan.zig");
+// const Metal = @import("GraphicsAPIs/metal/metal.zig");
+// const DirectX = @import("GraphicsAPIs/directx12/directx.zig");
+
 const Stopwatch = @import("Stopwatch.zig");
 
 // sdl - huge library - hopefully drop support in the future
-const sdl = @cImport({
-    @cDefine("SDL_DISABLE_OLD_NAMES", {});
-    @cInclude("SDL3/SDL.h");
-    @cInclude("SDL3/SDL_revision.h");
-
-    // @cDefine("VULKAN_H_", "1");
-    @cInclude("SDL3/SDL_vulkan.h");
-
-    @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
-    @cInclude("SDL3/SDL_main.h");
-});
+// const sdl = @cImport({
+//     @cDefine("SDL_DISABLE_OLD_NAMES", {});
+//     @cInclude("SDL3/SDL.h");
+//     @cInclude("SDL3/SDL_revision.h");
+//
+//     // @cDefine("VULKAN_H_", "1");
+//     @cInclude("SDL3/SDL_vulkan.h");
+//
+//     @cDefine("SDL_MAIN_HANDLED", {}); // for programs w/ their own entry point
+//     @cInclude("SDL3/SDL_main.h");
+// });
 
 const Self = @This();
 
 allo: Allocator,
-window: *sdl.SDL_Window,
-vulkan: ?Vulkan = null,
-metal: ?Metal = null,
-directX: ?DirectX = null,
+window: *Window,
+// graphics_api: GraphicsAPI, // should be a tagged union
+// vulkan: Vulkan,
+// metal: ?Metal = null,
+// directX: ?DirectX = null,
 
 // current_frame: u32 = 0,
 // resize: bool = false,
@@ -49,18 +54,24 @@ directX: ?DirectX = null,
 // public functions
 pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2D) !Self {
     // TODO: drop sdl use in the future
-    errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
-    if (is_debug_mode) getSDLVersion();
-    initSDL();
+    // errdefer |err| if (err == error.SdlError) std.log.err("Sdl Error: {s}", .{sdl.SDL_GetError()});
+    // if (is_debug_mode) getSDLVersion();
+    // initSDL();
 
     // TODO: swap with custom QOI loader - faster + memory efficient
     // zstbi.init(allo);
 
-    const window: *sdl.SDL_Window = try createWindow(app_name, initial_extent, &.{
-        sdl.SDL_WINDOW_VULKAN,
-        sdl.SDL_WINDOW_RESIZABLE,
-    });
-    const vulkan = try Vulkan.init(allo);
+    // const window: *sdl.SDL_Window = sdl.SDL_CreateWindow(
+    //     app_name,
+    //     @as(c_int, @intCast(initial_extent.width)),
+    //     @as(c_int, @intCast(initial_extent.height)),
+    //     @as(u64, sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_VULKAN),
+    // ) orelse {
+    //     std.debug.print("Failed to create window: {s}\n", .{sdl.SDL_GetError()});
+    //     return error.FailedToCreateWindow;
+    // };
+
+    // const vulkan = try Vulkan.init(allo);
 
     // const time = Stopwatch.init();
     // if (is_debug_mode) std.debug.print("Stopwatch started\n", .{});
@@ -68,17 +79,17 @@ pub fn init(allo: Allocator, app_name: [*:0]const u8, initial_extent: vk.Extent2
     return Self{
         .allo = allo,
         .window = window,
-        .vulkan = vulkan,
+        // .vulkan = vulkan,
         // .surface = surface,
         // .time = time,
     };
 }
 
 pub fn deinit(self: *Self) void {
-    defer sdl.SDL_Quit();
-    defer zstbi.deinit();
-    defer sdl.SDL_DestroyWindow(self.window);
-    defer self.vulkan.deinit();
+    // defer sdl.SDL_Quit();
+    // defer zstbi.deinit();
+    // defer sdl.SDL_DestroyWindow(self.window);
+    // defer self.vulkan.deinit();
 }
 
 pub fn mainLoop(self: *Self) !void {
@@ -156,16 +167,17 @@ fn createWindow(
         combo |= flag;
     }
 
-    return sdl.SDL_CreateWindow(
+    const window = sdl.SDL_CreateWindow(
         app_name,
-        @intCast(extent.width),
-        @intCast(extent.height),
+        @as(c_int, @intCast(extent.width)),
+        @as(c_int, @intCast(extent.height)),
         combo,
-        // sdl.SDL_WINDOW_VULKAN | sdl.SDL_WINDOW_RESIZABLE,
     ) orelse {
-        std.debug.print("Failed to create window:{s}\n", .{sdl.SDL_GetError()});
+        std.debug.print("Failed to create window: {s}\n", .{sdl.SDL_GetError()});
         return error.FailedToCreateWindow;
     };
+
+    return window;
 }
 
 fn loadImage(filepath: []const u8) !zstbi.Image {
